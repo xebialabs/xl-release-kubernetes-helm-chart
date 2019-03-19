@@ -36,8 +36,8 @@ resources: {}
 
 volumes:
   ## ERROR: Using /usr/local/* results in this error,
-  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, gke-np-noshare-np-noshare-ops-b1336487-q01r  MountVolume.SetUp failed for volume "xlr-bootstrap" : mkdir /usr/local/xlr-bootstrap: read-only file system
-  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, gke-np-noshare-np-noshare-ops-b1336487-q01r  MountVolume.SetUp failed for volume "xlr-data" : mkdir /usr/local/xlr-data: read-only file system
+  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, MountVolume.SetUp failed for volume "xlr-bootstrap" : mkdir /usr/local/xlr-bootstrap: read-only file system
+  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, MountVolume.SetUp failed for volume "xlr-data" : mkdir /usr/local/xlr-data: read-only file system
   ## By passed by changing /usr to /tmp, this fails with EULA agreement error.
   - name: xlr-bootstrap
     hostPath:
