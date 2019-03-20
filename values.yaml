@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-ImageRepository: "xl-release"
+ImageRepository: "xebialabs/xl-release"
 ImageTag: "8.5.0"
 ImagePullPolicy: "Always"
 # ImagePullSecret: xlRelease
