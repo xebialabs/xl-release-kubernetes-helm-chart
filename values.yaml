@@ -3,18 +3,22 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
+ImageRepository: "xebialabs/xl-release"
+ImageTag: "8.5.0"
+ImagePullPolicy: "Always"
+# ImagePullSecret: xlRelease
 
 ingress:
-  annotations: {}
+  annotations:
+    # ingress.kubernetes.io/tls-acme: "true"
     # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
   path: /
   hosts:
-    - xl-release.minikube
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+    - example.com
+  tls:
+   - secretName: example-secretsName
+     hosts:
+       - example.com
 
 xlrDevelopmentMode: false
 
@@ -31,12 +35,24 @@ resources: {}
   #  memory: 128Mi
 
 volumes:
+  ## ERROR: Using /usr/local/* results in this error,
+  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, MountVolume.SetUp failed for volume "xlr-bootstrap" : mkdir /usr/local/xlr-bootstrap: read-only file system
+  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, MountVolume.SetUp failed for volume "xlr-data" : mkdir /usr/local/xlr-data: read-only file system
+  ## By passed by changing /usr to /tmp, this fails with EULA agreement error.
   - name: xlr-bootstrap
     hostPath:
-      path: /Users/vinny/Research/run-k8s-jobs-from-xlr/xlr-bootstrap
+      path: /usr/local/xlr-bootstrap
+      type: DirectoryOrCreate
   - name: xlr-data
     hostPath:
-      path: /Users/vinny/Research/run-k8s-jobs-from-xlr/xlr-data
+      path: /usr/local/xlr-data
+      type: DirectoryOrCreate
+
+HealthProbes: true
+HealthProbesLivenessTimeout: 60
+HealthProbesReadinessTimeout: 60
+HealthProbeFailureThreshold: 12
+HealthPeriodScans: 10
 
 nodeSelector: {}
 

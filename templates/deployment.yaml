@@ -21,8 +21,8 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "vpartington/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
-          imagePullPolicy: Always
+          image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
+          imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
           ports:
             - name: xlr-http
               containerPort: 5516
@@ -32,20 +32,22 @@ spec:
               mountPath: /opt/xl-release/xlr-bootstrap
             - name: xlr-data
               mountPath: /opt/xl-release/xlr-data
+{{- if .Values.HealthProbes }}
           livenessProbe:
             httpGet:
               path: /
               port: xlr-http
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            failureThreshold: 12
+            initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           readinessProbe:
             httpGet:
               path: /
               port: xlr-http
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            failureThreshold: 12
+            initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
+{{- end }}
           env:
             - name: XLR_DEVELOPMENT_MODE
               value: "{{ .Values.xlrDevelopmentMode }}"
