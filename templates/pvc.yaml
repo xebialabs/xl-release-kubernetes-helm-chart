@@ -1,0 +1,28 @@
+{{- if and .Values.Persistence.Enabled -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+{{- if .Values.Persistence.Annotations }}
+  annotations:
+{{ toYaml .Values.Persistence.Annotations | indent 4 }}
+{{- end }}
+  name: {{ template "xl-release.fullname" . }}
+  labels:
+    app: {{ template "xl-release.name" . }}
+    chart: {{ template "xl-release.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  accessModes:
+    - {{ .Values.Persistence.AccessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.Persistence.Size | quote }}
+{{- if .Values.Persistence.StorageClass }}
+{{- if (eq "-" .Values.Persistence.StorageClass) }}
+  storageClassName: ""
+{{- else }}
+  storageClassName: "{{ .Values.Persistence.StorageClass }}"
+{{- end }}
+{{- end }}
+{{- end }}
