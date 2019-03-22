@@ -1,3 +1,4 @@
+{{- if and .Values.ingress.Enabled -}}
 {{- $fullName := include "xl-release.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
@@ -34,3 +35,4 @@ spec:
               serviceName: {{ $fullName }}
               servicePort: xlr-http-svc
   {{- end }}
+{{- end -}}
