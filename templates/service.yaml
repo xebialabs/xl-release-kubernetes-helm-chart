@@ -8,12 +8,12 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  type: ClusterIP
-  ports:
-    - port: 80
-      targetPort: xlr-http
-      protocol: TCP
-      name: xlr-http-svc
   selector:
     app: {{ template "xl-release.name" . }}
     release: {{ .Release.Name }}
+  type: ClusterIP
+  ports:
+    - name: xlr-http
+      port: 80
+      targetPort: http
+      protocol: TCP

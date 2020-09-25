@@ -1,4 +1,11 @@
 1. Get the application URL by running these commands:
+{{- if or (eq .Values.K8sSetup.Platform "PlainK8s") (eq .Values.K8sSetup.Platform "AWSEKS")}}
 {{- range .Values.ingress.hosts }}
   http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
+{{- end }}
+{{- end }}
+{{- if eq .Values.K8sSetup.Platform "Openshift"}}
+{{- range .Values.route.hosts }}
+  http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}{{ $.Values.route.path }}
+{{- end }}
 {{- end }}

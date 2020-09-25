@@ -1,7 +1,8 @@
+{{- if or (eq .Values.K8sSetup.Platform "PlainK8s") (eq .Values.K8sSetup.Platform "AWSEKS")}}
 {{- if and .Values.ingress.Enabled -}}
 {{- $fullName := include "xl-release.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -33,6 +34,7 @@ spec:
           - path: {{ $ingressPath }}
             backend:
               serviceName: {{ $fullName }}
-              servicePort: xlr-http-svc
+              servicePort: xlr-http
   {{- end }}
+{{- end -}}
 {{- end -}}

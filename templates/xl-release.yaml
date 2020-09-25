@@ -1,0 +1,149 @@
+{{$XLR_DB_USER := .Values.UseExistingDB.XLR_DB_USER | default "xlr"}}
+{{$XLR_DB_PASS := .Values.UseExistingDB.XLR_DB_PASS | default "xlr"}}
+{{$XLR_REPORT_DB_USER := .Values.UseExistingDB.XLR_REPORT_DB_USER | default "xlr-report"}}
+{{$XLR_REPORT_DB_PASS := .Values.UseExistingDB.XLR_REPORT_DB_PASS | default "xlr-report"}}
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "xl-release.fullname" . }}
+  labels:
+    app: {{ template "xl-release.name" . }}
+    chart: {{ template "xl-release.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ template "xl-release.name" . }}
+      release: {{ .Release.Name }}
+  serviceName: {{ template "xl-release.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "xl-release.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: xebialabs/tiny-tools
+          command:
+            - sh
+            - -c
+            - >
+              until nc -z -w 2 $POSTGRES_SVC $POSTGRES_PORT && echo database ok; do
+                sleep 2;
+              done;
+          env:
+           - name: POSTGRES_SVC
+             value: {{ template "xl-release.fullname" . }}-postgresql
+           - name: POSTGRES_PORT
+             value: "5432"
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
+          imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
+          ports:
+            - name: http
+              containerPort: 5516
+              protocol: TCP
+          volumeMounts:
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/reports
+          {{- if .Values.HealthProbes }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
+          {{- end }}
+          env:
+            - name: ADMIN_PASSWORD
+              value: {{ .Values.AdminPassword | default "admin" }}
+            - name: XL_CLUSTER_MODE
+              value: full
+            - name: SERVER_URL
+              value: "http://localhost:5516"
+            - name: XL_DB_URL
+              {{- if not .Values.UseExistingDB.Enabled }}
+              value: jdbc:postgresql://{{ template "xl-release.fullname" . }}-postgresql:5432/xlr-db
+              {{- else }}
+              value: {{ .Values.UseExistingDB.XLR_DB_URL }}
+              {{- end }}
+            - name: XL_DB_USERNAME
+              value: {{$XLR_DB_USER}}
+            - name: XL_DB_PASSWORD
+              value: "{{$XLR_DB_PASS}}"
+            - name: XL_LICENSE
+              value: {{ .Values.xlrLicense }}
+            - name: XL_REPORT_DB_URL
+              {{- if not .Values.UseExistingDB.Enabled }}
+              value: jdbc:postgresql://{{ template "xl-release.fullname" . }}-postgresql:5432/xlr-report-db
+              {{- else }}
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
+              {{- end }}
+            - name: XL_REPORT_DB_USERNAME
+              value: {{$XLR_REPORT_DB_USER}}
+            - name: XL_REPORT_DB_PASSWORD
+              value: "{{$XLR_REPORT_DB_PASS}}"
+            - name: XL_METRICS_ENABLED
+              value: "false"
+            - name: FORCE_UPGRADE
+              value: "true"
+            - name: ENABLE_EMBEDDED_QUEUE
+              value: "false"
+            {{- if index .Values "activemq-artemis" "install" }}          
+            - name: XLR_TASK_QUEUE_USERNAME
+              value: {{ index .Values "activemq-artemis" "artemisUser" }}
+            - name: XLR_TASK_QUEUE_PASSWORD
+              value: {{ index .Values "activemq-artemis" "artemisPassword" | quote }}
+            - name: XLR_TASK_QUEUE_URL
+              value: "amqp://{{ index .Values "activemq-artemis" "fullnameOverride" }}.{{ .Release.Namespace }}.svc.cluster.local:61616"
+            - name: XLR_TASK_QUEUE_NAME
+              value: "xlr-tasks-queue"
+            {{- else }}
+            {{- if .Values.UseExistingMQ.Enabled }}
+            - name: XLR_TASK_QUEUE_USERNAME
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_USERNAME }}
+            - name: XLR_TASK_QUEUE_PASSWORD
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_PASSWORD | quote }}
+            - name: XLR_TASK_QUEUE_URL
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_URL | quote }}
+            - name: XLR_TASK_QUEUE_NAME
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_NAME | quote }}
+            {{- end }}
+            {{- end }}
+            - name: REPOSITORY_KEYSTORE
+              value: {{ .Values.RepositoryKeystore }}
+            - name: REPOSITORY_KEYSTORE_PASSPHRASE
+              value: {{ .Values.KeystorePassphrase }}  
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: reports-dir
+          persistentVolumeClaim:
+            claimName: {{ template "xl-release.fullname" . }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

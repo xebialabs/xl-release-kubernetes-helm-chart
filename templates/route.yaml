@@ -1,0 +1,27 @@
+{{- if eq .Values.K8sSetup.Platform "Openshift"}}
+{{- if and .Values.route.Enabled -}}
+{{- $fullName := include "xl-release.fullname" . -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app: {{ template "xl-release.name" . }}
+    chart: {{ template "xl-release.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+{{- with .Values.route.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- range .Values.route.hosts }}
+  host: {{ . }}
+  to:
+    kind: Service
+    name: {{ $fullName }}
+  port:
+    targetPort: xlr-http
+{{- end }}
+{{- end }}
+{{- end}}
