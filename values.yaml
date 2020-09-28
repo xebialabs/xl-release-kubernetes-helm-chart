@@ -31,13 +31,13 @@ ingress:
   Enabled: true
   annotations:
     # ingress.kubernetes.io/tls-acme: "true"
-    # kubernetes.io/ingress.class: nginx
-    # nginx.ingress.kubernetes.io/rewrite-target: /
-    # nginx.ingress.kubernetes.io/affinity: cookie
-    # nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
-    # ingress.kubernetes.io/session-cookie-strategy: prefix
-    # ingress.kubernetes.io/config-backend: |
-      # option httpchk GET /ha/health HTTP/1.0
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    ingress.kubernetes.io/session-cookie-strategy: prefix
+    ingress.kubernetes.io/config-backend: |
+      option httpchk GET /ha/health HTTP/1.0
   path: /
   hosts:
     - app.example.com
@@ -85,7 +85,7 @@ activemq-artemis:
 UseExistingMQ:
   Enabled: false
   # If you want to use a existing Message Queue, change 'activemq-artemis.install' to 'false'.
-  # Set "UseExistingMQ.Enabled to true".Uncomment the following lines and provide the values.
+  # Set 'UseExistingMQ.Enabled' to 'true'.Uncomment the following lines and provide the values.
   # XLR_TASK_QUEUE_USERNAME: 
   # XLR_TASK_QUEUE_PASSWORD: 
   # XLR_TASK_QUEUE_NAME: 
