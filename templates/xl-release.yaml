@@ -13,6 +13,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  podManagementPolicy: OrderedReady
   replicas: {{ .Values.replicaCount }}
   updateStrategy:
     type: RollingUpdate
@@ -27,6 +28,7 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
+      {{- if not .Values.UseExistingDB.Enabled }}
       initContainers:
         - name: wait-for-db
           image: xebialabs/tiny-tools
@@ -42,6 +44,7 @@ spec:
              value: {{ template "xl-release.fullname" . }}-postgresql
            - name: POSTGRES_PORT
              value: "5432"
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
@@ -49,7 +52,6 @@ spec:
           ports:
             - name: http
               containerPort: 5516
-              protocol: TCP
           volumeMounts:
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
@@ -71,7 +73,10 @@ spec:
           {{- end }}
           env:
             - name: ADMIN_PASSWORD
-              value: {{ .Values.AdminPassword | default "admin" }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: release-password
             - name: XL_CLUSTER_MODE
               value: full
             - name: SERVER_URL

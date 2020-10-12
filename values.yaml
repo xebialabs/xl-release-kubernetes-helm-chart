@@ -20,10 +20,13 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
-## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
+## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
-ingress-nginx:
+haproxy-ingress:
   install: true
+  controller:
+    service:
+      type: NodePort
 
 ## Ingress Configuration
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
@@ -31,20 +34,21 @@ ingress:
   Enabled: true
   annotations:
     # ingress.kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/affinity: cookie
-    nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.class: haproxy
+    ingress.kubernetes.io/rewrite-target: /
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: JSESSIONID
     ingress.kubernetes.io/session-cookie-strategy: prefix
     ingress.kubernetes.io/config-backend: |
       option httpchk GET /ha/health HTTP/1.0
-  path: /
-  hosts:
-    - app.example.com
-  tls:
-    - secretName: example-secretsName
-      hosts:
-        - example.com
+  path: /xl-release/
+  tls: false
+
+#  tls:
+#    - secretName: example-secretsName
+#      hosts:
+#        - example.com
 
 AdminPassword:
 # Provide the admin password to be used
@@ -68,7 +72,7 @@ UseExistingDB:
   # XLR_DB_PASS:
   # XLR_REPORT_DB_URL:
   # XLR_REPORT_DB_USER:
-  # XLR_REPORT_DB_PASS
+  # XLR_REPORT_DB_PASS:
 
 ## Install activemq artemis chart. If you have an existing message queue deployment, set 'install' to 'false'.
 activemq-artemis:
@@ -104,8 +108,8 @@ resources: {}
   #  memory: 1700Mi
 
 ## Configure extra options for liveness and readiness probes
-HealthProbesLivenessTimeout: 60
-HealthProbesReadinessTimeout: 60
+HealthProbesLivenessTimeout: 90
+HealthProbesReadinessTimeout: 90
 HealthProbeFailureThreshold: 12
 HealthPeriodScans: 10
 
