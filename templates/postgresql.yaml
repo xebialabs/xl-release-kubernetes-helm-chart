@@ -105,9 +105,19 @@ spec:
             - mountPath: /docker-entrypoint-initdb.d
               name: schema
       volumes:
+        {{- if .Values.Persistence.Enabled }}
+        - name: data
+          emptyDir: {}
+        {{- else }}
+        - name: data
+          hostPath:
+            path: /var/lib/postgresql/data
+            type: DirectoryOrCreate
+        {{- end }}
         - name: schema
           configMap:
             name: {{ template "xl-release.fullname" . }}-postgresql
+  {{- if .Values.Persistence.Enabled }}
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -117,4 +127,5 @@ spec:
         resources:
           requests:
             storage: 10Gi
+  {{- end }}
 {{- end }}

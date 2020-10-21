@@ -1,7 +1,7 @@
-{{$XLR_DB_USER := .Values.UseExistingDB.XLR_DB_USER | default "xlr"}}
-{{$XLR_DB_PASS := .Values.UseExistingDB.XLR_DB_PASS | default "xlr"}}
-{{$XLR_REPORT_DB_USER := .Values.UseExistingDB.XLR_REPORT_DB_USER | default "xlr-report"}}
-{{$XLR_REPORT_DB_PASS := .Values.UseExistingDB.XLR_REPORT_DB_PASS | default "xlr-report"}}
+{{$XLR_DB_USER := .Values.UseExistingDB.XLR_DB_USER}}
+{{$XLR_DB_PASS := .Values.UseExistingDB.XLR_DB_PASS}}
+{{$XLR_REPORT_DB_USER := .Values.UseExistingDB.XLR_REPORT_DB_USER}}
+{{$XLR_REPORT_DB_PASS := .Values.UseExistingDB.XLR_REPORT_DB_PASS}}
 
 apiVersion: apps/v1
 kind: StatefulSet
@@ -81,28 +81,35 @@ spec:
               value: full
             - name: SERVER_URL
               value: "http://localhost:5516"
+            {{- if not .Values.UseExistingDB.Enabled }}
             - name: XL_DB_URL
-              {{- if not .Values.UseExistingDB.Enabled }}
               value: jdbc:postgresql://{{ template "xl-release.fullname" . }}-postgresql:5432/xlr-db
-              {{- else }}
+            - name: XL_DB_USERNAME
+              value: xlr
+            - name: XL_DB_PASSWORD
+              value: "xlr"
+            - name: XL_REPORT_DB_URL
+              value: jdbc:postgresql://{{ template "xl-release.fullname" . }}-postgresql:5432/xlr-report-db
+            - name: XL_REPORT_DB_USERNAME
+              value: xlr-report
+            - name: XL_REPORT_DB_PASSWORD
+              value: "xlr-report"
+            {{- else }}
+            - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
-              {{- end }}
             - name: XL_DB_USERNAME
               value: {{$XLR_DB_USER}}
             - name: XL_DB_PASSWORD
               value: "{{$XLR_DB_PASS}}"
-            - name: XL_LICENSE
-              value: {{ .Values.xlrLicense }}
             - name: XL_REPORT_DB_URL
-              {{- if not .Values.UseExistingDB.Enabled }}
-              value: jdbc:postgresql://{{ template "xl-release.fullname" . }}-postgresql:5432/xlr-report-db
-              {{- else }}
               value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
-              {{- end }}
             - name: XL_REPORT_DB_USERNAME
               value: {{$XLR_REPORT_DB_USER}}
             - name: XL_REPORT_DB_PASSWORD
               value: "{{$XLR_REPORT_DB_PASS}}"
+            {{- end }}
+            - name: XL_LICENSE
+              value: {{ .Values.xlrLicense }}
             - name: XL_METRICS_ENABLED
               value: "false"
             - name: FORCE_UPGRADE
@@ -137,9 +144,16 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
+        {{- if .Values.Persistence.Enabled }}
         - name: reports-dir
           persistentVolumeClaim:
             claimName: {{ template "xl-release.fullname" . }}
+        {{- else }}
+        - name: reports-dir
+          hostPath:
+            path: /opt/xebialabs/xl-release-server/reports
+            type: DirectoryOrCreate
+        {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
