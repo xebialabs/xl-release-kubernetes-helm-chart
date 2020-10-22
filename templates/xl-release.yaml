@@ -63,13 +63,6 @@ spec:
             initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
-            periodSeconds: {{ .Values.HealthPeriodScans }}
-            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           {{- end }}
           env:
             - name: ADMIN_PASSWORD
@@ -116,13 +109,16 @@ spec:
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
               value: "false"
-            {{- if index .Values "activemq-artemis" "install" }}          
+            {{- if index .Values "rabbitmq-ha" "install" }}          
             - name: XLR_TASK_QUEUE_USERNAME
-              value: {{ index .Values "activemq-artemis" "artemisUser" }}
+              value: {{ index .Values "rabbitmq-ha" "rabbitmqUsername" }}
             - name: XLR_TASK_QUEUE_PASSWORD
-              value: {{ index .Values "activemq-artemis" "artemisPassword" | quote }}
+              valueFrom:
+                secretKeyRef:
+                   name: {{ .Release.Name }}-rabbitmq-ha
+                   key: rabbitmq-password
             - name: XLR_TASK_QUEUE_URL
-              value: "amqp://{{ index .Values "activemq-artemis" "fullnameOverride" }}.{{ .Release.Namespace }}.svc.cluster.local:61616"
+              value: "amqp://{{ .Release.Name }}-rabbitmq-ha.{{ .Release.Namespace }}.svc.cluster.local:5672/"
             - name: XLR_TASK_QUEUE_NAME
               value: "xlr-tasks-queue"
             {{- else }}

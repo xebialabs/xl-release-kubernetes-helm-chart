@@ -74,28 +74,42 @@ UseExistingDB:
   # XLR_REPORT_DB_USER:
   # XLR_REPORT_DB_PASS:
 
-## Install activemq artemis chart. If you have an existing message queue deployment, set 'install' to 'false'.
-activemq-artemis:
+## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
+## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
+rabbitmq-ha:
   install: true
-  fullnameOverride: artemis
-  artemisUser: admin
-  artemisPassword: admin
-  replicas: 1
-  persistence:
-    enabled: false
-    accessMode: ReadWriteOnce
-    size: 8Gi
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 100m
-  loadbalancer:
+  rabbitmqUsername: guest
+  rabbitmqPassword: ""
+  extraPlugins: |
+    rabbitmq_shovel,
+    rabbitmq_shovel_management,
+    rabbitmq_federation,
+    rabbitmq_federation_management,
+    rabbitmq_amqp1_0,
+  replicaCount: 2
+  rbac:
+    create: true
+  service:
+    type: ClusterIP
+  persistentVolume:
     enabled: true
+    size: 1Gi
+    annotations: {}
+    resources: {}
+  #  requests:
+  #    memory: "250Mi"
+  #    cpu: "100m"
+  #  limits:
+  #    memory: "550Mi"
+  #    cpu: "200m"
+  prometheus:
+    operator:
+      enabled: false
 
 ## Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
 UseExistingMQ:
   Enabled: false
-  # If you want to use a existing Message Queue, change 'activemq-artemis.install' to 'false'.
+  # If you want to use a existing Message Queue, change 'rabbitmq-ha.install' to 'false'.
   # Set 'UseExistingMQ.Enabled' to 'true'.Uncomment the following lines and provide the values.
   # XLR_TASK_QUEUE_USERNAME: 
   # XLR_TASK_QUEUE_PASSWORD: 

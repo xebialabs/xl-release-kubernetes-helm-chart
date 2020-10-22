@@ -10,9 +10,8 @@ dependencies:
   repository: "https://kubernetes-charts-incubator.storage.googleapis.com/"
   condition: haproxy-ingress.install
 
-- name: activemq-artemis
-  version: 0.0.2
-  repository: "file://./subcharts/activemq-artemis"
-  # repository: "https://vromero.github.io/activemq-artemis-helm/"
-  condition: activemq-artemis.install
+- name: rabbitmq-ha
+  version: 1.47.1
+  repository: "https://kubernetes-charts.storage.googleapis.com/"
+  condition: rabbitmq-ha.install
 
