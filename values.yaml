@@ -56,7 +56,7 @@ AdminPassword:
 xlrLicense:
 # Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 ) and put the output here
 
-RepositoryKeystore: 
+RepositoryKeystore:
 # Convert keystore.jks files content to base64 ( cat keystore.jks | base64 ) and put the output here
 
 KeystorePassphrase:
@@ -86,7 +86,8 @@ rabbitmq-ha:
     rabbitmq_federation,
     rabbitmq_federation_management,
     rabbitmq_amqp1_0,
-  replicaCount: 2
+	rabbitmq_management,
+  replicaCount: 3
   rbac:
     create: true
   service:
@@ -102,6 +103,23 @@ rabbitmq-ha:
   #  limits:
   #    memory: "550Mi"
   #    cpu: "200m"
+  definitions:
+    policies: |-
+      {
+        "name": "ha-all",
+        "pattern": ".*",
+        "vhost": "/",
+        "definition": {
+          "ha-mode": "all",
+          "ha-sync-mode": "automatic",
+          "ha-sync-batch-size": 1
+        }
+      }
+    globalParameters: |-
+      {
+          "name": "cluster_name",
+          "value": ""
+      }  
   prometheus:
     operator:
       enabled: false
@@ -111,10 +129,10 @@ UseExistingMQ:
   Enabled: false
   # If you want to use a existing Message Queue, change 'rabbitmq-ha.install' to 'false'.
   # Set 'UseExistingMQ.Enabled' to 'true'.Uncomment the following lines and provide the values.
-  # XLR_TASK_QUEUE_USERNAME: 
-  # XLR_TASK_QUEUE_PASSWORD: 
-  # XLR_TASK_QUEUE_NAME: 
-  # XLR_TASK_QUEUE_URL: 
+  # XLR_TASK_QUEUE_USERNAME:
+  # XLR_TASK_QUEUE_PASSWORD:
+  # XLR_TASK_QUEUE_NAME:
+  # XLR_TASK_QUEUE_URL:
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
