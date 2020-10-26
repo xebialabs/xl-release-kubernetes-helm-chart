@@ -10,6 +10,11 @@ dependencies:
   repository: "https://kubernetes-charts-incubator.storage.googleapis.com/"
   condition: haproxy-ingress.install
 
+- name: postgresql
+  version: 9.8.5
+  repository: "https://charts.bitnami.com/bitnami"
+  condition: postgresql.install
+
 - name: rabbitmq-ha
   version: 1.47.1
   repository: "https://kubernetes-charts.storage.googleapis.com/"

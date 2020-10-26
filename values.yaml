@@ -62,11 +62,43 @@ RepositoryKeystore:
 KeystorePassphrase:
 # Passphrase for keystore.jks file
 
+## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
+## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
+postgresql:
+  install: true
+  postgresqlUsername: postgres
+  postgresqlPassword: ""
+  replication:
+    enabled: true
+    user: repl_user
+    password: repl_password
+    slaveReplicas: 1
+  postgresqlExtendedConf:
+    listenAddresses: "'*'"
+    maxConnections: "500"
+  initdbScriptsSecret: postgresql-init-sql-xlr
+  service:
+    port: 5432
+  persistence:
+    enabled: true
+    size: 10Gi
+    existingClaim:
+  resources: {}
+  #  requests:
+  #    memory: "1Gi"
+  #    cpu: "250m"
+  #  limits:
+  #    memory: "2Gi"
+  #    cpu: "1"
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
 ## Ref: https://docs.xebialabs.com/v.9.7/release/how-to/configure-the-xl-release-sql-repository-in-a-database#configuration-examples
 UseExistingDB:
   Enabled: false
-  # If you want to use existing database, change the the value to "true".
-  # Uncomment the following lines and provide the values.
+  # If you want to use a existing database, change 'postgresql.install' to 'false'.
+  # Set 'UseExistingDB.Enabled' to 'true'.Uncomment the following lines and provide the values.
   # XLR_DB_URL:
   # XLR_DB_USER:
   # XLR_DB_PASS:

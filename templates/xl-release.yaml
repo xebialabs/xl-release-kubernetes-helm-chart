@@ -1,8 +1,3 @@
-{{$XLR_DB_USER := .Values.UseExistingDB.XLR_DB_USER}}
-{{$XLR_DB_PASS := .Values.UseExistingDB.XLR_DB_PASS}}
-{{$XLR_REPORT_DB_USER := .Values.UseExistingDB.XLR_REPORT_DB_USER}}
-{{$XLR_REPORT_DB_PASS := .Values.UseExistingDB.XLR_REPORT_DB_PASS}}
-
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -28,7 +23,7 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
-      {{- if not .Values.UseExistingDB.Enabled }}
+      {{- if .Values.postgresql.install }}
       initContainers:
         - name: wait-for-db
           image: xebialabs/tiny-tools
@@ -41,7 +36,7 @@ spec:
               done;
           env:
            - name: POSTGRES_SVC
-             value: {{ template "xl-release.fullname" . }}-postgresql
+             value: {{ .Release.Name }}-postgresql
            - name: POSTGRES_PORT
              value: "5432"
       {{- end }}
@@ -74,32 +69,34 @@ spec:
               value: full
             - name: SERVER_URL
               value: "http://localhost:5516"
-            {{- if not .Values.UseExistingDB.Enabled }}
+            {{- if .Values.postgresql.install }}
             - name: XL_DB_URL
-              value: jdbc:postgresql://{{ template "xl-release.fullname" . }}-postgresql:5432/xlr-db
+              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db
             - name: XL_DB_USERNAME
               value: xlr
             - name: XL_DB_PASSWORD
               value: "xlr"
             - name: XL_REPORT_DB_URL
-              value: jdbc:postgresql://{{ template "xl-release.fullname" . }}-postgresql:5432/xlr-report-db
+              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-report-db
             - name: XL_REPORT_DB_USERNAME
               value: xlr-report
             - name: XL_REPORT_DB_PASSWORD
               value: "xlr-report"
             {{- else }}
+            {{- if .Values.UseExistingDB.Enabled }}
             - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
             - name: XL_DB_USERNAME
-              value: {{$XLR_DB_USER}}
+              value: {{ .Values.UseExistingDB.XLR_DB_USER }}
             - name: XL_DB_PASSWORD
-              value: "{{$XLR_DB_PASS}}"
+              value: {{ .Values.UseExistingDB.XLR_DB_PASS }}
             - name: XL_REPORT_DB_URL
               value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
             - name: XL_REPORT_DB_USERNAME
-              value: {{$XLR_REPORT_DB_USER}}
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_USER }}
             - name: XL_REPORT_DB_PASSWORD
-              value: "{{$XLR_REPORT_DB_PASS}}"
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_PASS }}
+            {{- end }}
             {{- end }}
             - name: XL_LICENSE
               value: {{ .Values.xlrLicense }}
