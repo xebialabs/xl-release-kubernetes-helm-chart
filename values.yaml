@@ -6,6 +6,7 @@
 K8sSetup:
   Platform: PlainK8s
 
+# No. of XL-Release master pods to run.
 replicaCount: 3
 
 ## XL-Release image version

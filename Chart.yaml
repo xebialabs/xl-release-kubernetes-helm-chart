@@ -2,12 +2,12 @@ apiVersion: v2
 appVersion: v9.7
 description: A Helm chart for XL Release
 name: xl-release
-version: 9.7
+version: 1.0.1
 
 dependencies:
 - name: haproxy-ingress
-  version: 0.0.27
-  repository: "https://kubernetes-charts-incubator.storage.googleapis.com/"
+  version: 0.10.1
+  repository: "https://haproxy-ingress.github.io/charts"
   condition: haproxy-ingress.install
 
 - name: postgresql
