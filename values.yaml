@@ -26,6 +26,7 @@ ImagePullPolicy: "Always"
 haproxy-ingress:
   install: true
   controller:
+    kind: DaemonSet
     service:
       type: NodePort
 

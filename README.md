@@ -51,7 +51,8 @@ NodePort service is exposed externally on the available worker nodes and can be 
 ```bash
 kubectl get service
 ```
-You can access xlrelease UI from an outside cluster with NodeIP:NodePort/xl-release/ 
+You can access xlrelease UI from an outside cluster with NodeIP:NodePort/xl-release/
+The path should be unique across the kubernetes cluster.(Ex "/xl-release/") 
 ## Uninstalling the Chart
 To uninstall/delete the `xlr-production` deployment:
 ```bash
@@ -204,5 +205,5 @@ If you want to use an existing ingress controller,  change `haproxy.install` to 
 - [`xebialabs/xl-release:<tagname>`](https://hub.docker.com/r/xebialabs/xl-release/tags) – Docker Hub repository for xlrelease
 - [`stable/rabbitmq-ha`](https://github.com/helm/charts/tree/master/stable/rabbitmq-ha) -  Github repository for RabbitMQ Helm Chart
 - [`bitnami/postgresql`](https://github.com/bitnami/charts/tree/master/bitnami/postgresql) -  Github repository for Postgresql Helm Chart
-- [`incubator/haproxy-ingress`](https://github.com/helm/charts/tree/master/incubator/haproxy-ingress) -  Github repository for HAProxy Ingress Controller Helm Chart
+- [`haproxy-ingress/haproxy-ingress`](https://github.com/haproxy-ingress/charts) -  Github repository for HAProxy Ingress Controller Helm Chart
 
