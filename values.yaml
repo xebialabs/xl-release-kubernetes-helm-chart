@@ -110,6 +110,9 @@ rabbitmq-ha:
   install: true
   rabbitmqUsername: guest
   rabbitmqPassword: ""
+  rabbitmqErlangCookie: RELEASERABBITMQCLUSTER
+  rabbitmqMemoryHighWatermark: 500MB
+  rabbitmqNodePort: 5672
   extraPlugins: |
     rabbitmq_shovel,
     rabbitmq_shovel_management,
