@@ -56,6 +56,14 @@ Before deploying EFS helm chart, there are some steps which needs to be performe
 ```bash
 helm install stable/efs-provisioner --set efsProvisioner.efsFileSystemId=fs-12345678 --set efsProvisioner.awsRegion=us-east-2
 ```
+* The `efs-provisioner` storage class must be marked with the default annotation so that PersistentVolumeClaim objects (without a StorageClass specified) will trigger dynamic provisioning.
+```bash
+kubectl patch storageclass efs-provisioner -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+* After deploying the nfs helm chart, execute the below command to get StorageClass name which can be used in values.yaml file for parameter `Persistence.StorageClass`
+```bash
+kubectl get storageclass
+```
 For more information on efs-provisioner, refer [stable/efs-provisioner](https://github.com/helm/charts/tree/master/stable/efs-provisioner)
 ## Installing the XL-Release Helm Chart
 Get the chart by cloning this repository:
