@@ -37,7 +37,7 @@ helm repo add stable https://charts.helm.sh/stable
 ```
 * To install the chart with the release name `nfs-provisioner`:
 ```bash
-helm install --set nfs.server=x.x.x.x --set nfs.path=/exported/path stable/nfs-provisioner
+helm install nfs-provisioner --set nfs.server=x.x.x.x --set nfs.path=/exported/path stable/nfs-provisioner
 ```
 * The `nfs-provisioner` storage class must be marked with the default annotation so that PersistentVolumeClaim objects (without a StorageClass specified) will trigger dynamic provisioning.
 ```bash
