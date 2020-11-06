@@ -60,7 +60,7 @@ helm install stable/efs-provisioner --set efsProvisioner.efsFileSystemId=fs-1234
 ```bash
 kubectl patch storageclass efs-provisioner -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
-* After deploying the nfs helm chart, execute the below command to get StorageClass name which can be used in values.yaml file for parameter `Persistence.StorageClass`
+* After deploying the efs helm chart, execute the below command to get StorageClass name which can be used in values.yaml file for parameter `Persistence.StorageClass`
 ```bash
 kubectl get storageclass
 ```
