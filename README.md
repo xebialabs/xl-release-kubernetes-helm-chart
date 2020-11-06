@@ -1,12 +1,12 @@
 # XL-Release HA on Kubernetes Helm Chart
-This repository contains a Helm Chart for Xebialabs Release (XL Release) product. The Helm Chart automates and simplifies deploying XL-Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
+This repository contains a Helm Chart for Xebialabs Release product. The Helm Chart automates and simplifies deploying XL-Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
 
 ## Prerequisites Details
 * Kubernetes 1.18+
 
 ## Chart Details
 This chart will deploy following components:
-* PostgreSQL single instance / pod (**NOTE:** For production grade installations it is recommended to use an external PostgreSQL)
+* PostgreSQL single instance / pod (**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to  install postgres-ha on kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://github.com/CrunchyData/postgres-operator/tree/master/installers/helm)
 * RabbitMQ in highly available configuration
 * HAProxy ingress controller
 * XL-Release in highly available configuration
@@ -14,28 +14,55 @@ This chart will deploy following components:
 ## Requirements
 - A running Kubernetes cluster
 	- Dynamic storage provisioning enabled
-	- StorageClass for persistent storage
-	- Desired StorageClass must be set to default
+	- StorageClass for persistent storage. The [Installing StorageClass Helm Chart](#installing-storageclass-helm-chart) section provides steps to install storage class on OnPremise Kubernetes cluster and AWS Elastic Kubernetes Service(EKS) cluster.
+	- StorageClass which is expected to be used with XL-Release should be set as default StorageClass
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed and setup to use the cluster
 - [Helm](https://helm.sh/docs/intro/install/) 3 installed
-- License File for XL-Release in Base64 Encoded format
-- Repository Keystorefile in Base64 Encoded format
+- License File for XL-Release in base64 encoded format
+- Repository Keystorefile in base64 encoded format
 
 ## Tested Configuration
-**Supported Platforms:**
-Kubernetes 1.18+
-AWS EKS
-**Storage:**
-NFS
-AWS EFS
-**Messaging Queue:**
-Rabbit MQ 
-**Database:**
-Postgresql 
-**LoadBalancers:**
-HAProxy Ingress Controller
+- **Supported Platforms:** - OnPremise Kubernetes, AWS Elastic Kubernetes Service (EKS)
+- **Storage:** - Network File System (NFS), AWS Elastic File System (EFS)
+- **Messaging Queue:** - Rabbit MQ 
+- **Database:** - Postgresql 
+- **LoadBalancers:** - HAProxy Ingress Controller
 
-## Installing the Chart
+## Installing StorageClass Helm Chart
+##### NFS Client Provisioner for OnPremise Kubernetes cluster
+* For deploying helm chart, `nfs server` and `nfs mount path` is required.
+* Before installing NFS Provisioner helm chart, you need to add the stable helm repository to your helm client as shown below:
+```bash
+helm repo add stable https://charts.helm.sh/stable
+```
+* To install the chart with the release name `nfs-provisioner`:
+```bash
+helm install --set nfs.server=x.x.x.x --set nfs.path=/exported/path stable/nfs-provisioner
+```
+* The `nfs-provisioner` storage class must be marked with the default annotation so that PersistentVolumeClaim objects (without a StorageClass specified) will trigger dynamic provisioning.
+```bash
+kubectl patch storageclass nfs-provisioner -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+* After deploying the nfs helm chart, execute the below command to get StorageClass name which can be used in values.yaml file for parameter `Persistence.StorageClass`
+```bash
+kubectl get storageclass
+```
+For more information on nfs-client-provisioner, refer [stable/nfs-client-provisioner](https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner)
+##### Elastic File System for AWS Elastic Kubernetes Service(EKS) cluster 
+Before deploying EFS helm chart, there are some steps which needs to be performed.
+* Create your EFS file system. Refer [Create Your Amazon EFS File System](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html) for creating file system.
+* Create mount target and mount the file system on EC2 instances within the cluster. Refer [Creating mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for creating mount target.
+* Provide the `efsFileSystemId` which is obtained by following above first step and install the chart with the release name `efs-provisioner`:
+```bash
+helm install stable/efs-provisioner --set efsProvisioner.efsFileSystemId=fs-12345678 --set efsProvisioner.awsRegion=us-east-2
+```
+For more information on efs-provisioner, refer [stable/efs-provisioner](https://github.com/helm/charts/tree/master/stable/efs-provisioner)
+## Installing the XL-Release Helm Chart
+Get the chart by cloning this repository:
+```bash
+git clone -b ENG-1816 https://github.com/xebialabs/xl-release-kubernetes-helm-chart.git
+```
+The [Parameters](#parameters) section lists the parameters that can be configured before installation starts.
 Before installing helm charts, you need to update the dependencies of a chart:
 ```bash
 helm dependency update xl-release-kubernetes-helm-chart
@@ -44,33 +71,32 @@ To install the chart with the release name `xlr-production`:
 ```bash
 helm install xlr-production xl-release-kubernetes-helm-chart
 ```
-The [Parameters](#parameters) section lists the parameters that can be configured during installation.
-
 ## Access XL-Release Dashboard
-NodePort service is exposed externally on the available worker nodes and can be seen by running below command
+NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
 ```bash
 kubectl get service
 ```
-You can access xlrelease UI from an outside cluster with NodeIP:NodePort/xl-release/
+You can access xl-release UI from an outside cluster with [http://NodeIP:NodePort/xl-release/](http://NodeIP:NodePort/xl-release/)
 The path should be unique across the kubernetes cluster.(Ex "/xl-release/") 
-## Uninstalling the Chart
+## Uninstalling the XL-Release Helm Chart
 To uninstall/delete the `xlr-production` deployment:
 ```bash
 helm delete xlr-production
 ```
-The command removes all the Kubernetes components but PV and PVC's associated with the chart is not removed.
-To delete the PVC's associated with `xlr-production`:
+The command removes all the Kubernetes components but PV and PVC's associated with the chart are not removed.
+To delete the PVC's associated with `xlr-production` execute below command:
 ```bash
 kubectl delete pvc -l release=xlr-production
 ```
 > **Note**: Deleting the PVC's will delete all data. Please be cautious before doing it.
 
 ## Parameters
-For deployment of Helm Chart on Production environment, all parameters need to be looked very carefully.
-However, for deployment of Helm Chart on test environment, only few values of parameters need to be added and it deploys chart with all default values. The values for the parameters which need to be added are as follows:
-*xlrLicense*: License for XL-Release in base64 format
-*Persistence.StorageClass*: Storage Class to be defined, NFS for OnPremise and EFS for AWS EKS
+For deployment on Production environment, all parameters need to be configured as per users requirement and k8s setup which is under use. However, for deployment on test environment, most of the default values will be sufficient. The following two parameters are required to be configured and rest of parameters may remain as default
+- *xlrLicense*: License for XL-Release in base64 format
+- *Persistence.StorageClass*: Storage Class to be defined, Network File System (NFS) for OnPremise and Elastic File System (EFS) for AWS Elastic Kubernetes Service(EKS)
+
 The following tables lists the configurable parameters of the XL-Release chart and their default values.
+
 Parameter                                        |Description                                                                                                                                                          |Default                                                                                                                                                                                                                                                                                                                                                                        
 -------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 K8sSetup.Platform                                |Platform on which to install the chart. Allowed values are PlainK8s and AWSEKS                                                                                                                               |PlainK8s                                                                                                                                                                                                                                                                                                                                                                       
@@ -86,7 +112,7 @@ ingress.Enabled                                  |Exposes HTTP and HTTPS routes 
 ingress.annotations                              |Annotations for ingress controller                                                                                                                                   |ingress.kubernetes.io/ssl-redirect: "false"&nbsp; &nbsp; &nbsp; kubernetes.io/ingress.class: haproxy ingress.kubernetes.io/rewrite-target: / ingress.kubernetes.io/affinity: cookie ingress.kubernetes.io/session-cookie-name: JSESSIONID ingress.kubernetes.io/session-cookie-strategy: prefix ingress.kubernetes.io/config-backend: `|`&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;  option httpchk GET /ha/health HTTP/1.0 |
 ingress.path                                     |You can route an Ingress to different Services based on the path                                                                                                     |/xl-release/                                                                                                                                                                                                                                                                                                                                                                   
 ingress.tls                                      |The Helm chart deploys the HAProxy Kubernetes Ingress Controller with default settings, but you can override the values by configuring TLS encryption                      |false                                                                                                                                                                                                                                                                                                                                                                          
-AdminPassword                                    |Admin password for xlrelease                                                                                                                                         |If user does not provide password, random 10 character alphanumeric string will be generated                                                                                                                                                                                                                                                                                                                                        
+AdminPassword                                    |Admin password for xl-release                                                                                                                                         |If user does not provide password, random 10 character alphanumeric string will be generated                                                                                                                                                                                                                                                                                                                                        
 xlrLicense                                       |Convert xl-release.lic files content to base64  here                                                                 |nil                                                                                                                                                                                                                                                                                                                                                                            
 RepositoryKeystore                               |Convert keystore.jks files content to base64  here                                                                     |nil                                                                                                                                                                                                                                                                                                                                                                            
 KeystorePassphrase                               |Passphrase for keystore.jks file                                                                                                                                     |nil                                                                                                                                                                                                                                                                                                                                                                            
@@ -106,12 +132,12 @@ postgresql.nodeSelector                          |Node labels for pod assignment
 postgresql.affinity                              |Affinity labels for pod assignment                                                                                                                                   |{}                                                                                                                                                                                                                                                                                                                                                                             
 postgresql.tolerations                           |Toleration labels for pod assignment                                                                                                                                 |\[\]                                                                                                                                                                                                                                                                                                                                                                           
 UseExistingDB.Enabled                            |If you want to use an existing database, change 'postgresql.install' to 'false'.                                                                                     |false                                                                                                                                                                                                                                                                                                                                                                          
-UseExistingDB.XLR\_DB\_URL                       |Database URL for xlrelease                                                                                                                                           |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_DB\_USER                      |Database User for xlrelease                                                                                                                                          |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_DB\_PASS                      |Database Password for xlrelease                                                                                                                                      |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_REPORT\_DB\_URL               |Database URL for xlrelease report db                                                                                                                                 |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_REPORT\_DB\_USER              |Database User for xlrelease report db                                                                                                                                |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_REPORT\_DB\_PASS              |Database Password for xlrelease report db                                                                                                                            |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingDB.XLR\_DB\_URL                       |Database URL for xl-release                                                                                                                                           |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingDB.XLR\_DB\_USER                      |Database User for xl-release                                                                                                                                          |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingDB.XLR\_DB\_PASS                      |Database Password for xl-release                                                                                                                                      |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingDB.XLR\_REPORT\_DB\_URL               |Database URL for xl-release report db                                                                                                                                 |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingDB.XLR\_REPORT\_DB\_USER              |Database User for xl-release report db                                                                                                                                |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingDB.XLR\_REPORT\_DB\_PASS              |Database Password for xl-release report db                                                                                                                            |nil                                                                                                                                                                                                                                                                                                                                                                            
 rabbitmq-ha.install                              |Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.                                                                  |true                                                                                                                                                                                                                                                                                                                                                                           
 rabbitmq-ha.rabbitmqUsername                     |RabbitMQ application username                                                                                                                                        |guest                                                                                                                                                                                                                                                                                                                                                                          
 rabbitmq-ha.rabbitmqPassword                     |RabbitMQ application password                                                                                                                                        |random 24 character long alphanumeric string                                                                                                                                                                                                                                                                                                                                   
@@ -127,10 +153,10 @@ rabbitmq-ha.definitions.policies                 |HA policies to add to definiti
 rabbitmq-ha.definitions.globalParameters         |Pre-configured global parameters                                                                                                                                     |`{"name":"cluster_name","value": "" }`                                                                                                                                                                                                                                                                                                                                
 rabbitmq-ha.prometheus.operator.enabled          |Enabling Prometheus Operator                                                                                                                                         |false                                                                                                                                                                                                                                                                                                                                                                          
 UseExistingMQ.Enabled                            |If you want to use an existing Message Queue, change 'rabbitmq-ha.install' to 'false'                                                                                |false                                                                                                                                                                                                                                                                                                                                                                          
-UseExistingMQ.XLR\_TASK\_QUEUE\_USERNAME         |Username for xlrelease task queue                                                                                                                                    |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingMQ.XLR\_TASK\_QUEUE\_PASSWORD         |Password for xlrelease task queue                                                                                                                                    |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingMQ.XLR\_TASK\_QUEUE\_NAME             |Name for xlrelease task queue                                                                                                                                        |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingMQ.XLR\_TASK\_QUEUE\_URL              |URL for xlrelease task queue                                                                                                                                         |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingMQ.XLR\_TASK\_QUEUE\_USERNAME         |Username for xl-release task queue                                                                                                                                    |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingMQ.XLR\_TASK\_QUEUE\_PASSWORD         |Password for xl-release task queue                                                                                                                                    |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingMQ.XLR\_TASK\_QUEUE\_NAME             |Name for xl-release task queue                                                                                                                                        |nil                                                                                                                                                                                                                                                                                                                                                                            
+UseExistingMQ.XLR\_TASK\_QUEUE\_URL              |URL for xl-release task queue                                                                                                                                         |nil                                                                                                                                                                                                                                                                                                                                                                            
 resources                                        |CPU/Memory resource requests/limits.User can change the parameter accordingly                                                                                                                                  |nil                                                                                                                                                                                                                                                                                                                                                                            
 HealthProbes                                     |Would you like a HealthProbes to be enabled                                                                                                                          |true                                                                                                                                                                                                                                                                                                                                                                           
 HealthProbesLivenessTimeout                      |Delay before liveness probe is initiated                                                                                                                             |90                                                                                                                                                                                                                                                                                                                                                                             
@@ -146,25 +172,25 @@ Persistence.Annotations                          |Annotations for the PVC       
 Persistence.AccessMode                           |PVC Access Mode for volume                                                                                                                                           |ReadWriteOnce                                                                                                                                                                                                                                                                                                                                                                  
 Persistence.Size                                 |PVC Storage Request for volume. For production grade setup, size must be changed                                                                                     |5Gi                                                                                                                                                                                                                                                                                                                                                                            
 
-## Upgrading the Chart
-To upgrade the version `ImageTag` parameter need to be updated to the desired version. To see the list available ImageTag for XL-Release see the following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags).
+## Upgrading the XL-Release Helm Chart
+To upgrade the version `ImageTag` parameter need to be updated to the desired version. To see the list of available ImageTag for XL-Release, refer following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags). For upgrade, Rolling Update strategy is used.
 To upgrade the chart with the release name `xlr-production`:
 ```bash
 helm upgrade xlr-production xl-release-kubernetes-helm-chart/
 ```
 > **Note**:
-	The custom plugins are not upgraded as part of helm upgrade, as default Docker images only included with the bundled plugins. If you have a new custom plugin, or external libraries that you want to install or upgrade, the user has to create their own Docker Image. See the [Adding custom plugins](https://docs.xebialabs.com/v.9.7/deploy/how-to/customize-xl-up/#adding-custom-plugins) section in the xebialabs official documentation.
+  Currently upgrading custom plugins and database drivers is not supported. In order to upgrade custom plugins and database drivers, users need to build custom docker image of xl-release containing required files.See the [adding custom plugins](https://docs.xebialabs.com/v.9.7/deploy/how-to/customize-xl-up/#adding-custom-plugins) section in the Xebialabs official documentation.
 ### Existing or External Databases
 There is an option to use external PostgreSQL database for your XL-Release. Configure values.yaml file accordingly.
 If you want to use an existing database,  these steps need to be followed:
 - Change `postgresql.install` to false
 - `UseExistingDB.Enabled`: true
 - `UseExistingDB.XLR_DB_URL`: jdbc:postgresql://<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-database-name>
-- `UseExistingDB.XLR_DB_USER`: Database User for xlrelease
-- `UseExistingDB.XLR_DB_PASS`: Database Password for xlrelease
+- `UseExistingDB.XLR_DB_USER`: Database User for xl-release
+- `UseExistingDB.XLR_DB_PASS`: Database Password for xl-release
 - `UseExistingDB.XLR_REPORT_DB_URL`: jdbc:postgresql://<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-report-database-name>
-- `UseExistingDB.XLR_REPORT_DB_USER`:  Database User for xlrelease report db
-- `UseExistingDB.XLR_REPORT_DB_PASS`:  Database Password for xlrelease report db
+- `UseExistingDB.XLR_REPORT_DB_USER`:  Database User for xl-release report db
+- `UseExistingDB.XLR_REPORT_DB_PASS`:  Database Password for xl-release report db
 **Example:**
 ```bash
 #Passing a custom PostgreSQL to XL-Release
@@ -179,15 +205,15 @@ UseExistingDB:
   XLR_REPORT_DB_USER: xlr-report
   XLR_REPORT_DB_PASS: xlr-report
 ``` 
-> **Note**: User might have databases instance running outside the cluster. Configure parameters accordingly. 
+> **Note**: User might have database instance running outside the cluster. Configure parameters accordingly. 
 ### Existing or External Messaging Queue
 There is an option to use external RabbitMQ for your XL-Release. Configure values.yaml file accordingly.
 If you want to use an existing RabbitMQ,  these steps need to be followed:
 - Change `rabbitmq-ha.install` to false
 - `UseExistingMQ.Enabled`: true
-- `UseExistingMQ.XLR_TASK_QUEUE_USERNAME`: Username for xlrelease task queue
-- `UseExistingMQ.XLR_TASK_QUEUE_PASSWORD`: Password for xlrelease task queue
-- `UseExistingMQ.XLR_TASK_QUEUE_NAME`: Queue Name for xlrelease
+- `UseExistingMQ.XLR_TASK_QUEUE_USERNAME`: Username for xl-release task queue
+- `UseExistingMQ.XLR_TASK_QUEUE_PASSWORD`: Password for xl-release task queue
+- `UseExistingMQ.XLR_TASK_QUEUE_NAME`: Queue Name for xl-release
 - `UseExistingMQ.XLR_TASK_QUEUE_URL`: amqp://<rabbitmq-service-name>.<namsepace>.svc.cluster.local:5672
 **Example:**
 ```bash
@@ -207,7 +233,7 @@ There is an option to use external ingress controller for XL-Release.
 If you want to use an existing ingress controller,  change `haproxy.install` to false.
 
 ## Useful links
-- [`xebialabs/xl-release:<tagname>`](https://hub.docker.com/r/xebialabs/xl-release/tags) – Docker Hub repository for xlrelease
+- [`xebialabs/xl-release:<tagname>`](https://hub.docker.com/r/xebialabs/xl-release/tags) – Docker Hub repository for xl-release
 - [`stable/rabbitmq-ha`](https://github.com/helm/charts/tree/master/stable/rabbitmq-ha) -  Github repository for RabbitMQ Helm Chart
 - [`bitnami/postgresql`](https://github.com/bitnami/charts/tree/master/bitnami/postgresql) -  Github repository for Postgresql Helm Chart
 - [`haproxy-ingress/haproxy-ingress`](https://github.com/haproxy-ingress/charts) -  Github repository for HAProxy Ingress Controller Helm Chart
