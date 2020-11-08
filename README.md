@@ -193,10 +193,10 @@ There is an option to use external PostgreSQL database for your XL-Release. Conf
 If you want to use an existing database,  these steps need to be followed:
 - Change `postgresql.install` to false
 - `UseExistingDB.Enabled`: true
-- `UseExistingDB.XLR_DB_URL`: jdbc:postgresql://<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-database-name>
+- `UseExistingDB.XLR_DB_URL`: jdbc:postgresql://`<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-database-name>`
 - `UseExistingDB.XLR_DB_USER`: Database User for xl-release
 - `UseExistingDB.XLR_DB_PASS`: Database Password for xl-release
-- `UseExistingDB.XLR_REPORT_DB_URL`: jdbc:postgresql://<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-report-database-name>
+- `UseExistingDB.XLR_REPORT_DB_URL`: `jdbc:postgresql://<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-report-database-name>`
 - `UseExistingDB.XLR_REPORT_DB_USER`:  Database User for xl-release report db
 - `UseExistingDB.XLR_REPORT_DB_PASS`:  Database Password for xl-release report db
 **Example:**
@@ -206,10 +206,10 @@ UseExistingDB:
   Enabled: true
   # If you want to use existing database, change the value to "true".
   # Uncomment the following lines and provide the values.
-  XLR_DB_URL: jdbc:postgresql://myrelease-postgresql.default.svc.cluster.local:5432/xlr-db
+  XLR_DB_URL: jdbc:postgresql://xlr-production-postgresql.default.svc.cluster.local:5432/xlr-db
   XLR_DB_USER: xlr
   XLR_DB_PASS: xlr
-  XLR_REPORT_DB_URL: jdbc:postgresql://myrelease-postgresql.default.svc.cluster.local:5432/xlr-report-db
+  XLR_REPORT_DB_URL: jdbc:postgresql://xlr-production-postgresql.default.svc.cluster.local:5432/xlr-report-db
   XLR_REPORT_DB_USER: xlr-report
   XLR_REPORT_DB_PASS: xlr-report
 ``` 
@@ -222,7 +222,7 @@ If you want to use an existing RabbitMQ,  these steps need to be followed:
 - `UseExistingMQ.XLR_TASK_QUEUE_USERNAME`: Username for xl-release task queue
 - `UseExistingMQ.XLR_TASK_QUEUE_PASSWORD`: Password for xl-release task queue
 - `UseExistingMQ.XLR_TASK_QUEUE_NAME`: Queue Name for xl-release
-- `UseExistingMQ.XLR_TASK_QUEUE_URL`: amqp://<rabbitmq-service-name>.<namsepace>.svc.cluster.local:5672
+- `UseExistingMQ.XLR_TASK_QUEUE_URL`: `amqp://<rabbitmq-service-name>.<namsepace>.svc.cluster.local:5672`
 **Example:**
 ```bash
 # Passing a custom RabbitMQ to XL-Release
@@ -233,7 +233,7 @@ UseExistingMQ:
   XLR_TASK_QUEUE_USERNAME: guest
   XLR_TASK_QUEUE_PASSWORD: guest
   XLR_TASK_QUEUE_NAME: xlr-task-queue
-  XLR_TASK_QUEUE_URL: amqp://myrelease-rabbitmq-ha.default.svc.cluster.local:5672
+  XLR_TASK_QUEUE_URL: amqp://xlr-production-rabbitmq-ha.default.svc.cluster.local:5672
 ```
 > **Note**: User might have rabbitmq instance running outside the cluster. Configure parameters accordingly.
 ### Existing Ingress Controller
