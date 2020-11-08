@@ -199,6 +199,7 @@ If you want to use an existing database,  these steps need to be followed:
 - `UseExistingDB.XLR_REPORT_DB_URL`: `jdbc:postgresql://<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-report-database-name>`
 - `UseExistingDB.XLR_REPORT_DB_USER`:  Database User for xl-release report db
 - `UseExistingDB.XLR_REPORT_DB_PASS`:  Database Password for xl-release report db
+
 **Example:**
 ```bash
 #Passing a custom PostgreSQL to XL-Release
