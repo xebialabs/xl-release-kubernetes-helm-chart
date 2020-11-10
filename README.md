@@ -91,12 +91,7 @@ To uninstall/delete the `xlr-production` deployment:
 ```bash
 helm delete xlr-production
 ```
-The command removes all the Kubernetes components but PV and PVC's associated with the chart are not removed.
-To delete the PVC's associated with `xlr-production` execute below command:
-```bash
-kubectl delete pvc -l release=xlr-production
-```
-> **Note**: Deleting the PVC's will delete all data. Please be cautious before doing it.
+
 
 ## Parameters
 For deployment on Production environment, all parameters need to be configured as per users requirement and k8s setup which is under use. However, for deployment on test environment, most of the default values will be sufficient. The following two parameters are required to be configured and rest of parameters may remain as default
