@@ -26,17 +26,12 @@ spec:
       secretName: {{ .secretName }}
   {{- end }}
 {{- end }}
-{{- if .Values.ingress.tls }}
   rules:
-  {{- range .Values.ingress.tls }}
-    - host: {{- range .hosts }} {{ . }} {{- end }}
-      http:
+    - http:
         paths:
           - path: {{ $ingressPath }}
             backend:
               serviceName: {{ $fullName }}
               servicePort: xlr-http
-  {{- end }}
-{{- end }} 
 {{- end -}}
 {{- end -}}
