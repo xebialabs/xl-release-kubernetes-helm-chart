@@ -2,9 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-## Platform on which to install the chart (PlainK8s/AWSEKS)
+## Platform on which to install the chart (PlainK8s/AWSEKS/Openshift)
 K8sSetup:
-  Platform: PlainK8s
+  Platform: Openshift
 
 # No. of XL-Release master pods to run.
 replicaCount: 3
@@ -24,7 +24,7 @@ ImagePullPolicy: "Always"
 ## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 haproxy-ingress:
-  install: true
+  install: false
   controller:
     kind: DaemonSet
     service:
@@ -33,7 +33,7 @@ haproxy-ingress:
 ## Ingress Configuration
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
-  Enabled: true
+  Enabled: false
   annotations:
     # ingress.kubernetes.io/tls-acme: "true"
     ingress.kubernetes.io/ssl-redirect: "false"
@@ -52,6 +52,19 @@ ingress:
 #    - secretName: example-secretsName
 #      hosts:
 #        - example.com
+
+## This section is meant for Openshift only
+## When using Openshift, set 'haproxy-ingress.install' to 'false'.
+## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html 
+route:
+  Enabled: true
+  annotations:
+    haproxy.router.openshift.io/cookie_name: JSESSIONID
+    haproxy.router.openshift.io/disable_cookies: "false"
+    haproxy.router.openshift.io/rewrite-target: /
+  path: /
+  hosts:
+    - app.example.com
 
 # https://docs.xebialabs.com/v.9.8/release/docker/docker-environment-variables/#get-started
 AdminPassword:
@@ -93,6 +106,16 @@ postgresql:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  volumePermissions:
+    securityContext:
+      runAsUser: auto
+  securityContext:
+    enabled: false
+  containerSecurityContext:
+    enabled: false
+  shmVolume:
+    chmod:
+      enabled: false
 
 ## Ref: https://docs.xebialabs.com/v.9.7/release/how-to/configure-the-xl-release-sql-repository-in-a-database#configuration-examples
 UseExistingDB:
