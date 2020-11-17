@@ -27,11 +27,14 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-    - http:
+  {{- range .Values.ingress.hosts }}
+    - host: {{ . }}
+      http:
         paths:
           - path: {{ $ingressPath }}
             backend:
               serviceName: {{ $fullName }}
               servicePort: xlr-http
+  {{- end }}
 {{- end -}}
 {{- end -}}
