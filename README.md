@@ -52,11 +52,15 @@ For more information on nfs-client-provisioner, refer [stable/nfs-client-provisi
 Before deploying EFS helm chart, there are some steps which needs to be performed.
 * Create your EFS file system. Refer [Create Your Amazon EFS File System](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html) for creating file system.
 * Create mount target and mount the file system on EC2 instances within the cluster. Refer [Creating mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for creating mount target.
-* Provide the `efsFileSystemId` which is obtained by following above first step and install the chart with the release name `efs-provisioner`:
+* Before installing EFS Provisioner helm chart, you need to add the stable helm repository to your helm client as shown below:
 ```bash
-helm install efs-provisioner stable/efs-provisioner --set efsProvisioner.efsFileSystemId=fs-12345678 --set efsProvisioner.awsRegion=us-east-2
+helm repo add stable https://charts.helm.sh/stable
 ```
-* The `efs-provisioner` storage class must be marked with the default annotation so that PersistentVolumeClaim objects (without a StorageClass specified) will trigger dynamic provisioning.
+* Provide the `efsFileSystemId` and `awsRegion` which is obtained by following above first step and install the chart with the release name `aws-efs`:
+```bash
+helm install aws-efs stable/efs-provisioner --set efsProvisioner.efsFileSystemId=fs-12345678 --set efsProvisioner.awsRegion=us-east-2
+```
+* The `aws-efs` storage class must be marked with the default annotation so that PersistentVolumeClaim objects (without a StorageClass specified) will trigger dynamic provisioning.
 ```bash
 kubectl patch storageclass aws-efs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
