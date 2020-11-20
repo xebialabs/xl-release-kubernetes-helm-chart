@@ -72,7 +72,7 @@ kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.ku
 kubectl get storageclass
 ```
 For more information on efs-provisioner, refer [stable/efs-provisioner](https://github.com/helm/charts/tree/master/stable/efs-provisioner)
-## Installing the XL-Release Helm Chart
+## Installing the Digital.ai Release Helm Chart
 Get the chart by cloning this repository:
 ```bash
 git clone https://github.com/xebialabs/xl-release-kubernetes-helm-chart.git
@@ -86,7 +86,7 @@ To install the chart with the release name `xlr-production`:
 ```bash
 helm install xlr-production xl-release-kubernetes-helm-chart
 ```
-## Access XL-Release Dashboard
+## Access Digital.ai Release Dashboard
 By default NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
 ```bash
 kubectl get service
@@ -100,7 +100,7 @@ Similarly for EKS, access xl-release UI using below link
  [http://ingress-loadbalancer-DNS/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
 
 The path should be unique across the kubernetes cluster.(Ex "/xl-release/") 
-## Uninstalling the XL-Release Helm Chart
+## Uninstalling the Digital.ai Release Helm Chart
 To uninstall/delete the `xlr-production` deployment:
 ```bash
 helm delete xlr-production
@@ -196,7 +196,7 @@ Persistence.Annotations                          |Annotations for the PVC       
 Persistence.AccessMode                           |PVC Access Mode for volume                                                                                                                                           |ReadWriteOnce                                                                                                                                                                                                                                                                                                                                                                  
 Persistence.Size                                 |PVC Storage Request for volume. For production grade setup, size must be changed                                                                                     |5Gi                                                                                                                                                                                                                                                                                                                                                                            
 
-## Upgrading the XL-Release Helm Chart
+## Upgrading the Digital.ai Release Helm Chart
 To upgrade the version `ImageTag` parameter need to be updated to the desired version. To see the list of available ImageTag for XL-Release, refer following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags). For upgrade, Rolling Update strategy is used.
 To upgrade the chart with the release name `xlr-production`:
 ```bash
