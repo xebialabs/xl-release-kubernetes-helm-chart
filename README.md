@@ -91,9 +91,14 @@ By default NodePort service is exposed externally on the available k8s worker no
 ```bash
 kubectl get service
 ```
-For OnPremise Cluster, You can access xl-release UI from an outside cluster with [http://ingress-loadbalancer-DNS:NodePort/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
-Similarly for EKS, access xl-release UI using following link 
+For OnPremise Cluster, You can access xl-release UI from an outside cluster with below link
+
+[http://ingress-loadbalancer-DNS:NodePort/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
+
+Similarly for EKS, access xl-release UI using below link 
+
  [http://ingress-loadbalancer-DNS/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
+
 The path should be unique across the kubernetes cluster.(Ex "/xl-release/") 
 ## Uninstalling the XL-Release Helm Chart
 To uninstall/delete the `xlr-production` deployment:
