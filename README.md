@@ -1,18 +1,9 @@
-# XL-Release HA on Kubernetes Helm Chart
+# Digital.ai Release HA on Kubernetes Helm Chart
 This repository contains a Helm Chart for Xebialabs Release product. The Helm Chart automates and simplifies deploying XL-Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
 
 ## Prerequisites Details
-* Kubernetes 1.18+
-
-## Chart Details
-This chart will deploy following components:
-* PostgreSQL single instance / pod (**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to  install postgres-ha on kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://github.com/CrunchyData/postgres-operator/tree/master/installers/helm)
-* RabbitMQ in highly available configuration
-* HAProxy ingress controller
-* XL-Release in highly available configuration
-
-## Requirements
-- A running Kubernetes cluster
+* Kubernetes v1.17+
+* A running Kubernetes cluster
 	- Dynamic storage provisioning enabled
 	- StorageClass for persistent storage. The [Installing StorageClass Helm Chart](#installing-storageclass-helm-chart) section provides steps to install storage class on OnPremise Kubernetes cluster and AWS Elastic Kubernetes Service(EKS) cluster.
 	- StorageClass which is expected to be used with XL-Release should be set as default StorageClass
@@ -21,12 +12,20 @@ This chart will deploy following components:
 - License File for XL-Release in base64 encoded format
 - Repository Keystorefile in base64 encoded format
 
+## Chart Details
+This chart will deploy following components:
+* PostgreSQL single instance / pod (**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to  install postgres-ha on kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://github.com/CrunchyData/postgres-operator/tree/master/installers/helm)
+* RabbitMQ in highly available configuration
+* HAProxy ingress controller
+* XL-Release in highly available configuration
+
+
 ## Tested Configuration
-- **Supported Platforms:** - OnPremise Kubernetes, AWS Elastic Kubernetes Service (EKS)
-- **Storage:** - Network File System (NFS), AWS Elastic File System (EFS)
-- **Messaging Queue:** - Rabbit MQ 
-- **Database:** - Postgresql 
-- **LoadBalancers:** - HAProxy Ingress Controller
+- **Supported Platforms:** - OnPremise Kubernetes(v1.18+), AWS Elastic Kubernetes Service (v1.17+)
+- **Storage:** - Network File System (NFS v1.2.11), AWS Elastic File System (EFS v0.13.2)
+- **Messaging Queue:** - Rabbit MQ (v1.47.0)
+- **Database:** - Postgresql (v 9.8.5) 
+- **LoadBalancers:** - HAProxy Ingress Controller (v0.9.1)
 
 ## Installing StorageClass Helm Chart
 ##### NFS Client Provisioner for OnPremise Kubernetes cluster
@@ -76,7 +75,7 @@ For more information on efs-provisioner, refer [stable/efs-provisioner](https://
 ## Installing the XL-Release Helm Chart
 Get the chart by cloning this repository:
 ```bash
-git clone -b ENG-1816 https://github.com/xebialabs/xl-release-kubernetes-helm-chart.git
+git clone https://github.com/xebialabs/xl-release-kubernetes-helm-chart.git
 ```
 The [Parameters](#parameters) section lists the parameters that can be configured before installation starts.
 Before installing helm charts, you need to update the dependencies of a chart:
@@ -88,11 +87,13 @@ To install the chart with the release name `xlr-production`:
 helm install xlr-production xl-release-kubernetes-helm-chart
 ```
 ## Access XL-Release Dashboard
-NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
+By default NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
 ```bash
 kubectl get service
 ```
-You can access xl-release UI from an outside cluster with [http://NodeIP:NodePort/xl-release/](http://NodeIP:NodePort/xl-release/)
+For OnPremise Cluster, You can access xl-release UI from an outside cluster with [http://ingress-loadbalancer-DNS:NodePort/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
+Similarly for EKS, access xl-release UI using following link 
+ [http://ingress-loadbalancer-DNS/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
 The path should be unique across the kubernetes cluster.(Ex "/xl-release/") 
 ## Uninstalling the XL-Release Helm Chart
 To uninstall/delete the `xlr-production` deployment:
@@ -105,6 +106,7 @@ helm delete xlr-production
 For deployment on Production environment, all parameters need to be configured as per users requirement and k8s setup which is under use. However, for deployment on test environment, most of the default values will be sufficient. The following two parameters are required to be configured and rest of parameters may remain as default
 - *xlrLicense*: License for XL-Release in base64 format
 - *Persistence.StorageClass*: Storage Class to be defined, Network File System (NFS) for OnPremise and Elastic File System (EFS) for AWS Elastic Kubernetes Service(EKS)
+- *ingress.hosts*: DNS name for accessing ui of XL-Release
 
 The following tables lists the configurable parameters of the XL-Release chart and their default values.
 
@@ -124,9 +126,9 @@ ingress.annotations                              |Annotations for ingress contro
 ingress.path                                     |You can route an Ingress to different Services based on the path                                                                                                     |/xl-release/                                                                                                                                                                                                                                                                                                                                                                   
 ingress.hosts                                     |DNS name for accessing ui of XL-Release                                                                                                     |example.com                                                                                                                                                                                                                                                                                                                                                                   
 ingress.tls.secretName                                      |Secret file which holds the tls private key and certificate                      |example-secretsName                                                                                                                                                                                                                                                                                                                                                                          
-ingress.tls.hosts                                      |DNS name for accessing ui of XL-Release using tls                      |example.com                                                                                                                                                                                                                                                                                                                                                                          
+ingress.tls.hosts                                      |DNS name for accessing ui of digital.ai Release using tls                      |example.com                                                                                                                                                                                                                                                                                                                                                                          
 ingress.tls                                      |The Helm chart deploys the HAProxy Kubernetes Ingress Controller with default settings, but you can override the values by configuring TLS encryption                      |false                                                                                                                                                                                                                                                                                                                                                                          
-AdminPassword                                    |Admin password for xl-release                                                                                                                                         |If user does not provide password, random 10 character alphanumeric string will be generated                                                                                                                                                                                                                                                                                                                                        
+AdminPassword                                    |Admin password for digital.ai release                                                                                                                                         |If user does not provide password, random 10 character alphanumeric string will be generated                                                                                                                                                                                                                                                                                                                                        
 xlrLicense                                       |Convert xl-release.lic files content to base64  here                                                                 |nil                                                                                                                                                                                                                                                                                                                                                                            
 RepositoryKeystore                               |Convert keystore.jks files content to base64  here                                                                     |nil                                                                                                                                                                                                                                                                                                                                                                            
 KeystorePassphrase                               |Passphrase for keystore.jks file                                                                                                                                     |nil                                                                                                                                                                                                                                                                                                                                                                            
@@ -155,6 +157,9 @@ UseExistingDB.XLR\_REPORT\_DB\_PASS              |Database Password for xl-relea
 rabbitmq-ha.install                              |Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.                                                                  |true                                                                                                                                                                                                                                                                                                                                                                           
 rabbitmq-ha.rabbitmqUsername                     |RabbitMQ application username                                                                                                                                        |guest                                                                                                                                                                                                                                                                                                                                                                          
 rabbitmq-ha.rabbitmqPassword                     |RabbitMQ application password                                                                                                                                        |random 24 character long alphanumeric string                                                                                                                                                                                                                                                                                                                                   
+rabbitmq-ha.rabbitmqErlangCookie                     |Erlang cookie                                                                                                                                        |random 32 character long alphanumeric string                                                                                                                                                                                                                                                                                                                                   
+rabbitmq-ha.rabbitmqMemoryHighWatermark                     |Memory high watermark                                                                                                                                        |256MB                                                                                                                                                                                                                                                                                                                                   
+rabbitmq-ha.rabbitmqNodePort                     |Node port                                                                                                                                        |5672                                                                                                                                                                                                                                                                                                                                   
 rabbitmq-ha.extraPlugins                         |Additional plugins to add to the default configmap                                                                                                                   |rabbitmq_shovel, rabbitmq_shovel_management, rabbitmq_federation, rabbitmq_federation_management, rabbitmq_amqp1_0, rabbitmq_management,                                                                                                                                                                                                               
 rabbitmq-ha.replicaCount                         |Number of replica                                                                                                                                                    |3                                                                                                                                                                                                                                                                                                                                                                              
 rabbitmq-ha.rbac.create                          |If true, create & use RBAC resources                                                                                                                                 |true                                                                                                                                                                                                                                                                                                                                                                           
