@@ -1,5 +1,22 @@
-apiVersion: v1
-appVersion: v8.5.0
+apiVersion: v2
+appVersion: v9.7
 description: A Helm chart for XL Release
-name: xl-release
-version: 8.5.0
+name: xl-release-helmcharts
+version: 1.0.1
+
+dependencies:
+- name: haproxy-ingress
+  version: 0.9.1
+  repository: "https://haproxy-ingress.github.io/charts"
+  condition: haproxy-ingress.install
+
+- name: postgresql
+  version: 9.8.5
+  repository: "https://charts.bitnami.com/bitnami"
+  condition: postgresql.install
+
+- name: rabbitmq-ha
+  version: 1.47.0
+  repository: "https://kubernetes-charts.storage.googleapis.com/"
+  condition: rabbitmq-ha.install
+

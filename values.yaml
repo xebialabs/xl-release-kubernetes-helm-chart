@@ -2,26 +2,172 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
+## Platform on which to install the chart (PlainK8s/AWSEKS)
+K8sSetup:
+  Platform: PlainK8s
+
+# No. of XL-Release master pods to run.
+replicaCount: 3
+
+## XL-Release image version
+## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
 ImageRepository: "xebialabs/xl-release"
-ImageTag: "8.5.0"
+ImageTag: "9.7"
+
+## Specify a imagePullPolicy
+## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
+
+## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
+## If you have any other ingress controller installed, you can set the 'install' to 'false'.
+haproxy-ingress:
+  install: true
+  controller:
+    kind: DaemonSet
+    service:
+      type: NodePort
+
+## Ingress Configuration
+## Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
   Enabled: true
   annotations:
     # ingress.kubernetes.io/tls-acme: "true"
-    # kubernetes.io/ingress.class: nginx
-  path: /
+    ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.class: haproxy
+    ingress.kubernetes.io/rewrite-target: /
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    ingress.kubernetes.io/session-cookie-strategy: prefix
+    ingress.kubernetes.io/config-backend: |
+      option httpchk GET /ha/health HTTP/1.0
+  path: /xl-release/
   hosts:
     - example.com
-  tls:
-   - secretName: example-secretsName
-     hosts:
-       - example.com
 
-xlrDevelopmentMode: false
+#  tls:
+#    - secretName: example-secretsName
+#      hosts:
+#        - example.com
+
+# https://docs.xebialabs.com/v.9.8/release/docker/docker-environment-variables/#get-started
+AdminPassword:
+# Provide the admin password to be used
+
+xlrLicense:
+# Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
+
+RepositoryKeystore:
+# https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
+# Convert keystore.jks files content to base64 ( cat keystore.jks | base64 -w 0 ) and put the output here
+
+KeystorePassphrase:
+# Passphrase for keystore.jks file
+
+## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
+## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
+postgresql:
+  install: true
+  postgresqlUsername: postgres
+  postgresqlPassword: ""
+  postgresqlExtendedConf:
+    listenAddresses: "'*'"
+    maxConnections: "500"
+  initdbScriptsSecret: postgresql-init-sql-xlr
+  service:
+    port: 5432
+  persistence:
+    enabled: true
+    size: 50Gi
+    existingClaim:
+  resources: {}
+  #  requests:
+  #    memory: "1Gi"
+  #    cpu: "250m"
+  #  limits:
+  #    memory: "2Gi"
+  #    cpu: "1"
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
+## Ref: https://docs.xebialabs.com/v.9.7/release/how-to/configure-the-xl-release-sql-repository-in-a-database#configuration-examples
+UseExistingDB:
+  Enabled: false
+  # If you want to use a existing database, change 'postgresql.install' to 'false'.
+  # Set 'UseExistingDB.Enabled' to 'true'.Uncomment the following lines and provide the values.
+  # XLR_DB_URL:
+  # XLR_DB_USER:
+  # XLR_DB_PASS:
+  # XLR_REPORT_DB_URL:
+  # XLR_REPORT_DB_USER:
+  # XLR_REPORT_DB_PASS:
+
+## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
+## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
+rabbitmq-ha:
+  install: true
+  rabbitmqUsername: guest
+  rabbitmqPassword: ""
+  rabbitmqErlangCookie: RELEASERABBITMQCLUSTER
+  rabbitmqMemoryHighWatermark: 500MB
+  rabbitmqNodePort: 5672
+  extraPlugins: |
+    rabbitmq_shovel,
+    rabbitmq_shovel_management,
+    rabbitmq_federation,
+    rabbitmq_federation_management,
+    rabbitmq_amqp1_0,
+    rabbitmq_management,
+  replicaCount: 3
+  rbac:
+    create: true
+  service:
+    type: ClusterIP
+  persistentVolume:
+    enabled: true
+    size: 20Gi
+    annotations: {}
+    resources: {}
+  #  requests:
+  #    memory: "250Mi"
+  #    cpu: "100m"
+  #  limits:
+  #    memory: "550Mi"
+  #    cpu: "200m"
+  definitions:
+    policies: |-
+      {
+        "name": "ha-all",
+        "pattern": ".*",
+        "vhost": "/",
+        "definition": {
+          "ha-mode": "all",
+          "ha-sync-mode": "automatic",
+          "ha-sync-batch-size": 1
+        }
+      }
+    globalParameters: |-
+      {
+          "name": "cluster_name",
+          "value": ""
+      }  
+  prometheus:
+    operator:
+      enabled: false
+
+## Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
+UseExistingMQ:
+  Enabled: false
+  # If you want to use a existing Message Queue, change 'rabbitmq-ha.install' to 'false'.
+  # Set 'UseExistingMQ.Enabled' to 'true'.Uncomment the following lines and provide the values.
+  # XLR_TASK_QUEUE_USERNAME:
+  # XLR_TASK_QUEUE_PASSWORD:
+  # XLR_TASK_QUEUE_NAME:
+  # XLR_TASK_QUEUE_URL:
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -29,29 +175,16 @@ resources: {}
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
-  #  cpu: 100m
-  #  memory: 128Mi
+  #  cpu: 3
+  #  memory: 3Gi
   # requests:
-  #  cpu: 100m
-  #  memory: 128Mi
+  #  cpu: 0.7
+  #  memory: 1700Mi
 
-volumes:
-  ## ERROR: Using /usr/local/* results in this error,
-  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, MountVolume.SetUp failed for volume "xlr-bootstrap" : mkdir /usr/local/xlr-bootstrap: read-only file system
-  ## Warning  FailedMount  3s (x6 over 19s)  kubelet, MountVolume.SetUp failed for volume "xlr-data" : mkdir /usr/local/xlr-data: read-only file system
-  ## By passed by changing /usr to /tmp, this fails with EULA agreement error.
-  - name: xlr-bootstrap
-    hostPath:
-      path: /usr/local/xlr-bootstrap
-      type: DirectoryOrCreate
-  - name: xlr-data
-    hostPath:
-      path: /usr/local/xlr-data
-      type: DirectoryOrCreate
-
+## Configure extra options for liveness and readiness probes
 HealthProbes: true
-HealthProbesLivenessTimeout: 60
-HealthProbesReadinessTimeout: 60
+HealthProbesLivenessTimeout: 90
+HealthProbesReadinessTimeout: 90
 HealthProbeFailureThreshold: 12
 HealthPeriodScans: 10
 
@@ -59,12 +192,16 @@ nodeSelector: {}
 
 tolerations: []
 
+## Affinity and anti-affinity
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}
 
+## XL Release data Persistent Volume for 'XL Release Report'
+## If "Persistence.Enabled" set to "false", it will use hostPath.
 Persistence:
-  Enabled: false
+  Enabled: true
   ## Choose storage class provided by your cloud provider, example "ssd" on GKE, AWS and OpenStack
-  # StorageClass: "-"
+  StorageClass: "-"
   Annotations: {}
   AccessMode: ReadWriteOnce
-  Size: 10Gi
+  Size: 5Gi

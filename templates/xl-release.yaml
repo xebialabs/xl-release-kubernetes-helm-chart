@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "xl-release.fullname" . }}
+  labels:
+    app: {{ template "xl-release.name" . }}
+    chart: {{ template "xl-release.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  podManagementPolicy: OrderedReady
+  replicas: {{ .Values.replicaCount }}
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: {{ template "xl-release.name" . }}
+      release: {{ .Release.Name }}
+  serviceName: {{ template "xl-release.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "xl-release.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      {{- if .Values.postgresql.install }}
+      initContainers:
+        - name: wait-for-db
+          image: xebialabs/tiny-tools
+          command:
+            - sh
+            - -c
+            - >
+              until nc -z -w 2 $POSTGRES_SVC $POSTGRES_PORT && echo database ok; do
+                sleep 2;
+              done;
+          env:
+           - name: POSTGRES_SVC
+             value: {{ .Release.Name }}-postgresql
+           - name: POSTGRES_PORT
+             value: "5432"
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
+          imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
+          ports:
+            - name: http
+              containerPort: 5516
+          volumeMounts:
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/reports
+          {{- if .Values.HealthProbes }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
+          {{- end }}
+          env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: release-password
+            - name: XL_CLUSTER_MODE
+              value: full
+            - name: SERVER_URL
+              value: "http://localhost:5516"
+            {{- if .Values.postgresql.install }}
+            - name: XL_DB_URL
+              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db
+            - name: XL_DB_USERNAME
+              value: xlr
+            - name: XL_DB_PASSWORD
+              value: "xlr"
+            - name: XL_REPORT_DB_URL
+              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-report-db
+            - name: XL_REPORT_DB_USERNAME
+              value: xlr-report
+            - name: XL_REPORT_DB_PASSWORD
+              value: "xlr-report"
+            {{- else }}
+            {{- if .Values.UseExistingDB.Enabled }}
+            - name: XL_DB_URL
+              value: {{ .Values.UseExistingDB.XLR_DB_URL }}
+            - name: XL_DB_USERNAME
+              value: {{ .Values.UseExistingDB.XLR_DB_USER }}
+            - name: XL_DB_PASSWORD
+              value: {{ .Values.UseExistingDB.XLR_DB_PASS }}
+            - name: XL_REPORT_DB_URL
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
+            - name: XL_REPORT_DB_USERNAME
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_USER }}
+            - name: XL_REPORT_DB_PASSWORD
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_PASS }}
+            {{- end }}
+            {{- end }}
+            - name: XL_LICENSE
+              value: {{ .Values.xlrLicense }}
+            - name: XL_METRICS_ENABLED
+              value: "false"
+            - name: FORCE_UPGRADE
+              value: "true"
+            - name: ENABLE_EMBEDDED_QUEUE
+              value: "false"
+            {{- if index .Values "rabbitmq-ha" "install" }}          
+            - name: XLR_TASK_QUEUE_USERNAME
+              value: {{ index .Values "rabbitmq-ha" "rabbitmqUsername" }}
+            - name: XLR_TASK_QUEUE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                   name: {{ .Release.Name }}-rabbitmq-ha
+                   key: rabbitmq-password
+            - name: XLR_TASK_QUEUE_URL
+              value: "amqp://{{ .Release.Name }}-rabbitmq-ha.{{ .Release.Namespace }}.svc.cluster.local:5672/"
+            - name: XLR_TASK_QUEUE_NAME
+              value: "xlr-tasks-queue"
+            {{- else }}
+            {{- if .Values.UseExistingMQ.Enabled }}
+            - name: XLR_TASK_QUEUE_USERNAME
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_USERNAME }}
+            - name: XLR_TASK_QUEUE_PASSWORD
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_PASSWORD | quote }}
+            - name: XLR_TASK_QUEUE_URL
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_URL | quote }}
+            - name: XLR_TASK_QUEUE_NAME
+              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_NAME | quote }}
+            {{- end }}
+            {{- end }}
+            - name: REPOSITORY_KEYSTORE
+              value: {{ .Values.RepositoryKeystore }}
+            - name: REPOSITORY_KEYSTORE_PASSPHRASE
+              value: {{ .Values.KeystorePassphrase }}  
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        {{- if .Values.Persistence.Enabled }}
+        - name: reports-dir
+          persistentVolumeClaim:
+            claimName: {{ template "xl-release.fullname" . }}
+        {{- else }}
+        - name: reports-dir
+          hostPath:
+            path: /opt/xebialabs/xl-release-server/reports
+            type: DirectoryOrCreate
+        {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

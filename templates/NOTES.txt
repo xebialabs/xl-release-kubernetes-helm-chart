@@ -1,4 +1,13 @@
-1. Get the application URL by running these commands:
+1. To get the application URL, run:
 {{- range .Values.ingress.hosts }}
-  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
+http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
 {{- end }}
+
+2. To get the admin password for xl-release, run:
+kubectl get secret --namespace {{ .Release.Namespace }} {{ include "xl-release.fullname" . }} -o jsonpath="{.data.release-password}" | base64 --decode; echo
+
+3. To get the password for postgresql, run:
+kubectl get secret {{ .Release.Name }}-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode; echo
+
+4. To get the password for rabbitMQ, run:
+kubectl get secret {{ .Release.Name }}-rabbitmq-ha  -o jsonpath="{.data.rabbitmq-password}" | base64 --decode; echo

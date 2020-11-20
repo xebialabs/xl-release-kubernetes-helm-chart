@@ -1,0 +1,12 @@
+{{- if .Values.postgresql.install }}
+kind: Secret
+apiVersion: v1
+metadata:
+  name: postgresql-init-sql-xlr
+  labels:
+    app: {{ template "xl-release.name" . }}
+    chart: {{ template "xl-release.chart" . }}
+    release: {{ .Release.Name }}
+data:
+  init.sql: Q1JFQVRFIFVTRVIgInhsciIgV0lUSCBFTkNSWVBURUQgUEFTU1dPUkQgJ3hscic7CkNSRUFURSBEQVRBQkFTRSAieGxyLWRiIjsKR1JBTlQgQUxMIFBSSVZJTEVHRVMgT04gREFUQUJBU0UgInhsci1kYiIgVE8gInhsciI7CkNSRUFURSBVU0VSICJ4bHItcmVwb3J0IiBXSVRIIEVOQ1JZUFRFRCBQQVNTV09SRCAneGxyLXJlcG9ydCc7CkNSRUFURSBEQVRBQkFTRSAieGxyLXJlcG9ydC1kYiI7CkdSQU5UIEFMTCBQUklWSUxFR0VTIE9OIERBVEFCQVNFICJ4bHItcmVwb3J0LWRiIiBUTyAieGxyLXJlcG9ydCI7Cg==
+{{- end }}
