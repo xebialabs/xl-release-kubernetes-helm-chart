@@ -1,5 +1,5 @@
 # Digital.ai Release HA on Kubernetes Helm Chart
-This repository contains a Helm Chart for Xebialabs Release product. The Helm Chart automates and simplifies deploying XL-Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
+This repository contains a Helm Chart for Digital.ai Release product. The Helm Chart automates and simplifies deploying digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
 
 ## Prerequisites Details
 * Kubernetes v1.17+
@@ -21,11 +21,11 @@ This chart will deploy following components:
 
 
 ## Tested Configuration
-- **Supported Platforms:** - OnPremise Kubernetes(v1.18+), AWS Elastic Kubernetes Service (v1.17+)
-- **Storage:** - Network File System (NFS v1.2.11), AWS Elastic File System (EFS v0.13.2)
-- **Messaging Queue:** - Rabbit MQ (v1.47.0)
-- **Database:** - Postgresql (v 9.8.5) 
-- **LoadBalancers:** - HAProxy Ingress Controller (v0.9.1)
+- **Supported Platforms:** - OnPremise Kubernetes, AWS Elastic Kubernetes Service (EKS)
+- **Storage:** - Network File System (NFS), AWS Elastic File System (EFS)
+- **Messaging Queue:** - Rabbit MQ
+- **Database:** - Postgresql
+- **LoadBalancers:** - HAProxy Ingress Controller 
 
 ## Installing StorageClass Helm Chart
 ##### NFS Client Provisioner for OnPremise Kubernetes cluster
