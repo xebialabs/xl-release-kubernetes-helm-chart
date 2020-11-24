@@ -1,5 +1,5 @@
-# Helm Charts for Digital.ai Release on Kubernetes
- This repository contains Helm Charts for Digital.ai (formerly Xebialabs)Release product. The Helm Chart automates and simplifies deploying Digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
+# Helm Charts for Digital.ai Release on Kubernetes (BETA) 
+ This repository contains Helm Charts for Digital.ai (formerly Xebialabs) Release product. The Helm Chart automates and simplifies deploying Digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
 
 ## Prerequisites Details
 * Kubernetes v1.17+
@@ -16,7 +16,7 @@
 This chart will deploy following components:
 * PostgreSQL single instance / pod 
 
-(**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to  install postgres-ha on kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://github.com/CrunchyData/postgres-operator/tree/master/installers/helm)
+(**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to install Postgres HA on Kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes/)
 * RabbitMQ in highly available configuration
 * HAProxy ingress controller
 * Digital.ai Release in highly available configuration
@@ -50,10 +50,10 @@ kubectl patch storageclass nfs-provisioner -p '{"metadata": {"annotations":{"sto
 kubectl get storageclass
 ```
 For more information on nfs-client-provisioner, refer [stable/nfs-client-provisioner](https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner)
-##### Elastic File System for AWS Elastic Kubernetes Service(EKS) cluster 
+### Elastic File System for AWS Elastic Kubernetes Service(EKS) cluster 
 Before deploying EFS helm chart, there are some steps which need to be performed. 
 * Create your EFS file system. Refer [Create Your Amazon EFS File System](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html) for creating file system.
-* Create mount target. Refer [Creating mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for creating mount target.
+* Create a mount target. Refer [Creating mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for creating mount target.
 * Before installing EFS Provisioner helm chart, you need to add the stable helm repository to your helm client as shown below:
 ```bash
 helm repo add stable https://charts.helm.sh/stable
@@ -90,11 +90,13 @@ To install the chart with the release name `xlr-production`:
 helm install xlr-production xl-release-kubernetes-helm-chart
 ```
 ## Access Digital.ai Release Dashboard
-By default, NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
+By default, the NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
 ```bash
 kubectl get service
 ```
-For OnPremise Cluster, You can access Digital.ai Release UI from an outside cluster with below link
+For production grade setups, we recommend using LoadBalancer as service type.
+
+For OnPremise Cluster, you can access Digital.ai Release UI from an outside cluster with below link 
 
 [http://ingress-loadbalancer-DNS:NodePort/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
 
@@ -116,7 +118,7 @@ For deployment on Production environment, all parameters need to be configured a
 - *Persistence.StorageClass*: Storage Class to be defined, Network File System (NFS) for OnPremise or Elastic File System (EFS) for AWS Elastic Kubernetes Service(EKS) 
 - *ingress.hosts*: DNS name for accessing ui of Digital.ai Release
 
-The following tables lists the configurable parameters of the Digital.ai Release chart and their default values.
+The following table lists the configurable parameters of the Digital.ai Release chart and their default values.
 
 Parameter                                        |Description                                                                                                                                                          |Default                                                                                                                                                                                                                                                                                                                                                                        
 -------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -200,13 +202,13 @@ Persistence.AccessMode                           |PVC Access Mode for volume    
 Persistence.Size                                 |PVC Storage Request for volume. For production grade setup, size must be changed                                                                                     |5Gi                                                                                                                                                                                                                                                                                                                                                                            
 
 ## Upgrading the Digital.ai Release Helm Chart
-To upgrade the version `ImageTag` parameter need to be updated to the desired version. To see the list of available ImageTag for Digital.ai Release, refer following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags). For upgrade, Rolling Update strategy is used.
+To upgrade the version `ImageTag` parameter needs to be updated to the desired version. To see the list of available ImageTag for Digital.ai Release, refer following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags). For upgrade, Rolling Update strategy is used.
 To upgrade the chart with the release name `xlr-production`, execute below command: 
 ```bash
 helm upgrade xlr-production xl-release-kubernetes-helm-chart/
 ```
 > **Note**:
-  Currently upgrading custom plugins and database drivers is not supported. In order to upgrade custom plugins and database drivers, users need to build custom docker image of xl-release containing required files.See the [adding custom plugins](https://docs.xebialabs.com/v.9.7/deploy/how-to/customize-xl-up/#adding-custom-plugins) section in the  Digital.ai (formerly Xebialabs) official documentation.
+  Currently upgrading custom plugins and database drivers is not supported. In order to upgrade custom plugins and database drivers, users need to build custom docker image of Digital.ai Release containing required files. See the [adding custom plugins](https://docs.xebialabs.com/v.9.7/deploy/how-to/customize-xl-up/#adding-custom-plugins) section in the Digital.ai (formerly Xebialabs) official documentation. 
 ### Existing or External Databases
 There is an option to use external PostgreSQL database for your Digital.ai Release. Configure values.yaml file accordingly.
 If you want to use an existing database,  these steps need to be followed:
@@ -235,8 +237,7 @@ UseExistingDB:
 ``` 
 > **Note**: User might have database instance running outside the cluster. Configure parameters accordingly. 
 ### Existing or External Messaging Queue
-There is an option to use external RabbitMQ for your Digital.ai Release. Configure values.yaml file accordingly.
-If you want to use an existing RabbitMQ,  these steps need to be followed:
+If you plan to use an existing messaging queue, follow these steps to configure values.yaml
 - Change `rabbitmq-ha.install` to false
 - `UseExistingMQ.Enabled`: true
 - `UseExistingMQ.XLR_TASK_QUEUE_USERNAME`: Username for xl-release task queue
