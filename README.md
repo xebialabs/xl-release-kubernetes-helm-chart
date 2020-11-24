@@ -1,23 +1,26 @@
-# Digital.ai Release HA on Kubernetes Helm Chart
-This repository contains a Helm Chart for Digital.ai Release product. The Helm Chart automates and simplifies deploying digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
+
+# Helm Charts for Digital.ai Release on Kubernetes (BETA) 
+ This repository contains Helm Charts for Digital.ai (formerly Xebialabs) Release product. The Helm Chart automates and simplifies deploying Digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
 
 ## Prerequisites Details
 * Kubernetes v1.17+
 * A running Kubernetes cluster
 	- Dynamic storage provisioning enabled
 	- StorageClass for persistent storage. The [Installing StorageClass Helm Chart](#installing-storageclass-helm-chart) section provides steps to install storage class on OnPremise Kubernetes cluster and AWS Elastic Kubernetes Service(EKS) cluster.
-	- StorageClass which is expected to be used with XL-Release should be set as default StorageClass
+	- StorageClass which is expected to be used with Digital.ai Release should be set as default StorageClass
 - [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed and setup to use the cluster
 - [Helm](https://helm.sh/docs/intro/install/) 3 installed
-- License File for XL-Release in base64 encoded format
+- License File for Digital.ai Release in base64 encoded format
 - Repository Keystorefile in base64 encoded format
 
 ## Chart Details
 This chart will deploy following components:
-* PostgreSQL single instance / pod (**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to  install postgres-ha on kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://github.com/CrunchyData/postgres-operator/tree/master/installers/helm)
+* PostgreSQL single instance / pod 
+
+(**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to install Postgres HA on Kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes/)
 * RabbitMQ in highly available configuration
 * HAProxy ingress controller
-* XL-Release in highly available configuration
+* Digital.ai Release in highly available configuration
 
 
 ## Tested Configuration
@@ -28,8 +31,9 @@ This chart will deploy following components:
 - **LoadBalancers:** - HAProxy Ingress Controller 
 
 ## Installing StorageClass Helm Chart
-##### NFS Client Provisioner for OnPremise Kubernetes cluster
-* For deploying helm chart, `nfs server` and `nfs mount path` is required.
+If you are using storage class other than NFS and EFS then please proceed with installation steps 
+### NFS Client Provisioner for OnPremise Kubernetes cluster
+* For deploying helm chart, `nfs server` and `nfs mount path` are required.
 * Before installing NFS Provisioner helm chart, you need to add the stable helm repository to your helm client as shown below:
 ```bash
 helm repo add stable https://charts.helm.sh/stable
@@ -47,15 +51,15 @@ kubectl patch storageclass nfs-provisioner -p '{"metadata": {"annotations":{"sto
 kubectl get storageclass
 ```
 For more information on nfs-client-provisioner, refer [stable/nfs-client-provisioner](https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner)
-##### Elastic File System for AWS Elastic Kubernetes Service(EKS) cluster 
-Before deploying EFS helm chart, there are some steps which needs to be performed.
+### Elastic File System for AWS Elastic Kubernetes Service(EKS) cluster 
+Before deploying EFS helm chart, there are some steps which need to be performed. 
 * Create your EFS file system. Refer [Create Your Amazon EFS File System](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html) for creating file system.
-* Create mount target and mount the file system on EC2 instances within the cluster. Refer [Creating mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for creating mount target.
+* Create a mount target. Refer [Creating mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for creating mount target.
 * Before installing EFS Provisioner helm chart, you need to add the stable helm repository to your helm client as shown below:
 ```bash
 helm repo add stable https://charts.helm.sh/stable
 ```
-* Provide the `efsFileSystemId` and `awsRegion` which is obtained by following above first step and install the chart with the release name `aws-efs`:
+* Provide the `efsFileSystemId` and `awsRegion` which can be obtained by executing above steps. Install the chart with the release name `aws-efs`:
 ```bash
 helm install aws-efs stable/efs-provisioner --set efsProvisioner.efsFileSystemId=fs-12345678 --set efsProvisioner.awsRegion=us-east-2
 ```
@@ -87,19 +91,21 @@ To install the chart with the release name `xlr-production`:
 helm install xlr-production xl-release-kubernetes-helm-chart
 ```
 ## Access Digital.ai Release Dashboard
-By default NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
+By default, the NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
 ```bash
 kubectl get service
 ```
-For OnPremise Cluster, You can access xl-release UI from an outside cluster with below link
+For production grade setups, we recommend using LoadBalancer as service type.
+
+For OnPremise Cluster, you can access Digital.ai Release UI from an outside cluster with below link 
 
 [http://ingress-loadbalancer-DNS:NodePort/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
 
-Similarly for EKS, access xl-release UI using below link 
+Similarly for EKS, access Digital.ai Release UI using below link 
 
  [http://ingress-loadbalancer-DNS/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
 
-The path should be unique across the kubernetes cluster.(Ex "/xl-release/") 
+The path should be unique across the Kubernetes cluster.(Ex "/xl-release/") 
 ## Uninstalling the Digital.ai Release Helm Chart
 To uninstall/delete the `xlr-production` deployment:
 ```bash
@@ -108,12 +114,12 @@ helm delete xlr-production
 
 
 ## Parameters
-For deployment on Production environment, all parameters need to be configured as per users requirement and k8s setup which is under use. However, for deployment on test environment, most of the default values will be sufficient. The following two parameters are required to be configured and rest of parameters may remain as default
-- *xlrLicense*: License for XL-Release in base64 format
-- *Persistence.StorageClass*: Storage Class to be defined, Network File System (NFS) for OnPremise and Elastic File System (EFS) for AWS Elastic Kubernetes Service(EKS)
-- *ingress.hosts*: DNS name for accessing ui of XL-Release
+For deployment on Production environment, all parameters need to be configured as per users requirement and k8s setup which is under use. However, for deployment on test environment, most of the default values will suffice. The following parameters are required to be configured and rest of the parameters may remain as default 
+- *xlrLicense*: License for Digital.ai Release in base64 format
+- *Persistence.StorageClass*: Storage Class to be defined, Network File System (NFS) for OnPremise or Elastic File System (EFS) for AWS Elastic Kubernetes Service(EKS) 
+- *ingress.hosts*: DNS name for accessing ui of Digital.ai Release
 
-The following tables lists the configurable parameters of the XL-Release chart and their default values.
+The following table lists the configurable parameters of the Digital.ai Release chart and their default values.
 
 Parameter                                        |Description                                                                                                                                                          |Default                                                                                                                                                                                                                                                                                                                                                                        
 -------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -129,7 +135,7 @@ haproxy-ingress.controller.service.type          |Kubernetes Service type for ha
 ingress.Enabled                                  |Exposes HTTP and HTTPS routes from outside the cluster to services within the cluster                                                                                |true                                                                                                                                                                                                                                                                                                                                                                           
 ingress.annotations                              |Annotations for ingress controller                                                                                                                                   |ingress.kubernetes.io/ssl-redirect: "false"&nbsp; &nbsp; &nbsp; kubernetes.io/ingress.class: haproxy ingress.kubernetes.io/rewrite-target: / ingress.kubernetes.io/affinity: cookie ingress.kubernetes.io/session-cookie-name: JSESSIONID ingress.kubernetes.io/session-cookie-strategy: prefix ingress.kubernetes.io/config-backend: `|`&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;  option httpchk GET /ha/health HTTP/1.0 |
 ingress.path                                     |You can route an Ingress to different Services based on the path                                                                                                     |/xl-release/                                                                                                                                                                                                                                                                                                                                                                   
-ingress.hosts                                     |DNS name for accessing ui of XL-Release                                                                                                     |example.com                                                                                                                                                                                                                                                                                                                                                                   
+ingress.hosts                                     |DNS name for accessing ui of Digital.ai Release                                                                                                     |example.com                                                                                                                                                                                                                                                                                                                                                                   
 ingress.tls.secretName                                      |Secret file which holds the tls private key and certificate                      |example-secretsName                                                                                                                                                                                                                                                                                                                                                                          
 ingress.tls.hosts                                      |DNS name for accessing ui of digital.ai Release using tls                      |example.com                                                                                                                                                                                                                                                                                                                                                                          
 ingress.tls                                      |The Helm chart deploys the HAProxy Kubernetes Ingress Controller with default settings, but you can override the values by configuring TLS encryption                      |false                                                                                                                                                                                                                                                                                                                                                                          
@@ -197,15 +203,15 @@ Persistence.AccessMode                           |PVC Access Mode for volume    
 Persistence.Size                                 |PVC Storage Request for volume. For production grade setup, size must be changed                                                                                     |5Gi                                                                                                                                                                                                                                                                                                                                                                            
 
 ## Upgrading the Digital.ai Release Helm Chart
-To upgrade the version `ImageTag` parameter need to be updated to the desired version. To see the list of available ImageTag for XL-Release, refer following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags). For upgrade, Rolling Update strategy is used.
-To upgrade the chart with the release name `xlr-production`:
+To upgrade the version `ImageTag` parameter needs to be updated to the desired version. To see the list of available ImageTag for Digital.ai Release, refer following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags). For upgrade, Rolling Update strategy is used.
+To upgrade the chart with the release name `xlr-production`, execute below command: 
 ```bash
 helm upgrade xlr-production xl-release-kubernetes-helm-chart/
 ```
 > **Note**:
-  Currently upgrading custom plugins and database drivers is not supported. In order to upgrade custom plugins and database drivers, users need to build custom docker image of xl-release containing required files.See the [adding custom plugins](https://docs.xebialabs.com/v.9.7/deploy/how-to/customize-xl-up/#adding-custom-plugins) section in the Xebialabs official documentation.
+  Currently upgrading custom plugins and database drivers is not supported. In order to upgrade custom plugins and database drivers, users need to build custom docker image of Digital.ai Release containing required files. See the [adding custom plugins](https://docs.xebialabs.com/v.9.7/deploy/how-to/customize-xl-up/#adding-custom-plugins) section in the Digital.ai (formerly Xebialabs) official documentation. 
 ### Existing or External Databases
-There is an option to use external PostgreSQL database for your XL-Release. Configure values.yaml file accordingly.
+There is an option to use external PostgreSQL database for your Digital.ai Release. Configure values.yaml file accordingly.
 If you want to use an existing database,  these steps need to be followed:
 - Change `postgresql.install` to false
 - `UseExistingDB.Enabled`: true
@@ -232,8 +238,7 @@ UseExistingDB:
 ``` 
 > **Note**: User might have database instance running outside the cluster. Configure parameters accordingly. 
 ### Existing or External Messaging Queue
-There is an option to use external RabbitMQ for your XL-Release. Configure values.yaml file accordingly.
-If you want to use an existing RabbitMQ,  these steps need to be followed:
+If you plan to use an existing messaging queue, follow these steps to configure values.yaml
 - Change `rabbitmq-ha.install` to false
 - `UseExistingMQ.Enabled`: true
 - `UseExistingMQ.XLR_TASK_QUEUE_USERNAME`: Username for xl-release task queue
@@ -254,12 +259,11 @@ UseExistingMQ:
 ```
 > **Note**: User might have rabbitmq instance running outside the cluster. Configure parameters accordingly.
 ### Existing Ingress Controller
-There is an option to use external ingress controller for XL-Release.
+There is an option to use external ingress controller for Digital.ai Release.
 If you want to use an existing ingress controller,  change `haproxy.install` to false.
 
 ## Useful links
-- [`xebialabs/xl-release:<tagname>`](https://hub.docker.com/r/xebialabs/xl-release/tags) – Docker Hub repository for xl-release
+- [`xebialabs/xl-release:<tagname>`](https://hub.docker.com/r/xebialabs/xl-release/tags) – Docker Hub repository for Digital.ai Release
 - [`stable/rabbitmq-ha`](https://github.com/helm/charts/tree/master/stable/rabbitmq-ha) -  Github repository for RabbitMQ Helm Chart
 - [`bitnami/postgresql`](https://github.com/bitnami/charts/tree/master/bitnami/postgresql) -  Github repository for Postgresql Helm Chart
 - [`haproxy-ingress/haproxy-ingress`](https://github.com/haproxy-ingress/charts) -  Github repository for HAProxy Ingress Controller Helm Chart
-
