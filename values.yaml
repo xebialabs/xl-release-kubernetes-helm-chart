@@ -66,6 +66,22 @@ route:
   hosts:
     - app.example.com
 
+## By default only Edge Termination is supported with Release.
+## To configure SSL/TLS with Release uncomment the below tls section and provide the private key, certificate and optional caCertificate.
+## The allowed values for insecureEdgeTerminationPolicy are: None or empty (for disabled), Allow or Redirect
+## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/secured-routes.html
+#  tls:
+#    key: |-
+#      -----BEGIN PRIVATE KEY-----
+#      -----END PRIVATE KEY-----
+#    certificate: |-
+#      -----BEGIN CERTIFICATE-----
+#      -----END CERTIFICATE-----
+#    caCertificate: |-
+#      -----BEGIN CERTIFICATE-----
+#      -----END CERTIFICATE-----
+#    insecureEdgeTerminationPolicy: Redirect 
+
 # https://docs.xebialabs.com/v.9.8/release/docker/docker-environment-variables/#get-started
 AdminPassword:
 # Provide the admin password to be used

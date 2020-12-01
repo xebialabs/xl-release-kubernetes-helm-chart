@@ -22,6 +22,19 @@ spec:
     name: {{ $fullName }}
   port:
     targetPort: xlr-http
+{{- if $.Values.route.tls }}
+  tls:
+  {{- with $.Values.route.tls }}
+    key: |-
+{{ .key | indent 6 }}
+    certificate: |-
+{{ .certificate | indent 6 }}
+    caCertificate: |-
+{{ .caCertificate | indent 6 }}
+    insecureEdgeTerminationPolicy: {{ .insecureEdgeTerminationPolicy }}
+  {{- end }}
+    termination: edge
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end}}
