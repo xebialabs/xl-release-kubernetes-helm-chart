@@ -1,4 +1,3 @@
-{{- if eq .Values.K8sSetup.Platform "Openshift"}}
 {{- if and .Values.route.Enabled -}}
 {{- $fullName := include "xl-release.fullname" . -}}
 apiVersion: route.openshift.io/v1
@@ -37,4 +36,3 @@ spec:
 {{- end }}
 {{- end }}
 {{- end }}
-{{- end}}

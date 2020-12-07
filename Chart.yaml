@@ -5,10 +5,6 @@ name: xl-release-helmcharts
 version: 1.0.1
 
 dependencies:
-- name: haproxy-ingress
-  version: 0.9.1
-  repository: "https://haproxy-ingress.github.io/charts"
-  condition: haproxy-ingress.install
 
 - name: postgresql
   version: 9.8.5
