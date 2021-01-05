@@ -106,16 +106,16 @@ spec:
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
               value: "false"
-            {{- if index .Values "rabbitmq-ha" "install" }}          
+            {{- if .Values.rabbitmq.install }}          
             - name: XLR_TASK_QUEUE_USERNAME
-              value: {{ index .Values "rabbitmq-ha" "rabbitmqUsername" }}
+              value: {{ .Values.rabbitmq.auth.username }}
             - name: XLR_TASK_QUEUE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                   name: {{ .Release.Name }}-rabbitmq-ha
+                   name: {{ .Release.Name }}-rabbitmq
                    key: rabbitmq-password
             - name: XLR_TASK_QUEUE_URL
-              value: "amqp://{{ .Release.Name }}-rabbitmq-ha.{{ .Release.Namespace }}.svc.cluster.local:5672/"
+              value: "amqp://{{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local:5672/"
             - name: XLR_TASK_QUEUE_NAME
               value: "xlr-tasks-queue"
             {{- else }}
