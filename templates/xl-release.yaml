@@ -67,8 +67,12 @@ spec:
                   key: release-password
             - name: XL_CLUSTER_MODE
               value: full
+            {{- if and .Values.ingress.Enabled }}
+            {{- range .Values.ingress.hosts }}
             - name: SERVER_URL
-              value: "http://localhost:5516"
+              value: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.postgresql.install }}
             - name: XL_DB_URL
               value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db

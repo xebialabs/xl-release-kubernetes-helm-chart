@@ -1,6 +1,8 @@
 ## To get the application URL, run:
+{{- if and .Values.ingress.Enabled }}
 {{- range .Values.ingress.hosts }}
 http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
+{{- end }}
 {{- end }}
 
 ## To get the admin password for xl-release, run:
