@@ -7,7 +7,7 @@ http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
 
 ## To get the admin password for xl-release, run:
 kubectl get secret --namespace {{ .Release.Namespace }} {{ include "xl-release.fullname" . }} -o jsonpath="{.data.release-password}" | base64 --decode; echo
-{{- if .Values.postgresql.install }}
+{{ if .Values.postgresql.install }}
 ## To get the password for postgresql, run:
 kubectl get secret --namespace  {{ .Release.Namespace }} {{ .Release.Name }}-postgresql -o jsonpath="{.data.postgresql-password}" | base64 --decode; echo
 {{ end }}
