@@ -1,6 +1,9 @@
 # Helm Charts for Digital.ai Release Changelog
 All changes to this chart will be documented in this file
 
+## [1.1.3]
+* Use secrets for username/password for both existing MQ/DB, license and keystore files
+
 ## [1.1.2]
 * Add support for Azure AKS
 
