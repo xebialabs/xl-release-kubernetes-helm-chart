@@ -91,19 +91,34 @@ spec:
             - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
             - name: XL_DB_USERNAME
-              value: {{ .Values.UseExistingDB.XLR_DB_USER }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: databaseUsername              
             - name: XL_DB_PASSWORD
-              value: {{ .Values.UseExistingDB.XLR_DB_PASS }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: databasePassword
             - name: XL_REPORT_DB_URL
               value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
             - name: XL_REPORT_DB_USERNAME
-              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_USER }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: reportDatabaseUsername
             - name: XL_REPORT_DB_PASSWORD
-              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_PASS }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: reportDatabasePassword
             {{- end }}
             {{- end }}
             - name: XL_LICENSE
-              value: {{ .Values.xlrLicense }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: xlr-License
             - name: XL_METRICS_ENABLED
               value: "false"
             - name: FORCE_UPGRADE
@@ -125,9 +140,15 @@ spec:
             {{- else }}
             {{- if .Values.UseExistingMQ.Enabled }}
             - name: XLR_TASK_QUEUE_USERNAME
-              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_USERNAME }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: rabbitmqUsername
             - name: XLR_TASK_QUEUE_PASSWORD
-              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_PASSWORD | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: rabbitmqPassword
             - name: XLR_TASK_QUEUE_URL
               value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_URL | quote }}
             - name: XLR_TASK_QUEUE_NAME
@@ -135,9 +156,15 @@ spec:
             {{- end }}
             {{- end }}
             - name: REPOSITORY_KEYSTORE
-              value: {{ .Values.RepositoryKeystore }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: repositoryKeystore
             - name: REPOSITORY_KEYSTORE_PASSPHRASE
-              value: {{ .Values.KeystorePassphrase }}  
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: keystorePassphrase  
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
