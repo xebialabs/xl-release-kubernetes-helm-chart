@@ -1,6 +1,9 @@
 # Helm Charts for Digital.ai Release Changelog
 All changes to this chart will be documented in this file
 
+## [1.1.2]
+* Use secrets for username/password for both existing MQ/DB, license and keystore files
+
 ## [1.1.1]
 * Fix for Invalid path of release instance shows in release audit report for openshift
 
