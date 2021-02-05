@@ -16,3 +16,4 @@ dependencies:
   repository: "https://charts.bitnami.com/bitnami"
   condition: rabbitmq.install
 
+
