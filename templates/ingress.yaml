@@ -1,4 +1,4 @@
-{{- if or (eq .Values.K8sSetup.Platform "PlainK8s") (eq .Values.K8sSetup.Platform "AWSEKS")}}
+{{- if or (eq .Values.K8sSetup.Platform "PlainK8s") (eq .Values.K8sSetup.Platform "AWSEKS") (eq .Values.K8sSetup.Platform "AzureAKS")}}
 {{- if and .Values.ingress.Enabled -}}
 {{- $fullName := include "xl-release.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
