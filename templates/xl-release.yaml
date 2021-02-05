@@ -67,8 +67,12 @@ spec:
                   key: release-password
             - name: XL_CLUSTER_MODE
               value: full
+            {{- if .Values.route.Enabled }}
+            {{- range .Values.route.hosts }}
             - name: SERVER_URL
-              value: "http://localhost:5516"
+              value: "http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}{{ $.Values.route.path }}"
+            {{- end }}
+            {{- end }}
             {{- if .Values.postgresql.install }}
             - name: XL_DB_URL
               value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db
@@ -87,43 +91,64 @@ spec:
             - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
             - name: XL_DB_USERNAME
-              value: {{ .Values.UseExistingDB.XLR_DB_USER }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: databaseUsername 
             - name: XL_DB_PASSWORD
-              value: {{ .Values.UseExistingDB.XLR_DB_PASS }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: databasePassword
             - name: XL_REPORT_DB_URL
               value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
             - name: XL_REPORT_DB_USERNAME
-              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_USER }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: reportDatabaseUsername
             - name: XL_REPORT_DB_PASSWORD
-              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_PASS }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: reportDatabasePassword
             {{- end }}
             {{- end }}
             - name: XL_LICENSE
-              value: {{ .Values.xlrLicense }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: xlr-License
             - name: XL_METRICS_ENABLED
               value: "false"
             - name: FORCE_UPGRADE
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
               value: "false"
-            {{- if index .Values "rabbitmq-ha" "install" }}          
+            {{- if .Values.rabbitmq.install }}          
             - name: XLR_TASK_QUEUE_USERNAME
-              value: {{ index .Values "rabbitmq-ha" "rabbitmqUsername" }}
+              value: {{ .Values.rabbitmq.auth.username }}
             - name: XLR_TASK_QUEUE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                   name: {{ .Release.Name }}-rabbitmq-ha
+                   name: {{ .Release.Name }}-rabbitmq
                    key: rabbitmq-password
             - name: XLR_TASK_QUEUE_URL
-              value: "amqp://{{ .Release.Name }}-rabbitmq-ha.{{ .Release.Namespace }}.svc.cluster.local:5672/"
+              value: "amqp://{{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local:5672/"
             - name: XLR_TASK_QUEUE_NAME
               value: "xlr-tasks-queue"
             {{- else }}
             {{- if .Values.UseExistingMQ.Enabled }}
             - name: XLR_TASK_QUEUE_USERNAME
-              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_USERNAME }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: rabbitmqUsername
             - name: XLR_TASK_QUEUE_PASSWORD
-              value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_PASSWORD | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: rabbitmqPassword
             - name: XLR_TASK_QUEUE_URL
               value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_URL | quote }}
             - name: XLR_TASK_QUEUE_NAME
@@ -131,9 +156,15 @@ spec:
             {{- end }}
             {{- end }}
             - name: REPOSITORY_KEYSTORE
-              value: {{ .Values.RepositoryKeystore }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: repositoryKeystore
             - name: REPOSITORY_KEYSTORE_PASSPHRASE
-              value: {{ .Values.KeystorePassphrase }}  
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "xl-release.fullname" . }}
+                  key: keystorePassphrase
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
