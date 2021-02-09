@@ -111,6 +111,12 @@ UseExistingDB:
 rabbitmq:
   install: true
   replicaCount: 3
+  image:
+    registry: docker.io
+    repository: bitnami/rabbitmq
+    tag: 3.8.11-debian-10-r0
+    # pullSecrets:
+    #   - myRegistryKeySecretName 
   auth:
     username: guest
     password: guest

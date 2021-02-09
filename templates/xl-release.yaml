@@ -23,6 +23,10 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
+      {{- if .Values.ImagePullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.ImagePullSecret }}
+      {{- end }}
       {{- if .Values.postgresql.install }}
       initContainers:
         - name: wait-for-db
