@@ -124,8 +124,8 @@ rabbitmq:
     erlangCookie: RELEASERABBITMQCLUSTER
   extraPlugins: 'rabbitmq_amqp1_0'
   extraSecrets:
-    load-definition:
-      load_definition.json: |
+    xlr-load-definition:
+      xlr-load_definition.json: |
         {
         "users": [
           {
@@ -170,9 +170,9 @@ rabbitmq:
         }
   loadDefinition:
     enabled: true
-    existingSecret: load-definition
+    existingSecret: xlr-load-definition
   extraConfiguration: |
-    load_definitions = /app/load_definition.json
+    load_definitions = /app/xlr-load_definition.json
   persistence:
     enabled: true
     storageClass: "-"
