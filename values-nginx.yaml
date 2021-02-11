@@ -21,33 +21,31 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
-## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
+## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
-haproxy-ingress:
-  install: true
-  controller:
-    kind: DaemonSet
-    service:
-      type: NodePort
-
+## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
 nginx-ingress-controller:
+  install: true
+  replicaCount: 1
+  service:
+    type: NodePort
+
+haproxy-ingress:
   install: false
 
 ## Ingress Configuration
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+## Ref: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/
 ingress:
   Enabled: true
   annotations:
     # ingress.kubernetes.io/tls-acme: "true"
-    ingress.kubernetes.io/ssl-redirect: "false"
-    kubernetes.io/ingress.class: haproxy
-    ingress.kubernetes.io/rewrite-target: /
-    ingress.kubernetes.io/affinity: cookie
-    ingress.kubernetes.io/session-cookie-name: JSESSIONID
-    ingress.kubernetes.io/session-cookie-strategy: prefix
-    ingress.kubernetes.io/config-backend: |
-      option httpchk GET /ha/health HTTP/1.0
-  path: /xl-release/
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+  path: /xl-release(/|$)(.*)
   hosts:
     - example.com
 

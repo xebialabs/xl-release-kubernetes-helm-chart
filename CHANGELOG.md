@@ -1,6 +1,9 @@
 # Helm Charts for Digital.ai Release Changelog
 All changes to this chart will be documented in this file
 
+## [1.2.0]
+* Add Nginx ingress controller
+
 ## [1.1.3]
 * Use image pull secrets
 
