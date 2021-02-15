@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-## Platform on which to install the chart (PlainK8s/AWSEKS/AzureAKS)
+## Platform on which to install the chart (PlainK8s/AWSEKS/AzureAKS/GoogleGKE)
 K8sSetup:
   Platform: PlainK8s
 
@@ -12,7 +12,7 @@ replicaCount: 3
 ## XL-Release image version
 ## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
 ImageRepository: "xebialabs/xl-release"
-ImageTag: "9.7"
+ImageTag: "10.0"
 
 ## Specify a imagePullPolicy
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
