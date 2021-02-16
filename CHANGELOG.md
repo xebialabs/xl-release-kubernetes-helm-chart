@@ -1,6 +1,10 @@
 # Helm Charts for Digital.ai Release Changelog
 All changes to this chart will be documented in this file
 
+## [1.2.0]
+* Bumping image tag to 10.0
+* Change in rabbitmq load-defination
+
 ## [1.1.2]
 * Use secrets for username/password for both existing MQ/DB, license and keystore files
 
