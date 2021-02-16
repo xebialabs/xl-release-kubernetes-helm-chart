@@ -8,14 +8,11 @@ replicaCount: 3
 ## XL-Release image version
 ## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
 ImageRepository: "xebialabs/xl-release"
-ImageTag: "9.7"
+ImageTag: "10.0"
 
 ## Specify a imagePullPolicy
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
-
-## Secrets must be manually created in the namespace.
-# ImagePullSecret: xlRelease
 
 ## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html 
 route:
@@ -72,6 +69,7 @@ postgresql:
     port: 5432
   persistence:
     enabled: true
+    storageClass: "-"
     size: 50Gi
     existingClaim:
   resources: {}
@@ -118,8 +116,8 @@ rabbitmq:
     erlangCookie: RELEASERABBITMQCLUSTER
   extraPlugins: 'rabbitmq_amqp1_0'
   extraSecrets:
-    load-definition:
-      load_definition.json: |
+    xlr-load-definition:
+      xlr-load_definition.json: |
         {
         "users": [
           {
@@ -164,11 +162,12 @@ rabbitmq:
         }
   loadDefinition:
     enabled: true
-    existingSecret: load-definition
+    existingSecret: xlr-load-definition
   extraConfiguration: |
-    load_definitions = /app/load_definition.json
+    load_definitions = /app/xlr-load_definition.json
   persistence:
     enabled: true
+    storageClass: "-"
     size: 8Gi
   service:
     type: ClusterIP
