@@ -198,8 +198,8 @@ resources: {}
 
 ## Configure extra options for liveness and readiness probes
 HealthProbes: true
-HealthProbesLivenessTimeout: 90
-HealthProbesReadinessTimeout: 90
+HealthProbesLivenessTimeout: 60
+HealthProbesReadinessTimeout: 60
 HealthProbeFailureThreshold: 12
 HealthPeriodScans: 10
 

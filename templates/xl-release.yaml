@@ -58,6 +58,13 @@ spec:
             initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           {{- end }}
           env:
             - name: ADMIN_PASSWORD
