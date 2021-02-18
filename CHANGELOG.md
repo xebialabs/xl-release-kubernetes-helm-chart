@@ -4,6 +4,7 @@ All changes to this chart will be documented in this file
 ## [10.0]
 * Bump image tag to 10.0
 * Change chart and app version to 10.0 
+* Change health probe timeouts
 
 ## [1.1.3]
 * Use image pull secrets
