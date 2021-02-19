@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: v9.7
+appVersion: v10.0
 description: A Helm chart for XL Release
 name: xl-release-helmcharts
-version: 1.0.2-GA
+version: 10.0-GA
 
 dependencies:
 
