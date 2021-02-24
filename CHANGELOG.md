@@ -1,7 +1,8 @@
 # Helm Charts for Digital.ai Release Changelog
 All changes to this chart will be documented in this file
 
-## [1.2.1]
+## [10.1]
+* Bumping chart version to 10.1
 * Change health probe timeouts
 * Add liveness probe
 
