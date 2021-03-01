@@ -5,6 +5,7 @@ All changes to this chart will be documented in this file
 * Bump image tag to 10.0
 * Change chart and app version to 10.1 
 * Change health probe timeouts
+* Add nginx ingress
 
 ## [1.1.3]
 * Use image pull secrets

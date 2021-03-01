@@ -10,6 +10,11 @@ dependencies:
   repository: "https://haproxy-ingress.github.io/charts"
   condition: haproxy-ingress.install
 
+- name: nginx-ingress-controller
+  version: 7.4.2
+  repository: "https://charts.bitnami.com/bitnami"
+  condition: nginx-ingress-controller.install
+
 - name: postgresql
   version: 9.8.5
   repository: "https://charts.bitnami.com/bitnami"
