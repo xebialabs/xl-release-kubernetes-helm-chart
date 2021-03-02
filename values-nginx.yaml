@@ -26,6 +26,9 @@ ImagePullPolicy: "Always"
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
 nginx-ingress-controller:
   install: true
+  image:
+    # pullSecrets:
+    #   - myRegistryKeySecretName
   replicaCount: 1
   service:
     type: NodePort
