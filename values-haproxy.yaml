@@ -30,6 +30,9 @@ haproxy-ingress:
     service:
       type: NodePort
 
+nginx-ingress-controller:
+  install: false
+
 ## Ingress Configuration
 ## Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ingress:
