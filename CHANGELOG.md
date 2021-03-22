@@ -6,6 +6,7 @@ All changes to this chart will be documented in this file
 * Change chart and app version to 10.1 
 * Change health probe timeouts
 * Add nginx ingress
+* Added support for GoogleGKE
 
 ## [1.1.3]
 * Use image pull secrets
