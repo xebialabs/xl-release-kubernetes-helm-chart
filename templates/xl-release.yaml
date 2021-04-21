@@ -78,10 +78,17 @@ spec:
                   key: release-password
             - name: XL_CLUSTER_MODE
               value: full
-            {{- if and .Values.ingress.Enabled }}
+            {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
+            {{- if and .Values.ingress.Enabled }}{{- if eq $ingressclass "nginx" }}
+            {{- range .Values.ingress.hosts }}
+            - name: SERVER_URL
+              value: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ include "path.fullname" $ }}
+            {{- end }}
+            {{- else }}
             {{- range .Values.ingress.hosts }}
             - name: SERVER_URL
               value: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
+            {{- end }}
             {{- end }}
             {{- end }}
             {{- if .Values.postgresql.install }}

@@ -35,8 +35,11 @@ Create chart name and version as used by the chart label.
 Remove Nginx regex from NOTES.txt.
 */}}
 {{- define "path.fullname" -}}
-{{- if index .Values "nginx-ingress-controller" "install" -}}
+{{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
+{{- if and .Values.ingress.Enabled }}
+{{- if eq $ingressclass "nginx" }}
 {{- $name := ( split "(" .Values.ingress.path)._0 -}}
 {{- printf "%s" $name -}}/
+{{- end -}}
 {{- end -}}
 {{- end -}}
