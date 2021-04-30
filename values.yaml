@@ -80,6 +80,7 @@ postgresql:
   service:
     port: 5432
   persistence:
+    storageClass: "-"
     enabled: true
     size: 50Gi
     existingClaim:
@@ -129,6 +130,7 @@ rabbitmq-ha:
     type: ClusterIP
   persistentVolume:
     enabled: true
+    storageClass: "-"
     size: 20Gi
     annotations: {}
     resources: {}
