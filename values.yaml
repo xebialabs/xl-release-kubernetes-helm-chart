@@ -14,9 +14,6 @@ ImageTag: "10.0"
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
 
-## Secrets must be manually created in the namespace.
-# ImagePullSecret: xlRelease
-
 ## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html 
 route:
   Enabled: true

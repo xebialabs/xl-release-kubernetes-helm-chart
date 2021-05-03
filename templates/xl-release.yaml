@@ -58,6 +58,13 @@ spec:
             initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           {{- end }}
           env:
             - name: ADMIN_PASSWORD
@@ -67,8 +74,12 @@ spec:
                   key: release-password
             - name: XL_CLUSTER_MODE
               value: full
+            {{- if .Values.route.Enabled }}
+            {{- range .Values.route.hosts }}
             - name: SERVER_URL
-              value: "http://localhost:5516"
+              value: "http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}{{ $.Values.route.path }}"
+            {{- end }}
+            {{- end }}
             {{- if .Values.postgresql.install }}
             - name: XL_DB_URL
               value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db
