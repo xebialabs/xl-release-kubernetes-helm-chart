@@ -23,6 +23,10 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
+      {{- if .Values.ImagePullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.ImagePullSecret }}
+      {{- end }}
       {{- if .Values.postgresql.install }}
       initContainers:
         - name: wait-for-db
@@ -51,6 +55,13 @@ spec:
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
           {{- if .Values.HealthProbes }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           readinessProbe:
             httpGet:
               path: /
@@ -67,8 +78,12 @@ spec:
                   key: release-password
             - name: XL_CLUSTER_MODE
               value: full
+            {{- if and .Values.ingress.Enabled }}
+            {{- range .Values.ingress.hosts }}
             - name: SERVER_URL
-              value: "http://localhost:5516"
+              value: "http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}"
+            {{- end }}
+            {{- end }}
             {{- if .Values.postgresql.install }}
             - name: XL_DB_URL
               value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db
