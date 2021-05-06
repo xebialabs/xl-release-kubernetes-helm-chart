@@ -5,6 +5,7 @@ All changes to this chart will be documented in this file
 * Bumping chart version to 10.1
 * Change health probe timeouts
 * Add liveness probe
+* Bump image to 10.1
 
 ## [1.2.0]
 * Bumping image tag to 10.0
