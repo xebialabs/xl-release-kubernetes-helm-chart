@@ -7,6 +7,7 @@ All changes to this chart will be documented in this file
 * Change health probe timeouts
 * Add nginx ingress
 * Added support for GoogleGKE
+* Bump image tag to 10.1
 
 ## [1.1.3]
 * Use image pull secrets
