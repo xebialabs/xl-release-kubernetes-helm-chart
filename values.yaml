@@ -124,6 +124,14 @@ rabbitmq-ha:
     rabbitmq_amqp1_0,
     rabbitmq_management,
   replicaCount: 3
+  image:
+    repository: rabbitmq
+    tag: 3.8.7-alpine
+    pullPolicy: IfNotPresent
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    # pullSecrets:
+    #   - myRegistrKeySecretName
   rbac:
     create: true
   service:
