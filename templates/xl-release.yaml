@@ -54,6 +54,28 @@ spec:
           volumeMounts:
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
+              subPath: reports
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/work
+              subPath: work
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/conf
+              subPath: conf
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/ext
+              subPath: ext
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/hotfix
+              subPath: hotfix
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/hotfix/lib
+              subPath: lib
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/hotfix/plugins
+              subPath: plugins
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/log
+              subPath: log
           {{- if .Values.HealthProbes }}
           livenessProbe:
             httpGet:
@@ -192,9 +214,7 @@ spec:
             claimName: {{ template "xl-release.fullname" . }}
         {{- else }}
         - name: reports-dir
-          hostPath:
-            path: /opt/xebialabs/xl-release-server/reports
-            type: DirectoryOrCreate
+          emptyDir: {}
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
