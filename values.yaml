@@ -8,7 +8,7 @@ replicaCount: 3
 ## XL-Release image version
 ## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
 ImageRepository: "xebialabs/xl-release"
-ImageTag: "10.1"
+ImageTag: "10.2"
 
 ## Specify a imagePullPolicy
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
