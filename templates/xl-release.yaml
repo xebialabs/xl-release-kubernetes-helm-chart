@@ -68,6 +68,12 @@ spec:
               mountPath: /opt/xebialabs/xl-release-server/hotfix
               subPath: hotfix
             - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/hotfix/lib
+              subPath: lib
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/hotfix/plugins
+              subPath: plugins
+            - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/log
               subPath: log
           {{- if .Values.HealthProbes }}
