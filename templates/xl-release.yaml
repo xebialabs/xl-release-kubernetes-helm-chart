@@ -52,6 +52,11 @@ spec:
             - name: http
               containerPort: 5516
           volumeMounts:
+            {{- if .Values.oidc.enabled }}
+            - name: release-conf
+              mountPath: /opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template
+              subPath: xl-release.conf.template
+            {{- end }}
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
               subPath: reports
@@ -100,8 +105,10 @@ spec:
                   key: release-password
             - name: XL_CLUSTER_MODE
               value: full
+            
             {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
-            {{- if and .Values.ingress.Enabled }}{{- if eq $ingressclass "nginx" }}
+            {{- if and .Values.ingress.Enabled }}
+            {{- if and (eq $ingressclass "nginx") (ne .Values.ingress.path "/") }}
             {{- range .Values.ingress.hosts }}
             - name: SERVER_URL
               value: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ include "path.fullname" $ }}
@@ -215,6 +222,11 @@ spec:
         {{- else }}
         - name: reports-dir
           emptyDir: {}
+        {{- end }}
+        {{- if .Values.oidc.enabled }}
+        - name: release-conf
+          configMap:
+            name: xl-release-conf
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
