@@ -48,6 +48,11 @@ spec:
             - name: http
               containerPort: 5516
           volumeMounts:
+            {{- if .Values.oidc.enabled }}
+            - name: release-conf
+              mountPath: /opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template
+              subPath: xl-release.conf.template
+            {{- end }}
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
               subPath: reports
@@ -204,6 +209,11 @@ spec:
         {{- else }}
         - name: reports-dir
           emptyDir: {}
+        {{- end }}
+        {{- if .Values.oidc.enabled }}
+        - name: release-conf
+          configMap:
+            name: xl-release-conf
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:

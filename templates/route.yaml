@@ -1,5 +1,6 @@
 {{- if and .Values.route.Enabled -}}
 {{- $fullName := include "xl-release.fullname" . -}}
+{{- $routePath := .Values.route.path -}}
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -16,6 +17,7 @@ metadata:
 spec:
 {{- range .Values.route.hosts }}
   host: {{ . }}
+  path: {{ $routePath }}
   to:
     kind: Service
     name: {{ $fullName }}

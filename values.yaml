@@ -220,3 +220,20 @@ Persistence:
   Annotations: {}
   AccessMode: ReadWriteOnce
   Size: 5Gi
+
+# OIDC Settings
+oidc:
+  enabled: false
+  clientId:
+  clientSecret:
+  issuer:
+  keyRetrievalUri:
+  accessTokenUri:
+  userAuthorizationUri:
+  logoutUri:
+  redirectUri:
+  postLogoutRedirectUri:
+  userNameClaim:
+  fullNameClaim:
+  emailClaim:
+  rolesClaim:
