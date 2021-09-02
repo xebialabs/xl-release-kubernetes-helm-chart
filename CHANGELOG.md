@@ -1,6 +1,10 @@
 # Helm Charts for Digital.ai Release Changelog
 All changes to this chart will be documented in this file
 
+## [10.2]
+* Bumping chart version to 10.2
+* Add OIDC Support
+
 ## [10.1]
 * Bumping chart version to 10.1
 * Change health probe timeouts
