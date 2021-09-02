@@ -56,7 +56,7 @@ ingress:
 #      hosts:
 #        - example.com
 
-# https://docs.xebialabs.com/v.9.8/release/docker/docker-environment-variables/#get-started
+# https://docs.xebialabs.com/v.10.2/release/docker/docker-environment-variables/
 AdminPassword:
 # Provide the admin password to be used
 
@@ -64,11 +64,11 @@ xlrLicense:
 # Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
 
 RepositoryKeystore:
-# https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
-# Convert keystore.jks files content to base64 ( cat keystore.jks | base64 -w 0 ) and put the output here
+# # https://docs.xebialabs.com/v.10.2/release/how-to/changing-passwords-in-xl-release/
+# Convert repository-keystore.jceks files content to base64 ( cat repository-keystore.jceks | base64 -w 0 ) and put the output here
 
 KeystorePassphrase:
-# Passphrase for keystore.jks file
+# Passphrase for repository-keystore.jceks file
 
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
@@ -98,7 +98,7 @@ postgresql:
   affinity: {}
   tolerations: []
 
-## Ref: https://docs.xebialabs.com/v.9.7/release/how-to/configure-the-xl-release-sql-repository-in-a-database#configuration-examples
+## Ref: https://docs.xebialabs.com/v.10.2/release/how-to/configure-the-xl-release-sql-repository-in-a-database/#configuration-examples
 UseExistingDB:
   Enabled: false
   # If you want to use a existing database, change 'postgresql.install' to 'false'.
@@ -185,7 +185,7 @@ rabbitmq:
   volumePermissions:
     enabled: true
 
-## Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
+## Ref: https://docs.xebialabs.com/v.10.2/release/webhooks/webhooks-overview/
 UseExistingMQ:
   Enabled: false
   # If you want to use a existing Message Queue, change 'rabbitmq.install' to 'false'.
