@@ -23,6 +23,8 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
+      securityContext:
+        fsGroup: 10001
       {{- if .Values.ImagePullSecret }}
       imagePullSecrets:
       - name: {{ .Values.ImagePullSecret }}
