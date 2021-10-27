@@ -1,27 +1,27 @@
 apiVersion: v2
-appVersion: v10.2
+appVersion: v10.3
 description: A Helm chart for XL Release
 name: digitalai-release
-version: 10.2
+version: 10.3
 
 dependencies:
 - name: haproxy-ingress
-  version: 0.9.1
+  version: 0.13.4
   repository: "https://haproxy-ingress.github.io/charts"
   condition: haproxy-ingress.install
 
 - name: nginx-ingress-controller
-  version: 7.4.2
+  version: 9.0.0
   repository: "https://charts.bitnami.com/bitnami"
   condition: nginx-ingress-controller.install
 
 - name: postgresql
-  version: 9.8.5
+  version: 10.12.7
   repository: "https://charts.bitnami.com/bitnami"
   condition: postgresql.install
 
 - name: rabbitmq
-  version: 8.6.1
+  version: 8.24.1
   repository: "https://charts.bitnami.com/bitnami"
   condition: rabbitmq.install
 
