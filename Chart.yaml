@@ -1,18 +1,18 @@
 apiVersion: v2
-appVersion: v10.2
+appVersion: v10.3
 description: A Helm chart for XL Release
 name: digitalai-release-ocp
-version: 10.2
+version: 10.3
 
 dependencies:
 
 - name: postgresql
-  version: 9.8.5
+  version: 10.12.7
   repository: "https://charts.bitnami.com/bitnami"
   condition: postgresql.install
 
 - name: rabbitmq
-  version: 8.6.1
+  version: 8.24.1
   repository: "https://charts.bitnami.com/bitnami"
   condition: rabbitmq.install
 
