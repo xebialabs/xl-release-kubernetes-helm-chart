@@ -12,7 +12,7 @@ replicaCount: 3
 ## XL-Release image version
 ## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
 ImageRepository: "xebialabs/xl-release"
-ImageTag: "10.2"
+ImageTag: "10.3"
 
 ## Specify a imagePullPolicy
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
@@ -27,14 +27,9 @@ ImagePullPolicy: "Always"
 nginx-ingress-controller:
   install: true
   image:
-    # pullSecrets:
-    #   - myRegistryKeySecretName
+    pullSecrets: []
   replicaCount: 1
   resources:
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
     limits: {}
     #   cpu: 100m
     #   memory: 128Mi
@@ -88,29 +83,24 @@ KeystorePassphrase:
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
   install: true
-  postgresqlUsername: postgres
-  postgresqlPassword: ""
-  postgresqlExtendedConf:
-    listenAddresses: "'*'"
-    maxConnections: "500"
-  initdbScriptsSecret: postgresql-init-sql-xlr
-  service:
-    port: 5432
+  initdbScriptsSecret: "postgresql-init-sql-xlr"
+  image:
+    pullSecrets: []
   persistence:
     enabled: true
     storageClass: "-"
-    size: 50Gi
-    existingClaim:
-  resources: {}
-  #  requests:
-  #    memory: "1Gi"
-  #    cpu: "250m"
-  #  limits:
-  #    memory: "2Gi"
-  #    cpu: "1"
-  nodeSelector: {}
-  affinity: {}
-  tolerations: []
+    size: 8Gi
+    existingClaim: ""
+  postgresqlUsername: postgres
+  postgresqlPassword: ""
+  postgresqlMaxConnections: ""
+  service:
+    type: ClusterIP
+    port: 5432
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
 
 ## Ref: https://docs.xebialabs.com/v.10.2/release/how-to/configure-the-xl-release-sql-repository-in-a-database/#configuration-examples
 UseExistingDB:
@@ -130,11 +120,7 @@ rabbitmq:
   install: true
   replicaCount: 3
   image:
-    registry: docker.io
-    repository: bitnami/rabbitmq
-    tag: 3.8.11-debian-10-r0
-    # pullSecrets:
-    #   - myRegistryKeySecretName 
+    pullSecrets: []
   auth:
     username: guest
     password: guest
@@ -244,7 +230,7 @@ Persistence:
   StorageClass: "-"
   Annotations: {}
   AccessMode: ReadWriteOnce
-  Size: 5Gi
+  Size: 8Gi
 
 # OIDC Settings
 oidc:

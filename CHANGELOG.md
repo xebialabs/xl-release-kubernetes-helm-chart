@@ -1,6 +1,10 @@
 # Helm Charts for Digital.ai Release Changelog
 All changes to this chart will be documented in this file
 
+## [10.3]
+* Bump version to 10.3
+* Update chart dependencies
+
 ## [10.2]
 * Bump version to 10.2
 * Add OIDC Support

@@ -106,8 +106,7 @@ spec:
                   name: {{ include "xl-release.fullname" . }}
                   key: release-password
             - name: XL_CLUSTER_MODE
-              value: full
-            
+              value: full            
             {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
             {{- if and .Values.ingress.Enabled }}
             {{- if and (eq $ingressclass "nginx") (ne .Values.ingress.path "/") }}
@@ -178,10 +177,7 @@ spec:
             - name: XLR_TASK_QUEUE_USERNAME
               value: {{ .Values.rabbitmq.auth.username }}
             - name: XLR_TASK_QUEUE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                   name: {{ .Release.Name }}-rabbitmq
-                   key: rabbitmq-password
+              value: {{ .Values.rabbitmq.auth.password }}
             - name: XLR_TASK_QUEUE_URL
               value: "amqp://{{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local:5672/"
             - name: XLR_TASK_QUEUE_NAME
