@@ -29,8 +29,9 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.ImagePullSecret }}
       {{- end }}
-      {{- if .Values.postgresql.install }}
+      {{- if or (.Values.postgresql.install) (index .Values "xl-release-server.conf") }}
       initContainers:
+        {{- if .Values.postgresql.install }}
         - name: wait-for-db
           image: xebialabs/tiny-tools
           command:
@@ -45,6 +46,23 @@ spec:
              value: {{ .Release.Name }}-postgresql
            - name: POSTGRES_PORT
              value: "5432"
+        {{- end }}
+        {{- if index .Values "xl-release-server.conf" }}
+        - name: copy
+          image: xebialabs/tiny-tools
+          command:
+            - sh
+            - -c
+            - >
+              cp -r /tmp/xl-release-server.conf /opt/xebialabs/xl-release-server/conf && chmod 0664 /opt/xebialabs/xl-release-server/conf/xl-release-server.conf
+          volumeMounts:
+            - name: server-conf
+              mountPath: /tmp/xl-release-server.conf
+              subPath: xl-release-server.conf
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/conf
+              subPath: conf
+        {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -225,6 +243,11 @@ spec:
         - name: release-conf
           configMap:
             name: xl-release-conf
+        {{- end }}
+        {{- if index .Values "xl-release-server.conf" }}
+        - name: server-conf
+          secret:
+            secretName: {{ template "xl-release.name" . }}-server-conf
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:

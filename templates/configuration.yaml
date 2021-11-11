@@ -1,0 +1,14 @@
+{{- if index .Values "xl-release-server.conf" }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ template "xl-release.name" . }}-server-conf
+  labels:
+    app: {{ template "xl-release.name" . }}
+    chart: {{ template "xl-release.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+stringData:
+  xl-release-server.conf: |-
+    {{- index .Values "xl-release-server.conf" | nindent 4 }}
+{{- end }}
