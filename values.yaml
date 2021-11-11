@@ -218,6 +218,11 @@ Persistence:
   AccessMode: ReadWriteOnce
   Size: 8Gi
 
+# Custom xl-release-server.conf values
+# Provide all the values. Provide password values in plain-text
+xl-release-server.conf: |-
+
+
 # OIDC Settings
 oidc:
   enabled: false
