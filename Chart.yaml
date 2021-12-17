@@ -7,12 +7,16 @@ version: 10.3
 dependencies:
 
 - name: postgresql
-  version: 10.12.7
+  version: 10.12.8
   repository: "https://charts.bitnami.com/bitnami"
   condition: postgresql.install
 
 - name: rabbitmq
-  version: 8.24.1
+  version: 8.24.2
   repository: "https://charts.bitnami.com/bitnami"
   condition: rabbitmq.install
 
+- name: keycloak
+  version: 15.1.0
+  repository: "https://codecentric.github.io/helm-charts"
+  condition: keycloak.install

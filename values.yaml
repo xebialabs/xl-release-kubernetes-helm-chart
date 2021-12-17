@@ -14,6 +14,81 @@ ImageTag: "10.3"
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
 
+keycloak:
+  install: true
+  extraEnv: |
+    - name: PROXY_ADDRESS_FORWARDING
+      value: "true"
+    - name: KEYCLOAK_USER
+      value: admin
+    - name: KEYCLOAK_PASSWORD
+      value: admin
+    - name: JGROUPS_DISCOVERY_PROTOCOL
+      value: dns.DNS_PING
+    - name: JGROUPS_DISCOVERY_PROPERTIES
+      value: 'dns_query={{ include "keycloak.serviceDnsName" . }}'
+    - name: CACHE_OWNERS_COUNT
+      value: "2"
+    - name: CACHE_OWNERS_AUTH_SESSIONS_COUNT
+      value: "2"
+    - name: JAVA_OPTS
+      value: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=50.0
+        -Djava.net.preferIPv4Stack=true
+        -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS
+        -Djava.awt.headless=true
+    - name: DB_VENDOR
+      value: postgres
+    - name: DB_ADDR
+      value: {{ .Release.Name }}-postgresql
+    - name: DB_PORT
+      value: "5432"
+    - name: DB_DATABASE
+      value: keycloak
+    - name: DB_USER
+      value: keycloak
+    - name: DB_PASSWORD
+      value: keycloak
+    - name: KEYCLOAK_IMPORT
+      value: /realm/digitalai-platform-realm.json
+  extraVolumes: |
+    - name: realm-config
+      configMap:
+        name: {{ .Release.Name }}-realm
+  extraVolumeMounts: |
+    - name: realm-config
+      mountPath: "/realm/"
+      readOnly: true
+  route:
+    enabled: true
+    annotations: {}
+    labels: {}
+    host: "keycloak.example.com"
+    tls:
+      enabled: true
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
+  postgresql:
+    enabled: false
+
+oidc:
+  enabled: true
+  external: false
+  clientId:
+  clientSecret:
+  issuer:
+  keyRetrievalUri:
+  accessTokenUri:
+  userAuthorizationUri:
+  logoutUri:
+  redirectUri:
+  postLogoutRedirectUri:
+  userNameClaim:
+  fullNameClaim:
+  emailClaim:
+  rolesClaim:
+
 ## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html 
 route:
   Enabled: true
@@ -217,20 +292,3 @@ Persistence:
   Annotations: {}
   AccessMode: ReadWriteOnce
   Size: 8Gi
-
-# OIDC Settings
-oidc:
-  enabled: false
-  clientId:
-  clientSecret:
-  issuer:
-  keyRetrievalUri:
-  accessTokenUri:
-  userAuthorizationUri:
-  logoutUri:
-  redirectUri:
-  postLogoutRedirectUri:
-  userNameClaim:
-  fullNameClaim:
-  emailClaim:
-  rolesClaim:
