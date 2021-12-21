@@ -99,8 +99,7 @@ spec:
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           {{- end }}
-          env:
-            
+          env: 
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
