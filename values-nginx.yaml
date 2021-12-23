@@ -21,6 +21,84 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+keycloak:
+  install: true
+  extraEnv: |
+    - name: PROXY_ADDRESS_FORWARDING
+      value: "true"
+    - name: KEYCLOAK_USER
+      value: admin
+    - name: KEYCLOAK_PASSWORD
+      value: admin
+    - name: JGROUPS_DISCOVERY_PROTOCOL
+      value: dns.DNS_PING
+    - name: JGROUPS_DISCOVERY_PROPERTIES
+      value: 'dns_query={{ include "keycloak.serviceDnsName" . }}'
+    - name: CACHE_OWNERS_COUNT
+      value: "2"
+    - name: CACHE_OWNERS_AUTH_SESSIONS_COUNT
+      value: "2"
+    - name: JAVA_OPTS
+      value: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=50.0
+        -Djava.net.preferIPv4Stack=true
+        -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS
+        -Djava.awt.headless=true
+    - name: DB_VENDOR
+      value: postgres
+    - name: DB_ADDR
+      value: {{ .Release.Name }}-postgresql
+    - name: DB_PORT
+      value: "5432"
+    - name: DB_DATABASE
+      value: keycloak
+    - name: DB_USER
+      value: keycloak
+    - name: DB_PASSWORD
+      value: keycloak
+    - name: KEYCLOAK_IMPORT
+      value: /realm/digitalai-platform-realm.json
+  extraVolumes: |
+    - name: realm-config
+      configMap:
+        name: {{ .Release.Name }}-realm
+  extraVolumeMounts: |
+    - name: realm-config
+      mountPath: "/realm/"
+      readOnly: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    rules:
+      -
+        host: 'keycloak.example.com'
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  postgresql:
+    enabled: false
+
+oidc:
+  enabled: true
+  external: false
+  clientId:
+  clientSecret:
+  issuer:
+  keyRetrievalUri:
+  accessTokenUri:
+  userAuthorizationUri:
+  logoutUri:
+  redirectUri:
+  postLogoutRedirectUri:
+  userNameClaim:
+  fullNameClaim:
+  emailClaim:
+  rolesClaim:
+
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
@@ -50,13 +128,13 @@ ingress:
     # ingress.kubernetes.io/tls-acme: "true"
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
-  path: /xl-release(/|$)(.*)
+  path: /
   hosts:
     - example.com
 
@@ -232,19 +310,3 @@ Persistence:
   AccessMode: ReadWriteOnce
   Size: 8Gi
 
-# OIDC Settings
-oidc:
-  enabled: false
-  clientId:
-  clientSecret:
-  issuer:
-  keyRetrievalUri:
-  accessTokenUri:
-  userAuthorizationUri:
-  logoutUri:
-  redirectUri:
-  postLogoutRedirectUri:
-  userNameClaim:
-  fullNameClaim:
-  emailClaim:
-  rolesClaim:
