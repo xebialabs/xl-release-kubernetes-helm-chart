@@ -19,11 +19,11 @@ if [[ $# -eq 0 ]] ; then
     exit 1
 fi
 
-if [[ $# -eq 2 ]] ; then
+if [[ $# > 1 ]] ; then
   containerOrganization=$2
 fi
 
-if [[ $# -eq 3 ]] ; then
+if [[ $# > 2 ]] ; then
   branchName=$3
 fi
 
