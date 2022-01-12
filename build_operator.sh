@@ -6,11 +6,11 @@ branchName="master"
 if [[ $# -eq 0 ]] ; then
     printf "\e[31mProvide in a first parameter a version (SemVer compatible) to release !\e[m\n"
     echo "For example:"
-    printf "\e[1;32m./build_operator.sh 0.0.1-openshift \e[0m"
+    printf "\e[1;32m./build_operator.sh 0.0.1 \e[0m"
     echo ""
-    printf "\e[1;32m./build_operator.sh 0.0.1-openshift acierto\e[0m"
+    printf "\e[1;32m./build_operator.sh 0.0.1 acierto\e[0m"
     echo ""
-    printf "\e[1;32m./build_operator.sh 0.0.1-openshift acierto ENG-8769\e[0m"
+    printf "\e[1;32m./build_operator.sh 0.0.1 acierto ENG-8769\e[0m"
     echo ""
     printf "Second example is about how to push the image to a non-default organization"
     echo ""
@@ -40,8 +40,8 @@ helm package xl-release-kubernetes-helm-chart
 rm -rf xl-release-kubernetes-helm-chart
 mv digitalai-release-*.tgz xlr.tgz
 operator-sdk init --domain digital.ai --plugins=helm
-operator-sdk create api --group=xlr --version=v1alpha1 --helm-chart=xlr.tgz
-export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1"
+operator-sdk create api --group=xlrocp --version=v1alpha1 --helm-chart=xlr.tgz
+export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1-openshift"
 make docker-build docker-push IMG=$OPERATOR_IMG
 cd ..
 rm -rf xlr
