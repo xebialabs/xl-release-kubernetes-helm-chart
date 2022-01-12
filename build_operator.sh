@@ -6,7 +6,7 @@ branchName="master"
 if [[ $# -eq 0 ]] ; then
     printf "\e[31mProvide in a first parameter a version (SemVer compatible) to release !\e[m\n"
     echo "For example:"
-    printf "\e[1;32m./build_operator.sh 0.0.1\e[0m"
+    printf "\e[1;32m./build_operator.sh 0.0.1 \e[0m"
     echo ""
     printf "\e[1;32m./build_operator.sh 0.0.1 acierto\e[0m"
     echo ""
