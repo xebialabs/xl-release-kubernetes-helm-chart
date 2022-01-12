@@ -160,11 +160,11 @@ spec:
                   name: {{ include "xl-release.fullname" . }}
                   key: xlr-License
             - name: XL_METRICS_ENABLED
-              value: {{ .Values.MetricsEnabled}}
+              value: {{ toString .Values.MetricsEnabled}}
             - name: GENERATE_XL_CONFIG
-              value: {{ .Values.GenerateXlConfig}}
+              value: {{ toString .Values.GenerateXlConfig}}
             - name: USE_IP_AS_HOSTNAME
-              value: {{ .Values.UseIpAsHostname}}
+              value: {{ toString .Values.UseIpAsHostname}}
             - name: FORCE_UPGRADE
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
