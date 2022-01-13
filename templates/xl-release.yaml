@@ -23,6 +23,12 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
+      securityContext:
+        fsGroup: 10001
+      {{- if .Values.ImagePullSecret }}
+      imagePullSecrets:
+      - name: {{ .Values.ImagePullSecret }}
+      {{- end }}
       {{- if .Values.postgresql.install }}
       initContainers:
         - name: wait-for-db
@@ -60,9 +66,6 @@ spec:
               mountPath: /opt/xebialabs/xl-release-server/work
               subPath: work
             - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/log
-              subPath: log
-            - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/conf
               subPath: conf
             - name: reports-dir
@@ -76,20 +79,23 @@ spec:
               subPath: lib
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/hotfix/plugins
-              subPath: plugins 
+              subPath: plugins
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/log
+              subPath: log
           {{- if .Values.HealthProbes }}
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
-            periodSeconds: {{ .Values.HealthPeriodScans }}
-            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           livenessProbe:
             httpGet:
               path: /
               port: http
             initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
+            periodSeconds: {{ .Values.HealthPeriodScans }}
+            failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           {{- end }}
@@ -128,7 +134,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "xl-release.fullname" . }}
-                  key: databaseUsername 
+                  key: databaseUsername
             - name: XL_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -154,12 +160,16 @@ spec:
                   name: {{ include "xl-release.fullname" . }}
                   key: xlr-License
             - name: XL_METRICS_ENABLED
-              value: "false"
+              value: "{{ .Values.MetricsEnabled }}"
+            - name: GENERATE_XL_CONFIG
+              value: "{{ .Values.GenerateXlConfig }}"
+            - name: USE_IP_AS_HOSTNAME
+              value: "{{ .Values.UseIpAsHostname }}"
             - name: FORCE_UPGRADE
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
               value: "false"
-            {{- if .Values.rabbitmq.install }}          
+            {{- if .Values.rabbitmq.install }}
             - name: XLR_TASK_QUEUE_USERNAME
               value: {{ .Values.rabbitmq.auth.username }}
             - name: XLR_TASK_QUEUE_PASSWORD

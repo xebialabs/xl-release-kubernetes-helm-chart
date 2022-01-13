@@ -89,7 +89,7 @@ oidc:
   emailClaim:
   rolesClaim:
 
-## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html 
+## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html
 route:
   Enabled: true
   annotations:
@@ -114,7 +114,7 @@ route:
 #    caCertificate: |-
 #      -----BEGIN CERTIFICATE-----
 #      -----END CERTIFICATE-----
-#    insecureEdgeTerminationPolicy: Redirect 
+#    insecureEdgeTerminationPolicy: Redirect
 
 # # https://docs.xebialabs.com/v.10.2/release/docker/docker-environment-variables/
 AdminPassword:
@@ -162,6 +162,10 @@ postgresql:
   shmVolume:
     chmod:
       enabled: false
+
+GenerateXlConfig: true
+MetricsEnabled: false
+UseIpAsHostname: false
 
 ## Ref: https://docs.xebialabs.com/v.10.2/release/how-to/configure-the-xl-release-sql-repository-in-a-database/#configuration-examples
 UseExistingDB:
