@@ -99,14 +99,14 @@ spec:
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           {{- end }}
-          env: 
+          env:
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ include "xl-release.fullname" . }}
                   key: release-password
             - name: XL_CLUSTER_MODE
-              value: full            
+              value: full
             {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
             {{- if and .Values.ingress.Enabled }}
             {{- if and (eq $ingressclass "nginx") (ne .Values.ingress.path "/") }}
@@ -142,7 +142,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "xl-release.fullname" . }}
-                  key: databaseUsername              
+                  key: databaseUsername
             - name: XL_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -168,12 +168,16 @@ spec:
                   name: {{ include "xl-release.fullname" . }}
                   key: xlr-License
             - name: XL_METRICS_ENABLED
-              value: "false"
+              value: "{{ .Values.MetricsEnabled}}"
+            - name: GENERATE_XL_CONFIG
+              value: "{{ .Values.GenerateXlConfig}}"
+            - name: USE_IP_AS_HOSTNAME
+              value: "{{ .Values.UseIpAsHostname}}"
             - name: FORCE_UPGRADE
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
               value: "false"
-            {{- if .Values.rabbitmq.install }}          
+            {{- if .Values.rabbitmq.install }}
             - name: XLR_TASK_QUEUE_USERNAME
               value: {{ .Values.rabbitmq.auth.username }}
             - name: XLR_TASK_QUEUE_PASSWORD
@@ -209,7 +213,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "xl-release.fullname" . }}
-                  key: keystorePassphrase  
+                  key: keystorePassphrase
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:

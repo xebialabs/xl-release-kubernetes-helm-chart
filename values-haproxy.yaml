@@ -172,6 +172,10 @@ postgresql:
       memory: 256Mi
       cpu: 250m
 
+GenerateXlConfig: true
+MetricsEnabled: false
+UseIpAsHostname: false
+
 ## Ref: https://docs.xebialabs.com/v.10.2/release/how-to/configure-the-xl-release-sql-repository-in-a-database/#configuration-examples
 UseExistingDB:
   Enabled: false
