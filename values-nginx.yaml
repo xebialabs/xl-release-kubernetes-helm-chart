@@ -22,7 +22,7 @@ ImagePullPolicy: "Always"
 # ImagePullSecret: xlRelease
 
 keycloak:
-  install: true
+  install: false
   extraEnv: |
     - name: PROXY_ADDRESS_FORWARDING
       value: "true"
@@ -83,7 +83,7 @@ keycloak:
     enabled: false
 
 oidc:
-  enabled: true
+  enabled: false
   external: false
   clientId:
   clientSecret:
@@ -163,6 +163,7 @@ postgresql:
   install: true
   initdbScriptsSecret: "postgresql-init-sql-xlr"
   image:
+    debug: true
     pullSecrets: []
   persistence:
     enabled: true
@@ -200,8 +201,10 @@ UseExistingDB:
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
 rabbitmq:
   install: true
+  forceBoot: true
   replicaCount: 3
   image:
+    debug: true
     pullSecrets: []
   auth:
     username: guest
