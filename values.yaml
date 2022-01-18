@@ -181,7 +181,7 @@ UseExistingDB:
   # XLR_REPORT_DB_PASS:
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
-## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
+## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq/README.md
 rabbitmq:
   install: true
   forceBoot: true
