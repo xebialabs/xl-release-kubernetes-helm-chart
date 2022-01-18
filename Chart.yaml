@@ -11,8 +11,8 @@ dependencies:
   repository: "https://charts.bitnami.com/bitnami"
   condition: postgresql.install
 
-- name: rabbitmq-ha
+- name: rabbitmq
   version: 1.47.0
   repository: "https://charts.helm.sh/stable"
-  condition: rabbitmq-ha.install
+  condition: rabbitmq.install
 
