@@ -1,16 +1,16 @@
 #!/bin/bash
 
 containerOrganization="xldevdocker"
-branchName="master"
+branchName="oc-master"
 
 if [[ $# -eq 0 ]] ; then
     printf "\e[31mProvide in a first parameter a version (SemVer compatible) to release !\e[m\n"
     echo "For example:"
-    printf "\e[1;32m./build_operator.sh 0.0.1 \e[0m"
+    printf "\e[1;32m./build_operator.sh 22.0.0-114.1255 \e[0m"
     echo ""
-    printf "\e[1;32m./build_operator.sh 0.0.1 acierto\e[0m"
+    printf "\e[1;32m./build_operator.sh 22.0.0-114.1255 acierto\e[0m"
     echo ""
-    printf "\e[1;32m./build_operator.sh 0.0.1 acierto ENG-8769\e[0m"
+    printf "\e[1;32m./build_operator.sh 22.0.0-114.1255 acierto ENG-8769\e[0m"
     echo ""
     printf "Second example is about how to push the image to a non-default organization"
     echo ""
@@ -31,8 +31,6 @@ mkdir xlr
 cd xlr
 git clone git@github.com:xebialabs/xl-release-kubernetes-helm-chart.git -b $branchName
 cd xl-release-kubernetes-helm-chart
-rm -f values-haproxy.yaml
-mv values-nginx.yaml values.yaml
 helm dependency update .
 rm -f Chart.lock
 cd ..
@@ -41,7 +39,7 @@ rm -rf xl-release-kubernetes-helm-chart
 mv digitalai-release-*.tgz xlr.tgz
 operator-sdk init --domain digital.ai --plugins=helm
 operator-sdk create api --group=xlrocp --version=v1alpha1 --helm-chart=xlr.tgz
-export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1-openshift"
+export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1"
 make docker-build docker-push IMG=$OPERATOR_IMG
 cd ..
 rm -rf xlr

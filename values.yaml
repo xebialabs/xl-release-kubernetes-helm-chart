@@ -136,6 +136,7 @@ postgresql:
   install: true
   initdbScriptsSecret: "postgresql-init-sql-xlr"
   image:
+    debug: true
     pullSecrets: []
   persistence:
     enabled: true
@@ -183,6 +184,7 @@ UseExistingDB:
 ## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
 rabbitmq:
   install: true
+  forceBoot: true
   replicaCount: 3
   image:
     pullSecrets: []
@@ -274,8 +276,8 @@ resources: {}
 
 ## Configure extra options for liveness and readiness probes
 HealthProbes: true
-HealthProbesLivenessTimeout: 60
-HealthProbesReadinessTimeout: 60
+HealthProbesLivenessTimeout: 120
+HealthProbesReadinessTimeout: 120
 HealthProbeFailureThreshold: 12
 HealthPeriodScans: 10
 
