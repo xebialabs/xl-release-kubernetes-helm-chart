@@ -39,7 +39,7 @@ rm -rf xl-release-kubernetes-helm-chart
 mv digitalai-release-*.tgz xlr.tgz
 operator-sdk init --domain digital.ai --plugins=helm
 operator-sdk create api --group=xlrocp --version=v1alpha1 --helm-chart=xlr.tgz
-export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1"
+export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1-openshift"
 make docker-build docker-push IMG=$OPERATOR_IMG
 cd ..
 rm -rf xlr

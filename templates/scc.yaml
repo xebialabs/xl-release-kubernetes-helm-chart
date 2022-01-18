@@ -1,8 +1,8 @@
-{{- if index .Values "rabbitmq-ha" "install" }}
+{{- if index .Values "rabbitmq" "install" }}
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
-  name: {{ .Release.Name }}-rabbitmq-ha
+  name: {{ .Release.Name }}-rabbitmq
 allowHostDirVolumePlugin: false
 allowHostIPC: false
 allowHostNetwork: false
@@ -26,7 +26,7 @@ seLinuxContext:
 supplementalGroups:
   type: RunAsAny
 users:
-- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-rabbitmq-ha
+- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-rabbitmq
 volumes:
 - configMap
 - downwardAPI
