@@ -1,4 +1,4 @@
-{{- if index .Values "rabbitmq" "install" }}
+{{- if index .Values "rabbitmq-ha" "install" }}
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
