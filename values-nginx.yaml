@@ -163,6 +163,7 @@ postgresql:
   install: true
   initdbScriptsSecret: "postgresql-init-sql-xlr"
   image:
+    debug: true
     pullSecrets: []
   persistence:
     enabled: true
@@ -200,8 +201,10 @@ UseExistingDB:
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
 rabbitmq:
   install: true
+  forceBoot: true
   replicaCount: 3
   image:
+    debug: true
     pullSecrets: []
   auth:
     username: guest
