@@ -27,7 +27,7 @@ All changes to this chart will be documented in this file
 
 ## [1.1.0]
 * Add Bitnami RabbitMQ chart
-* Remove deprecated RabbitMQ-HA chart
+* Remove deprecated rabbitmq chart
 
 ## [1.0.1]
 * Initial Release of Digital.ai Release chart
