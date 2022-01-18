@@ -14,7 +14,7 @@ ImageTag: "10.0"
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
 
-## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html 
+## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html
 route:
   Enabled: true
   annotations:
@@ -39,7 +39,7 @@ route:
 #    caCertificate: |-
 #      -----BEGIN CERTIFICATE-----
 #      -----END CERTIFICATE-----
-#    insecureEdgeTerminationPolicy: Redirect 
+#    insecureEdgeTerminationPolicy: Redirect
 
 # https://docs.xebialabs.com/v.9.8/release/docker/docker-environment-variables/#get-started
 AdminPassword:
@@ -58,6 +58,8 @@ KeystorePassphrase:
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
+  image:
+    debug: true
   install: true
   postgresqlUsername: postgres
   postgresqlPassword: ""
@@ -109,6 +111,7 @@ UseExistingDB:
 ## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
 rabbitmq-ha:
   install: true
+  forceBoot: true
   rabbitmqUsername: guest
   rabbitmqPassword: ""
   rabbitmqErlangCookie: RELEASERABBITMQCLUSTER
@@ -154,12 +157,12 @@ rabbitmq-ha:
       {
           "name": "cluster_name",
           "value": ""
-      }  
+      }
   prometheus:
     operator:
       enabled: false
 
-## Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
+# Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
 UseExistingMQ:
   Enabled: false
   # If you want to use a existing Message Queue, change 'rabbitmq-ha.install' to 'false'.
@@ -183,8 +186,8 @@ resources: {}
 
 ## Configure extra options for liveness and readiness probes
 HealthProbes: true
-HealthProbesLivenessTimeout: 90
-HealthProbesReadinessTimeout: 90
+HealthProbesLivenessTimeout: 120
+HealthProbesReadinessTimeout: 120
 HealthProbeFailureThreshold: 12
 HealthPeriodScans: 10
 
