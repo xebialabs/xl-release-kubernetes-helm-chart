@@ -111,6 +111,7 @@ UseExistingDB:
 ## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
 rabbitmq-ha:
   install: true
+  forceBoot: true
   rabbitmqUsername: guest
   rabbitmqPassword: ""
   rabbitmqErlangCookie: RELEASERABBITMQCLUSTER
@@ -164,7 +165,7 @@ rabbitmq-ha:
       {
           "name": "cluster_name",
           "value": ""
-      }  
+      }
   prometheus:
     operator:
       enabled: false
