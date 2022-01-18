@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # No. of XL-Release master pods to run.
-replicaCount: 3
+replicaCount: 1
 
 ## XL-Release image version
 ## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
@@ -14,7 +14,7 @@ ImageTag: "10.0"
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
 
-## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html 
+## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html
 route:
   Enabled: true
   annotations:
@@ -23,7 +23,7 @@ route:
     haproxy.router.openshift.io/rewrite-target: /
   path: /
   hosts:
-    - app.example.com
+    - router-default.apps.acierto.lnfl.p1.openshiftapps.com
 
 ## By default only Edge Termination is supported with Release.
 ## To configure SSL/TLS with Release uncomment the below tls section and provide the private key, certificate and optional caCertificate.
@@ -39,25 +39,22 @@ route:
 #    caCertificate: |-
 #      -----BEGIN CERTIFICATE-----
 #      -----END CERTIFICATE-----
-#    insecureEdgeTerminationPolicy: Redirect 
+#    insecureEdgeTerminationPolicy: Redirect
 
 # https://docs.xebialabs.com/v.9.8/release/docker/docker-environment-variables/#get-started
-AdminPassword:
-# Provide the admin password to be used
+AdminPassword: admin
 
-xlrLicense:
-# Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
+xlrLicense: LS0tIExpY2Vuc2UgLS0tCkxpY2Vuc2UgdmVyc2lvbjogMwpQcm9kdWN0OiBYTCBSZWxlYXNlCkxpY2Vuc2VkIHRvOiBYTCBSZWxlYXNlIERldiBUZWFtCkNvbnRhY3Q6IHhscmVsZWFzZUB4ZWJpYWxhYnMuY29tCkV4cGlyZXMgYWZ0ZXI6IDIwMzUtMDEtMDEKRWRpdGlvbjogRW50ZXJwcmlzZQotLS0gU2lnbmF0dXJlIChTSEExd2l0aERTQSkgLS0tCjMwMmMwMjE0NTk1NzhmOTgzYjRmZmVmMWNhYTAwODA5OTQ2OGM0MjM2YzJhZGQ1MDAyMTQwMWE1MTZkODc5MTAxZTFlMWJlZmJjMWUzYWNmCjdiZmUwOTdkZDBlYgotLS0gRW5kIG9mIFNpZ25hdHVyZSAtLS0K
 
-RepositoryKeystore:
-# https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
-# Convert keystore.jks files content to base64 ( cat keystore.jks | base64 -w 0 ) and put the output here
+RepositoryKeystore: zs7OzgAAAAIAAAABAAAAAwAWZGVwbG95aXQtcGFzc3N3b3JkLWtleQAAAX0PJb+CrO0ABXNyADNjb20uc3VuLmNyeXB0by5wcm92aWRlci5TZWFsZWRPYmplY3RGb3JLZXlQcm90ZWN0b3LNV8pZ5zC7UwIAAHhyABlqYXZheC5jcnlwdG8uU2VhbGVkT2JqZWN0PjY9psO3VHACAARbAA1lbmNvZGVkUGFyYW1zdAACW0JbABBlbmNyeXB0ZWRDb250ZW50cQB+AAJMAAlwYXJhbXNBbGd0ABJMamF2YS9sYW5nL1N0cmluZztMAAdzZWFsQWxncQB+AAN4cHVyAAJbQqzzF/gGCFTgAgAAeHAAAAARMA8ECJ5qQHT9gnDqAgMDDUB1cQB+AAUAAACQmtLr3iZ5MZZg1CaZ5+D3HW2x1ao5yGvSgxC085MShmXOGxFGRr0lLMbpTabZiXYxGYYWUhc6lcjgPFTg7JUvpWC8pD85tSAiMAHe9VaBQ7GWoFUhQz0WcZQZZkKztJkp7EzQ4zw+RYBI1yoHdWXSauEJaGb1lKy+uZQiWhSzF/5pI0pEiTC3uBvS4Deq0GMDdAAWUEJFV2l0aE1ENUFuZFRyaXBsZURFU3QAFlBCRVdpdGhNRDVBbmRUcmlwbGVERVNvcQWLkwe757iGUL7iAKvi4D4ghg==
 
-KeystorePassphrase:
-# Passphrase for keystore.jks file
+KeystorePassphrase: test123
 
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
+  image:
+    debug: true
   install: true
   postgresqlUsername: postgres
   postgresqlPassword: ""
@@ -69,7 +66,7 @@ postgresql:
     port: 5432
   persistence:
     enabled: true
-    storageClass: "-"
+    storageClass: "aws-efs"
     size: 50Gi
     existingClaim:
   resources: {}
@@ -109,6 +106,7 @@ UseExistingDB:
 ## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
 rabbitmq-ha:
   install: true
+  forceBoot: true
   rabbitmqUsername: guest
   rabbitmqPassword: ""
   rabbitmqErlangCookie: RELEASERABBITMQCLUSTER
@@ -128,7 +126,7 @@ rabbitmq-ha:
     type: ClusterIP
   persistentVolume:
     enabled: true
-    storageClass: "-"
+    storageClass: "aws-efs"
     size: 20Gi
     annotations: {}
     resources: {}
@@ -154,12 +152,12 @@ rabbitmq-ha:
       {
           "name": "cluster_name",
           "value": ""
-      }  
+      }
   prometheus:
     operator:
       enabled: false
 
-## Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
+# Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
 UseExistingMQ:
   Enabled: false
   # If you want to use a existing Message Queue, change 'rabbitmq-ha.install' to 'false'.
@@ -183,8 +181,8 @@ resources: {}
 
 ## Configure extra options for liveness and readiness probes
 HealthProbes: true
-HealthProbesLivenessTimeout: 90
-HealthProbesReadinessTimeout: 90
+HealthProbesLivenessTimeout: 120
+HealthProbesReadinessTimeout: 120
 HealthProbeFailureThreshold: 12
 HealthPeriodScans: 10
 
@@ -201,7 +199,7 @@ affinity: {}
 Persistence:
   Enabled: true
   ## Choose storage class provided by your cloud provider, example "ssd" on GKE, AWS and OpenStack
-  StorageClass: "-"
+  StorageClass: "aws-efs"
   Annotations: {}
   AccessMode: ReadWriteOnce
   Size: 5Gi
