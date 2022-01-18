@@ -108,8 +108,8 @@ UseExistingDB:
   # XLR_REPORT_DB_PASS:
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
-## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq-ha/README.md
-rabbitmq-ha:
+## ref: https://github.com/helm/charts/blob/master/stable/rabbitmq/README.md
+rabbitmq:
   install: true
   forceBoot: true
   rabbitmqUsername: guest
@@ -165,7 +165,7 @@ rabbitmq-ha:
 # Ref: https://docs.xebialabs.com/v.9.7/release/webhooks/webhooks-overview/#webhook-samples
 UseExistingMQ:
   Enabled: false
-  # If you want to use a existing Message Queue, change 'rabbitmq-ha.install' to 'false'.
+  # If you want to use a existing Message Queue, change 'rabbitmq.install' to 'false'.
   # Set 'UseExistingMQ.Enabled' to 'true'.Uncomment the following lines and provide the values.
   # XLR_TASK_QUEUE_USERNAME:
   # XLR_TASK_QUEUE_PASSWORD:

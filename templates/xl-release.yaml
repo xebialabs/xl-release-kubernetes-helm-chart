@@ -117,9 +117,9 @@ spec:
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
               value: "false"
-            {{- if index .Values "rabbitmq-ha" "install" }}
+            {{- if index .Values "rabbitmq" "install" }}
             - name: XLR_TASK_QUEUE_USERNAME
-              value: {{ index .Values "rabbitmq-ha" "rabbitmqUsername" }}
+              value: {{ index .Values "rabbitmq" "rabbitmqUsername" }}
             - name: XLR_TASK_QUEUE_PASSWORD
               valueFrom:
                 secretKeyRef:
