@@ -62,7 +62,6 @@ data:
         auth {
             providers {
                 oidc {
-                    {{- if .Values.oidc.external }}
                     clientId={{ .Values.oidc.clientId | quote }}
                     clientSecret={{ .Values.oidc.clientSecret | quote }}
                     issuer={{ .Values.oidc.issuer | quote }}
@@ -77,26 +76,6 @@ data:
                     emailClaim={{ .Values.oidc.emailClaim | quote }}
                     rolesClaim={{ .Values.oidc.rolesClaim | quote }}
                     scopes =["openid"]
-                    {{- else }}
-                    clientId="release"
-                    clientSecret="ab2088f6-2251-4233-9b22-e24db6a67483"
-                    {{- with .Values.keycloak.route.host }}
-                    issuer="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform"
-                    keyRetrievalUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/certs"
-                    accessTokenUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/token"
-                    userAuthorizationUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/auth"
-                    logoutUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/logout"
-                    {{- end }}
-                    {{- range .Values.route.hosts }}
-                    redirectUri="http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}/oidc-login"
-                    postLogoutRedirectUri="http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}/oidc-login"
-                    {{- end }}
-                    userNameClaim="preferred_username"
-                    fullNameClaim="name"
-                    emailClaim="email"
-                    rolesClaim="groups"
-                    scopes =["openid"]
-                    {{- end }}
                 }
             }
         }
