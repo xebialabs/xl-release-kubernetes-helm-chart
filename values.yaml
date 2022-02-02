@@ -87,7 +87,7 @@ postgresql:
     existingClaim: ""
   postgresqlUsername: postgres
   postgresqlPassword: ""
-  postgresqlMaxConnections: ""
+  postgresqlMaxConnections: "150"
   service:
     type: ClusterIP
     port: 5432
