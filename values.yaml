@@ -8,14 +8,14 @@ replicaCount: 3
 ## XL-Release image version
 ## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
 ImageRepository: "xebialabs/xl-release"
-ImageTag: "10.3"
+ImageTag: "22.0"
 
 ## Specify a imagePullPolicy
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
 
 keycloak:
-  install: false
+  install: true
   extraEnv: |
     - name: PROXY_ADDRESS_FORWARDING
       value: "true"
@@ -73,7 +73,7 @@ keycloak:
     enabled: false
 
 oidc:
-  enabled: false
+  enabled: true
   external: false
   clientId:
   clientSecret:
@@ -145,7 +145,7 @@ postgresql:
     existingClaim: ""
   postgresqlUsername: postgres
   postgresqlPassword: ""
-  postgresqlMaxConnections: ""
+  postgresqlMaxConnections: "150"
   service:
     type: ClusterIP
     port: 5432
@@ -244,6 +244,7 @@ rabbitmq:
     existingSecret: xlr-load-definition
   extraConfiguration: |
     load_definitions = /app/xlr-load_definition.json
+    raft.wal_max_size_bytes = 1048576
   persistence:
     enabled: true
     storageClass: "-"
