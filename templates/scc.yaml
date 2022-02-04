@@ -1,4 +1,4 @@
-{{- if or (eq .Values.rabbitmq.install true) (eq .Values.keycloak.install true) }}
+{{- if .Values.rabbitmq.install }}
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
@@ -27,7 +27,6 @@ supplementalGroups:
   type: RunAsAny
 users:
 - system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-rabbitmq
-- system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-keycloak
 volumes:
 - configMap
 - downwardAPI
