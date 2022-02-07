@@ -10,75 +10,96 @@ metadata:
 data:
   xl-release.conf.template: |
     xl {
-    cluster {
+      cluster {
         # mode: "default", "hot-standby", "full"
-        mode = ${XL_CLUSTER_MODE}
+        mode = "${XL_CLUSTER_MODE}"
         name = "xl-release_cluster"
         akka {
-        loglevel = "INFO"
-        actor.debug.receive = off
-        remote {
+          loglevel = "INFO"
+          actor.debug.receive = off
+          remote {
             log-received-messages = off
             log-sent-messages = off
+          }
         }
-        }
-    }
+      }
 
-    license {
-        kind = ${XL_LICENSE_KIND}
-        product = "xl-release"
-    }
+      license {
+          kind = "${XL_LICENSE_KIND}"
+          product = "xl-release"
+      }
 
-    database {
-        db-driver-classname="${XL_DB_DRIVER}"
-        db-password="${XL_DB_PASSWORD}"
-        db-url="${XL_DB_URL}"
-        db-username=${XL_DB_USERNAME}
-        max-pool-size=10
-    }
+      database {
+          db-driver-classname="${XL_DB_DRIVER}"
+          db-password="${XL_DB_PASSWORD}"
+          db-url="${XL_DB_URL}"
+          db-username=${XL_DB_USERNAME}
+          max-pool-size=10
+      }
 
-    # TODO XLR does not support (H2) running in one schema.
-    reporting {
-        db-driver-classname="${XL_DB_DRIVER}"
-        db-password="${XL_REPORT_DB_PASSWORD}"
-        db-url="${XL_REPORT_DB_URL}"
-        db-username=${XL_REPORT_DB_USERNAME}
-    }
+      # TODO XLR does not support (H2) running in one schema.
+      reporting {
+          db-driver-classname="${XL_DB_DRIVER}"
+          db-password="${XL_REPORT_DB_PASSWORD}"
+          db-url="${XL_REPORT_DB_URL}"
+          db-username="${XL_REPORT_DB_USERNAME}"
+      }
 
-    # Task queue
-    queue {
-        embedded=${ENABLE_EMBEDDED_QUEUE}
-        password="${XLR_TASK_QUEUE_PASSWORD}"
-        queueName="${XLR_TASK_QUEUE_NAME}"
-        url="${XLR_TASK_QUEUE_URL}"
-        username="${XLR_TASK_QUEUE_USERNAME}"
-    }
+      # Task queue
+      queue {
+          embedded="${ENABLE_EMBEDDED_QUEUE}"
+          password="${XLR_TASK_QUEUE_PASSWORD}"
+          queueName="${XLR_TASK_QUEUE_NAME}"
+          url="${XLR_TASK_QUEUE_URL}"
+          username="${XLR_TASK_QUEUE_USERNAME}"
+      }
 
-    metrics {
-        enabled = ${XL_METRICS_ENABLED}
-    }
+      metrics {
+          enabled="${XL_METRICS_ENABLED}"
+      }
 
-    security {
+      security {
         auth {
-            providers {
-                oidc {
-                    clientId={{ .Values.oidc.clientId | quote }}
-                    clientSecret={{ .Values.oidc.clientSecret | quote }}
-                    issuer={{ .Values.oidc.issuer | quote }}
-                    keyRetrievalUri={{ .Values.oidc.keyRetrievalUri | quote }}
-                    accessTokenUri={{ .Values.oidc.accessTokenUri | quote }}
-                    userAuthorizationUri={{ .Values.oidc.userAuthorizationUri | quote }}
-                    logoutUri={{ .Values.oidc.logoutUri | quote }}
-                    redirectUri={{ .Values.oidc.redirectUri | quote }}
-                    postLogoutRedirectUri={{ .Values.oidc.postLogoutRedirectUri | quote }}
-                    userNameClaim={{ .Values.oidc.userNameClaim | quote }}
-                    fullNameClaim={{ .Values.oidc.fullNameClaim | quote }}
-                    emailClaim={{ .Values.oidc.emailClaim | quote }}
-                    rolesClaim={{ .Values.oidc.rolesClaim | quote }}
-                    scopes =["openid"]
-                }
+          providers {
+            oidc {
+              {{- if .Values.oidc.external }}
+              clientId={{ .Values.oidc.clientId | quote }}
+              clientSecret={{ .Values.oidc.clientSecret | quote }}
+              issuer={{ .Values.oidc.issuer | quote }}
+              keyRetrievalUri={{ .Values.oidc.keyRetrievalUri | quote }}
+              accessTokenUri={{ .Values.oidc.accessTokenUri | quote }}
+              userAuthorizationUri={{ .Values.oidc.userAuthorizationUri | quote }}
+              logoutUri={{ .Values.oidc.logoutUri | quote }}
+              redirectUri={{ .Values.oidc.redirectUri | quote }}
+              postLogoutRedirectUri={{ .Values.oidc.postLogoutRedirectUri | quote }}
+              userNameClaim={{ .Values.oidc.userNameClaim | quote }}
+              fullNameClaim={{ .Values.oidc.fullNameClaim | quote }}
+              emailClaim={{ .Values.oidc.emailClaim | quote }}
+              rolesClaim={{ .Values.oidc.rolesClaim | quote }}
+              scopes=["openid"]
+              {{- else }}
+              clientId="release"
+              clientSecret="ab2088f6-2251-4233-9b22-e24db6a67483"
+              {{- with .Values.keycloak.route.host }}
+              issuer="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform"
+              keyRetrievalUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/certs"
+              accessTokenUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/token"
+              userAuthorizationUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/auth"
+              logoutUri="http{{ if $.Values.keycloak.route.tls }}s{{ end }}://{{ . }}/auth/realms/digitalai-platform/protocol/openid-connect/logout"
+              {{- end }}
+              {{- range .Values.route.hosts }}
+              redirectUri="http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}/oidc-login"
+              postLogoutRedirectUri="http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}/oidc-login"
+              {{- end }}
+              userNameClaim="preferred_username"
+              fullNameClaim="name"
+              emailClaim="email"
+              rolesClaim="groups"
+              scopes =["openid"]
+              {{- end }}
             }
+          }
         }
-    }
+      }
     }
 {{- end }}
