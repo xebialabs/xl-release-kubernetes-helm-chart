@@ -35,7 +35,7 @@ plugins {
 
 apply(plugin = "ai.digital.gradle-commit")
 
-group = "ai.digital.release.operator"
+group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
@@ -74,6 +74,10 @@ java {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+tasks.withType<AbstractPublishToMaven> {
+    dependsOn("buildHelmPackage")
 }
 
 tasks {
@@ -249,15 +253,14 @@ tasks {
 }
 
 publishing {
-    // TODO
-//    publications {
-//        register("operator-archive-$provider", MavenPublication::class) {
-//            artifact(tasks[toOperatorArchiveTaskName(provider)]) {
-//                artifactId = "release-operator-$provider"
-//                version = releasedVersion
-//            }
-//        }
-//    }
+    publications {
+        register("digitalai-release-helm", MavenPublication::class) {
+            artifact("${buildDir}/xlr/xlr.tgz") {
+                artifactId = "release-helm"
+                version = releasedVersion
+            }
+        }
+    }
 
     repositories {
         maven {
