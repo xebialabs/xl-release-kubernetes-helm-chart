@@ -40,9 +40,9 @@ project.defaultTasks = listOf("build")
 
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
 val releaseExplicitEnv = System.getenv()["RELEASE_EXPLICIT"]
-val releasedVersion = (releaseExplicitEnv ?: "22.0.0-${
+val releasedVersion = releaseExplicitEnv ?: "22.0.0-${
     LocalDateTime.now().format(DateTimeFormatter.ofPattern("Mdd.Hmm"))
-}") + "-openshift"
+}"
 project.extra.set("releasedVersion", releasedVersion)
 
 repositories {
