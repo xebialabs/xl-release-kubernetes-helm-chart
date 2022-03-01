@@ -229,7 +229,7 @@ tasks {
     }
 
     register<Exec>("publishToDockerHub") {
-        dependsOn("prepareOperatorImage")
+        dependsOn("buildOperatorImage")
         workingDir(buildXlrDir)
         val imageUrl = "docker.io/$dockerHubRepository/release-operator:$releasedVersion"
         commandLine("make", "docker-build", "docker-push", "IMG=$imageUrl")
