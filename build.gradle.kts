@@ -260,6 +260,10 @@ tasks {
             logger.lifecycle("Publish to DockerHub $imageUrl finished")
         }
     }
+
+    register("checkDependencyVersions") {
+        // a placeholder to unify with release in jenkins-job
+    }
 }
 
 publishing {
