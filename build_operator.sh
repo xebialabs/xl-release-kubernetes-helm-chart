@@ -1,7 +1,7 @@
 #!/bin/bash
 
 containerOrganization="xldevdocker"
-branchName="oc-master"
+branchName="master"
 
 if [[ $# -eq 0 ]] ; then
     printf "\e[31mProvide in a first parameter a version (SemVer compatible) to release !\e[m\n"
