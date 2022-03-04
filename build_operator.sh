@@ -1,7 +1,7 @@
 #!/bin/bash
 
-containerOrganization="xldevdocker"
-branchName="master"
+containerOrganization="xebialabsunsupported"
+branchName="oc-master"
 
 if [[ $# -eq 0 ]] ; then
     printf "\e[31mProvide in a first parameter a version (SemVer compatible) to release !\e[m\n"
@@ -31,8 +31,6 @@ mkdir xlr
 cd xlr
 git clone git@github.com:xebialabs/xl-release-kubernetes-helm-chart.git -b $branchName
 cd xl-release-kubernetes-helm-chart
-rm -f values-haproxy.yaml
-mv values-nginx.yaml values.yaml
 helm dependency update .
 rm -f Chart.lock
 cd ..
@@ -40,8 +38,8 @@ helm package xl-release-kubernetes-helm-chart
 rm -rf xl-release-kubernetes-helm-chart
 mv digitalai-release-*.tgz xlr.tgz
 operator-sdk init --domain digital.ai --plugins=helm
-operator-sdk create api --group=xlr --version=v1alpha1 --helm-chart=xlr.tgz
-export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1"
+operator-sdk create api --group=xlrocp --version=v1alpha1 --helm-chart=xlr.tgz
+export OPERATOR_IMG="docker.io/$containerOrganization/release-operator:$1-openshift"
 make docker-build docker-push IMG=$OPERATOR_IMG
 cd ..
 rm -rf xlr
