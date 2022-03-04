@@ -1,6 +1,6 @@
 #!/bin/bash
 
-containerOrganization="xldevdocker"
+containerOrganization="xebialabsunsupported"
 branchName="master"
 
 if [[ $# -eq 0 ]] ; then
