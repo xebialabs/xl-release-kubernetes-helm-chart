@@ -71,6 +71,8 @@ keycloak:
       termination: edge
   postgresql:
     enabled: false
+  service:
+    type: LoadBalancer
 
 oidc:
   enabled: true
