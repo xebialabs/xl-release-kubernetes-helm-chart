@@ -170,6 +170,7 @@ rabbitmq:
     existingSecret: xlr-load-definition
   extraConfiguration: |
     load_definitions = /app/xlr-load_definition.json
+    raft.wal_max_size_bytes = 1048576
   persistence:
     enabled: true
     storageClass: "-"
