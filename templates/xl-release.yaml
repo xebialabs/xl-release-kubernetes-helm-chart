@@ -30,7 +30,7 @@ spec:
       {{- if .Values.postgresql.install }}
       initContainers:
         - name: wait-for-db
-          image: xebialabs/tiny-tools
+          image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
           command:
             - sh
             - -c
