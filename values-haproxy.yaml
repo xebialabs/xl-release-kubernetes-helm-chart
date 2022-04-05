@@ -14,6 +14,11 @@ replicaCount: 3
 ImageRepository: "xebialabs/xl-release"
 ImageTag: "10.3"
 
+## xebialabs/tiny-tools image version
+## Ref: https://hub.docker.com/r/xebialabs/tiny-tools/tags
+TinyToolsImageRepository: "xebialabs/tiny-tools"
+TinyToolsImageTag: "22.2.0"
+
 ## Specify a imagePullPolicy
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
@@ -193,6 +198,7 @@ rabbitmq:
     existingSecret: xlr-load-definition
   extraConfiguration: |
     load_definitions = /app/xlr-load_definition.json
+    raft.wal_max_size_bytes = 1048576
   persistence:
     enabled: true
     storageClass: "-"
