@@ -109,7 +109,7 @@ spec:
               value: full
             {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
             {{- if and .Values.ingress.Enabled }}
-            {{- if and (eq $ingressclass "nginx") (ne .Values.ingress.path "/") }}
+            {{- if and (contains $ingressclass "nginx") (ne .Values.ingress.path "/") }}
             {{- range .Values.ingress.hosts }}
             - name: SERVER_URL
               value: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ include "path.fullname" $ }}
