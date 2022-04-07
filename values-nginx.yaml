@@ -88,24 +88,29 @@ KeystorePassphrase:
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
   install: true
-  initdbScriptsSecret: "postgresql-init-sql-xlr"
-  image:
-    pullSecrets: []
+  postgresqlUsername: postgres
+  postgresqlPassword: ""
+  postgresqlExtendedConf:
+    listenAddresses: "'*'"
+    maxConnections: "500"
+  initdbScriptsSecret: postgresql-init-sql-xlr
+  service:
+    port: 5432
   persistence:
     enabled: true
     storageClass: "-"
-    size: 8Gi
-    existingClaim: ""
-  postgresqlUsername: postgres
-  postgresqlPassword: ""
-  postgresqlMaxConnections: ""
-  service:
-    type: ClusterIP
-    port: 5432
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 250m
+    size: 50Gi
+    existingClaim:
+  resources: {}
+  #  requests:
+  #    memory: "1Gi"
+  #    cpu: "250m"
+  #  limits:
+  #    memory: "2Gi"
+  #    cpu: "1"
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
 
 ## Ref: https://docs.xebialabs.com/v.10.2/release/how-to/configure-the-xl-release-sql-repository-in-a-database/#configuration-examples
 UseExistingDB:

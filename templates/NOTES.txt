@@ -2,7 +2,7 @@
 {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- if and .Values.ingress.Enabled }}
-{{- if and (eq $ingressclass "nginx") (ne $ingressPath "/") }}
+{{- if and (contains $ingressclass "nginx") (ne $ingressPath "/") }}
 {{- range .Values.ingress.hosts }}
 http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ include "path.fullname" $ }}
 {{- end }}
