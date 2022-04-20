@@ -21,6 +21,8 @@ buildscript {
     dependencies {
         classpath("com.xebialabs.gradle.plugins:gradle-commit:${properties["gradleCommitPluginVersion"]}")
         classpath("com.xebialabs.gradle.plugins:gradle-xl-defaults-plugin:${properties["xlDefaultsPluginVersion"]}")
+        classpath("com.xebialabs.gradle.plugins:gradle-xl-plugins-plugin:${properties["xlPluginsPluginVersion"]}")
+        classpath("com.xebialabs.gradle.plugins:integration-server-gradle-plugin:${properties["integrationServerGradlePluginVersion"]}")
     }
 }
 
@@ -33,8 +35,11 @@ plugins {
     id("maven-publish")
 }
 
+apply(plugin = "integration.server")
 apply(plugin = "ai.digital.gradle-commit")
+apply(plugin = "com.xebialabs.dependency")
 
+apply(from = "$rootDir/integration-tests/base-test-configuration.gradle")
 group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
@@ -44,11 +49,19 @@ val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "22.2.0-${
 }"
 project.extra.set("releasedVersion", releasedVersion)
 
-repositories {
-    mavenLocal()
-    gradlePluginPortal()
-    maven {
-        url = uri("https://plugins.gradle.org/m2/")
+allprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        arrayOf("releases", "public", "thirdparty").forEach { r ->
+            maven {
+                url = uri("${project.property("nexusBaseUrl")}/repositories/${r}")
+                credentials {
+                    username = project.property("nexusUserName").toString()
+                    password = project.property("nexusPassword").toString()
+                }
+            }
+        }
     }
 }
 
@@ -75,6 +88,8 @@ java {
 tasks.named<Test>("test") {
     useJUnitPlatform()
 }
+
+val providers = listOf("aws-eks", "azure-aks", "gcp-gke", "onprem", "openshift")
 
 tasks.withType<AbstractPublishToMaven> {
     dependsOn("buildHelmPackage")
