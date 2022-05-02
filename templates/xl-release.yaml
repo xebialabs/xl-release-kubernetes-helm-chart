@@ -44,6 +44,22 @@ spec:
            - name: POSTGRES_PORT
              value: "5432"
       {{- end }}
+        {{- if .Values.rabbitmq.install }}
+        - name: wait-for-rabbitmq
+          image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
+          command:
+            - sh
+            - -c
+            - >
+              until nc -z -w 2 $RABBITMQ_SVC $RABBITMQ_PORT && echo rabbitmq ok; do
+                sleep 2;
+              done;
+          env:
+           - name: RABBITMQ_SVC
+             value: {{ .Release.Name }}-rabbitmq
+           - name: RABBITMQ_PORT
+             value: "5672"
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
