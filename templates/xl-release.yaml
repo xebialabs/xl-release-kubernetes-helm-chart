@@ -27,7 +27,7 @@ spec:
         fsGroup: 10001
       {{- if .Values.ImagePullSecret }}
       imagePullSecrets:
-        - name: {{ .Values.ImagePullSecret }}
+      - name: {{ .Values.ImagePullSecret }}
       {{- end }}
       initContainers:
         {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
