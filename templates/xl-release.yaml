@@ -27,10 +27,10 @@ spec:
         fsGroup: 10001
       {{- if .Values.ImagePullSecret }}
       imagePullSecrets:
-      - name: {{ .Values.ImagePullSecret }}
+        - name: {{ .Values.ImagePullSecret }}
       {{- end }}
-      {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
       initContainers:
+        {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
         - name: wait-for-db
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
           command:
@@ -45,7 +45,7 @@ spec:
              value: {{ .Release.Name }}-postgresql
            - name: POSTGRES_PORT
              value: "5432"
-      {{- end }}
+        {{- end }}
         {{- if .Values.rabbitmq.install }}
         - name: wait-for-rabbitmq
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
