@@ -29,8 +29,9 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.ImagePullSecret }}
       {{- end }}
-      {{- if .Values.postgresql.install }}
+      {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) }}
       initContainers:
+        {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
         - name: wait-for-db
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
           command:
@@ -45,7 +46,7 @@ spec:
              value: {{ .Release.Name }}-postgresql
            - name: POSTGRES_PORT
              value: "5432"
-      {{- end }}
+        {{- end }}
         {{- if .Values.rabbitmq.install }}
         - name: wait-for-rabbitmq
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
@@ -61,6 +62,7 @@ spec:
              value: {{ .Release.Name }}-rabbitmq
            - name: RABBITMQ_PORT
              value: "5672"
+        {{- end }}
         {{- end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -137,20 +139,6 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- if .Values.postgresql.install }}
-            - name: XL_DB_URL
-              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db
-            - name: XL_DB_USERNAME
-              value: xlr
-            - name: XL_DB_PASSWORD
-              value: "xlr"
-            - name: XL_REPORT_DB_URL
-              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-report-db
-            - name: XL_REPORT_DB_USERNAME
-              value: xlr-report
-            - name: XL_REPORT_DB_PASSWORD
-              value: "xlr-report"
-            {{- else }}
             {{- if .Values.UseExistingDB.Enabled }}
             - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
@@ -176,6 +164,20 @@ spec:
                 secretKeyRef:
                   name: {{ include "xl-release.fullname" . }}
                   key: reportDatabasePassword
+            {{- else }}
+            {{- if .Values.postgresql.install }}
+            - name: XL_DB_URL
+              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-db
+            - name: XL_DB_USERNAME
+              value: xlr
+            - name: XL_DB_PASSWORD
+              value: "xlr"
+            - name: XL_REPORT_DB_URL
+              value: jdbc:postgresql://{{ .Release.Name }}-postgresql:5432/xlr-report-db
+            - name: XL_REPORT_DB_USERNAME
+              value: xlr-report
+            - name: XL_REPORT_DB_PASSWORD
+              value: "xlr-report"
             {{- end }}
             {{- end }}
             - name: XL_LICENSE
