@@ -104,6 +104,7 @@ oidc:
   fullNameClaim:
   emailClaim:
   rolesClaim:
+  scopes: ["openid"]
 
 ## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
