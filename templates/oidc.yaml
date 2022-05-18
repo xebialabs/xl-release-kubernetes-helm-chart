@@ -76,7 +76,11 @@ data:
                     fullNameClaim={{ .Values.oidc.fullNameClaim | quote }}
                     emailClaim={{ .Values.oidc.emailClaim | quote }}
                     rolesClaim={{ .Values.oidc.rolesClaim | quote }}
-                    scopes =["openid"]
+                    {{ if $.Values.oidc.scopes }}
+                    scopes={{ .Values.oidc.scopes }}
+                    {{- else }}
+                    scopes=["openid"]
+                    {{ end }}
                     {{- else }}
                     clientId="release"
                     clientSecret="ab2088f6-2251-4233-9b22-e24db6a67483"
@@ -95,7 +99,7 @@ data:
                     fullNameClaim="name"
                     emailClaim="email"
                     rolesClaim="groups"
-                    scopes =["openid"]
+                    scopes=["openid"]
                     {{- end }}
                 }
             }

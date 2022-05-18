@@ -37,7 +37,7 @@ Remove Nginx regex from NOTES.txt.
 {{- define "path.fullname" -}}
 {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
 {{- if and .Values.ingress.Enabled }}
-{{- if eq $ingressclass "nginx" }}
+{{- if contains $ingressclass "nginx" }}
 {{- $name := ( split "(" .Values.ingress.path)._0 -}}
 {{- printf "%s" $name -}}/
 {{- end -}}
