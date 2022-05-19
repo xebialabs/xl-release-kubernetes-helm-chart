@@ -23,8 +23,9 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
-      {{- if .Values.postgresql.install }}
+      {{- if or (.Values.postgresql.install) (.Values.rabbitmq.install) }}
       initContainers:
+        {{- if .Values.postgresql.install }}
         - name: wait-for-db
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
           command:
@@ -39,7 +40,7 @@ spec:
              value: {{ .Release.Name }}-postgresql
            - name: POSTGRES_PORT
              value: "5432"
-      {{- end }}
+        {{- end }}
         {{- if .Values.rabbitmq.install }}
         - name: wait-for-rabbitmq
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
@@ -56,6 +57,7 @@ spec:
            - name: RABBITMQ_PORT
              value: "5672"
         {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
