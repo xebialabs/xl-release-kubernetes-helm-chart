@@ -1,9 +1,10 @@
-{{- if and .Values.Persistence.Enabled -}}
+{{- if and .Values.Persistence.Enabled (not .Values.persistence.existingClaim) -}}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
 {{- if .Values.Persistence.Annotations }}
   annotations:
+    helm.sh/resource-policy: "keep"
 {{ toYaml .Values.Persistence.Annotations | indent 4 }}
 {{- end }}
   name: {{ template "xl-release.fullname" . }}

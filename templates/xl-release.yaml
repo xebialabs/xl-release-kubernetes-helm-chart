@@ -237,7 +237,13 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
-        {{- if .Values.Persistence.Enabled }}
+        {{- if and .Values.persistence.enabled .Values.persistence.existingClaim }}
+        - name: reports-dir
+          persistentVolumeClaim:
+        {{- with .Values.persistence.existingClaim }}
+          claimName: {{ tpl . $ }}
+        {{- end }}
+        {{- else if and .Values.Persistence.Enabled (not .Values.persistence.existingClaim) }}
         - name: reports-dir
           persistentVolumeClaim:
             claimName: {{ template "xl-release.fullname" . }}
