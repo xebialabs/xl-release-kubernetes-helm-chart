@@ -93,6 +93,7 @@ oidc:
   fullNameClaim:
   emailClaim:
   rolesClaim:
+  scopes: ["openid"]
 
 ## Ref: https://docs.openshift.com/container-platform/4.5/networking/routes/route-configuration.html
 route:
