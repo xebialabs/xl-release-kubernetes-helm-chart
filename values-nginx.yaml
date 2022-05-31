@@ -104,6 +104,7 @@ oidc:
   fullNameClaim:
   emailClaim:
   rolesClaim:
+  scopes: ["openid"]
 
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
