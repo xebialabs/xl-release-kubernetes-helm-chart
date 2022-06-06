@@ -22,6 +22,6 @@ dependencies:
 
 - name: rabbitmq
   version: 8.6.1
-  repository: "https://charts.bitnami.com/bitnami"
+  repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
   condition: rabbitmq.install
 
