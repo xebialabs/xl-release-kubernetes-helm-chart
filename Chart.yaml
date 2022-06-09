@@ -11,7 +11,7 @@ dependencies:
   condition: haproxy-ingress.install
 
 - name: nginx-ingress-controller
-  version: 9.1.5
+  version: 9.2.0
   repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
   condition: nginx-ingress-controller.install
 
