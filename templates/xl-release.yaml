@@ -29,7 +29,7 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.ImagePullSecret }}
       {{- end }}
-      {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) }}
+      {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) (.Values.resetConf) }}
       initContainers:
         {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
         - name: wait-for-db
@@ -63,7 +63,21 @@ spec:
            - name: RABBITMQ_PORT
              value: "5672"
         {{- end }}
+        {{- if .Values.resetConf }}
+        - name: prepare-conf
+          image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
+          imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
+          volumeMounts:
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/conf
+              subPath: conf
+          command:
+            - sh
+            - -c
+            - >
+              rm -fv /opt/xebialabs/xl-release-server/conf/xlr-wrapper-linux.conf; rm -fv /opt/xebialabs/xl-release-server/conf/xl-release-license.lic;
         {{- end }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"

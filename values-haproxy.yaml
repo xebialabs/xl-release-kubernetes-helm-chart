@@ -26,6 +26,9 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+## Resets part of the configuration files and license
+resetConf: true
+
 keycloak:
   install: true
   extraEnv: |
