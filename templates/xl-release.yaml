@@ -29,8 +29,9 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.ImagePullSecret }}
       {{- end }}
-      {{- if .Values.postgresql.install }}
+      {{- if or (.Values.postgresql.install) (.Values.rabbitmq.install) }}
       initContainers:
+        {{- if .Values.postgresql.install }}
         - name: wait-for-db
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
           command:
@@ -45,7 +46,24 @@ spec:
              value: {{ .Release.Name }}-postgresql
            - name: POSTGRES_PORT
              value: "5432"
-      {{- end }}
+        {{- end }}
+        {{- if .Values.rabbitmq.install }}
+        - name: wait-for-rabbitmq
+          image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
+          command:
+            - sh
+            - -c
+            - >
+              until nc -z -w 2 $RABBITMQ_SVC $RABBITMQ_PORT && echo rabbitmq ok; do
+                sleep 2;
+              done;
+          env:
+           - name: RABBITMQ_SVC
+             value: {{ .Release.Name }}-rabbitmq
+           - name: RABBITMQ_PORT
+             value: "5672"
+        {{- end }}
+        {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
