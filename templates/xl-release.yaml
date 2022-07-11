@@ -113,6 +113,7 @@ spec:
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/hotfix/plugins
               subPath: plugins
+            {{- if .Values.release.configurationManagement.volumeMounts.enabled }}
             {{- range $key, $val := .Values.release.configurationManagement.volumeMounts.paths }}
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/{{ $key }}
