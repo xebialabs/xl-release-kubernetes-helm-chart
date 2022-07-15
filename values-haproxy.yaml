@@ -26,6 +26,9 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+## Resets part of the configuration files and license
+resetConf: true
+
 keycloak:
   install: true
   extraEnv: |
@@ -126,7 +129,7 @@ ingress:
   annotations:
     # ingress.kubernetes.io/tls-acme: "true"
     ingress.kubernetes.io/ssl-redirect: "false"
-    kubernetes.io/ingress.class: haproxy
+    kubernetes.io/ingress.class: haproxy-dai-xlr
     ingress.kubernetes.io/rewrite-target: /
     ingress.kubernetes.io/affinity: cookie
     ingress.kubernetes.io/session-cookie-name: JSESSIONID

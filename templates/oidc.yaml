@@ -99,7 +99,7 @@ data:
                     fullNameClaim="name"
                     emailClaim="email"
                     rolesClaim="groups"
-                    scopes=["openid"]
+                    scopes =["openid"]
                     {{- end }}
                 }
             }

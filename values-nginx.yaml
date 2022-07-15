@@ -26,6 +26,9 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+resetConf: true
+
+
 keycloak:
   install: true
   extraEnv: |
@@ -75,7 +78,7 @@ keycloak:
   ingress:
     enabled: true
     annotations:
-      kubernetes.io/ingress.class: nginx
+      kubernetes.io/ingress.class: nginx-dai-xlr
       nginx.ingress.kubernetes.io/ssl-redirect: "false"
     rules:
       - host: "keycloak.example.com"
@@ -133,7 +136,7 @@ ingress:
   Enabled: true
   annotations:
     # ingress.kubernetes.io/tls-acme: "true"
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: nginx-dai-xlr
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/affinity: cookie
