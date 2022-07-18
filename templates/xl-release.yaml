@@ -65,6 +65,24 @@ spec:
           ports:
             - name: http
               containerPort: 5516
+          {{- if .Values.release.configurationManagement.configuration.enabled }}
+          command:
+            - sh
+            - -c
+            - >
+              {{- range $.Values.release.configurationManagement.configuration.resetFiles }}
+              rm -fv /opt/xebialabs/xl-release-server/conf/{{ . }};
+              {{- end }}
+              echo "Finished reset of the conf files"; 
+              mkdir /opt/xebialabs/xl-release-server/xlr-configuration-management/; 
+              ORIGINAL_PWD=$(pwd);
+              cd /opt/xebialabs/xl-release-server/xlr-configuration-management/; 
+              cp /opt/xebialabs/xlr-configuration-management/* .; chmod +x *.sh; 
+              [ -x ./op-configuration-management.sh ] && ./op-configuration-management.sh;
+              cd $ORIGINAL_PWD;
+              echo "Finished release configuration management";
+              /opt/xebialabs/tini -s -- /opt/xebialabs/xl-release-server/bin/run-in-container.sh
+          {{- end }}
           volumeMounts:
             {{- if .Values.oidc.enabled }}
             - name: release-conf
@@ -94,7 +112,18 @@ spec:
               subPath: lib
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/hotfix/plugins
-              subPath: plugins 
+              subPath: plugins
+            {{- if .Values.release.configurationManagement.volumeMounts.enabled }}
+            {{- range $key, $val := .Values.release.configurationManagement.volumeMounts.paths }}
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/{{ $key }}
+              subPath: {{ $val }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.release.configurationManagement.configuration.enabled }}
+            - name: xlr-configuration-management-volume
+              mountPath: /opt/xebialabs/xlr-configuration-management
+            {{- end }}
           {{- if .Values.HealthProbes }}
           readinessProbe:
             httpGet:
@@ -146,7 +175,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "xl-release.fullname" . }}
-                  key: databaseUsername 
+                  key: databaseUsername
             - name: XL_DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -177,7 +206,7 @@ spec:
               value: "true"
             - name: ENABLE_EMBEDDED_QUEUE
               value: "false"
-            {{- if .Values.rabbitmq.install }}          
+            {{- if .Values.rabbitmq.install }}
             - name: XLR_TASK_QUEUE_USERNAME
               value: {{ .Values.rabbitmq.auth.username }}
             - name: XLR_TASK_QUEUE_PASSWORD
@@ -214,6 +243,12 @@ spec:
                 secretKeyRef:
                   name: {{ include "xl-release.fullname" . }}
                   key: keystorePassphrase
+            {{- if .Values.release.configurationManagement.environment.enabled }}
+            {{- range $key, $val := .Values.release.configurationManagement.environment.variables }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
@@ -229,6 +264,11 @@ spec:
         - name: release-conf
           configMap:
             name: xl-release-conf
+        {{- end }}
+        {{- if .Values.release.configurationManagement.configuration.enabled }}
+        - name: xlr-configuration-management-volume
+          configMap:
+            name: xlr-configuration-management-script
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
