@@ -44,7 +44,7 @@ group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
-val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "22.2.0-${
+val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "22.3.0-${
     LocalDateTime.now().format(DateTimeFormatter.ofPattern("Mdd.Hmm"))
 }"
 project.extra.set("releasedVersion", releasedVersion)
