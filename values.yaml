@@ -19,8 +19,24 @@ TinyToolsImageTag: "22.2.0"
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
 
-## Resets part of the configuration files and license
-resetConf: true
+release:
+  configurationManagement:
+    configuration:
+      enabled: true
+      resetFiles: ## Resets part of the configuration files and license
+        - xl-release-license.lic
+        - xlr-wrapper-linux.conf
+      script: |-
+        cat example.txt && echo ""; # Add here commands to be executed before release start
+      scriptData: ## Add here files that will be used by the configurationScript
+        example.txt: |-
+          Nothing to manage at this point.
+    environment:
+      enabled: true
+      variables: {}
+    volumeMounts:
+      enabled: true
+      paths: {}
 
 keycloak:
   install: true

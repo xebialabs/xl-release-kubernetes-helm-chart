@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: xlr-configuration-management-script
+  labels:
+    app: {{ template "xl-release.name" . }}
+    chart: {{ template "xl-release.chart" . }}
+    release: {{ .Release.Name }}
+data:
+  op-configuration-management.sh: |-
+    {{- .Values.release.configurationManagement.configuration.script | default "echo \"Nothing to execute.\"" | nindent 4 }}
+  {{- range $key, $val := .Values.release.configurationManagement.configuration.scriptData }}
+  {{ $key }}: |-
+    {{- $val | nindent 4 }}
+  {{- end }}
