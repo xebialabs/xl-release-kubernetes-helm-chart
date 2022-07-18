@@ -26,6 +26,25 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+release:
+  configurationManagement:
+    configuration:
+      enabled: true
+      resetFiles: ## Resets part of the configuration files and license
+        - xl-release-license.lic
+        - xlr-wrapper-linux.conf
+      script: |-
+        cat example.txt && echo ""; # Add here commands to be executed before release start
+      scriptData: ## Add here files that will be used by the configurationScript
+        example.txt: |-
+          Nothing to manage at this point.
+    environment:
+      enabled: true
+      variables: {}
+    volumeMounts:
+      enabled: true
+      paths: {}
+
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
