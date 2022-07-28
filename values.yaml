@@ -26,6 +26,7 @@ release:
       resetFiles: ## Resets part of the configuration files and license
         - xl-release-license.lic
         - xlr-wrapper-linux.conf
+        - jmx-exporter.yaml
       script: |-
         cat example.txt && echo ""; # Add here commands to be executed before release start
       scriptData: ## Add here files that will be used by the configurationScript
