@@ -65,21 +65,78 @@ data:
                     {{- if .Values.oidc.external }}
                     clientId={{ .Values.oidc.clientId | quote }}
                     clientSecret={{ .Values.oidc.clientSecret | quote }}
+                    {{ if $.Values.oidc.clientAuthMethod }}
+                    clientAuthMethod={{ .Values.oidc.clientAuthMethod | quote }}
+                    {{ end }}
+                    {{ if $.Values.oidc.clientAuthJwt }}
+                    clientAuthJwt {
+                        jwsAlg={{ .Values.oidc.clientAuthJwt.jwsAlg | quote }}
+                        tokenKeyId={{ .Values.oidc.clientAuthJwt.tokenKeyId | quote }}
+                        {{ if $.Values.oidc.clientAuthJwt.keyStore }}
+                        keyStore {
+                            path={{ .Values.oidc.clientAuthJwt.keyStore.path | quote }}
+                            password={{ .Values.oidc.clientAuthJwt.keyStore.password | quote }}
+                            type={{ .Values.oidc.clientAuthJwt.keyStore.type | quote }}
+                        }
+                        {{ end }}
+                        {{ if $.Values.oidc.clientAuthJwt.key }}
+                        key {
+                            alias={{ .Values.oidc.clientAuthJwt.key.alias | quote }}
+                            password={{ .Values.oidc.clientAuthJwt.key.password | quote }}
+                        }
+                        {{ end }}
+                    }
+                    {{ end }}
                     issuer={{ .Values.oidc.issuer | quote }}
+                    {{ if $.Values.oidc.keyRetrievalUri }}
                     keyRetrievalUri={{ .Values.oidc.keyRetrievalUri | quote }}
+                    {{- else }}
+                    keyRetrievalUri=""
+                    {{ end }}
+                    {{ if $.Values.oidc.accessTokenUri }}
                     accessTokenUri={{ .Values.oidc.accessTokenUri | quote }}
+                    {{- else }}
+                    accessTokenUri=""
+                    {{ end }}
+                    {{ if $.Values.oidc.userAuthorizationUri }}
                     userAuthorizationUri={{ .Values.oidc.userAuthorizationUri | quote }}
+                    {{- else }}
+                    userAuthorizationUri=""
+                    {{ end }}
+                    {{ if $.Values.oidc.logoutUri }}
                     logoutUri={{ .Values.oidc.logoutUri | quote }}
+                    {{- else }}
+                    logoutUri=""
+                    {{ end }}
                     redirectUri={{ .Values.oidc.redirectUri | quote }}
                     postLogoutRedirectUri={{ .Values.oidc.postLogoutRedirectUri | quote }}
                     userNameClaim={{ .Values.oidc.userNameClaim | quote }}
                     fullNameClaim={{ .Values.oidc.fullNameClaim | quote }}
                     emailClaim={{ .Values.oidc.emailClaim | quote }}
+                    externalIdClaim={{ .Values.oidc.externalIdClaim | quote }}
                     rolesClaim={{ .Values.oidc.rolesClaim | quote }}
                     {{ if $.Values.oidc.scopes }}
                     scopes={{ .Values.oidc.scopes }}
                     {{- else }}
                     scopes=["openid"]
+                    {{ end }}
+                    {{ if $.Values.oidc.idTokenJWSAlg }}
+                    idTokenJWSAlg={{ .Values.oidc.idTokenJWSAlg | quote }}
+                    {{ end }}
+                    {{ if $.Values.oidc.access-token }}
+                    access-token {
+                        issuer={{ .Values.oidc.access-token.issuer | quote }}
+                        audience={{ .Values.oidc.access-token.audience | quote }}
+                        keyRetrievalUri={{ .Values.oidc.access-token.keyRetrievalUri | quote }}
+                        jwsAlg={{ .Values.oidc.access-token.jwsAlg | quote }}
+                        secretKey={{ .Values.oidc.access-token.secretKey | quote }}
+                    }
+                    {{ end }}
+                    {{ if $.Values.oidc.proxyHost }}
+                    proxyHost={{ .Values.oidc.proxyHost | quote }}
+                    {{ end }}
+                    {{ if $.Values.oidc.proxyPort }}
+                    proxyPort={{ .Values.oidc.proxyPort | quote }}
                     {{ end }}
                     {{- else }}
                     clientId="release"
