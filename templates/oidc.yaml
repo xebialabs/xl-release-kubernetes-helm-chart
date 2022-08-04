@@ -88,35 +88,19 @@ data:
                     }
                     {{- end }}
                     issuer={{ .Values.oidc.issuer | quote }}
-                    {{- if .Values.oidc.keyRetrievalUri }}
-                    keyRetrievalUri={{ .Values.oidc.keyRetrievalUri | quote }}
-                    {{- else }}
-                    keyRetrievalUri=""
-                    {{- end }}
-                    {{- if .Values.oidc.accessTokenUri }}
-                    accessTokenUri={{ .Values.oidc.accessTokenUri | quote }}
-                    {{- else }}
-                    accessTokenUri=""
-                    {{- end }}
-                    {{- if .Values.oidc.userAuthorizationUri }}
-                    userAuthorizationUri={{ .Values.oidc.userAuthorizationUri | quote }}
-                    {{- else }}
-                    userAuthorizationUri=""
-                    {{- end }}
-                    {{- if .Values.oidc.logoutUri }}
-                    logoutUri={{ .Values.oidc.logoutUri | quote }}
-                    {{- else }}
-                    logoutUri=""
-                    {{- end }}
+                    keyRetrievalUri={{ default "" .Values.oidc.keyRetrievalUri | quote }}
+                    accessTokenUri={{ default "" .Values.oidc.accessTokenUri | quote }}
+                    userAuthorizationUri={{ default "" .Values.oidc.userAuthorizationUri | quote }}
+                    logoutUri={{ default "" .Values.oidc.logoutUri | quote }}
                     redirectUri={{ .Values.oidc.redirectUri | quote }}
                     postLogoutRedirectUri={{ .Values.oidc.postLogoutRedirectUri | quote }}
-                    userNameClaim={{ .Values.oidc.userNameClaim | quote }}
-                    fullNameClaim={{ .Values.oidc.fullNameClaim | quote }}
-                    emailClaim={{ .Values.oidc.emailClaim | quote }}
-                    {{- if $.Values.oidc.externalIdClaim }}
+                    userNameClaim={{ default "" .Values.oidc.userNameClaim | quote }}
+                    fullNameClaim={{ default "" .Values.oidc.fullNameClaim | quote }}
+                    emailClaim={{ default "" .Values.oidc.emailClaim | quote }}
+                    {{- if .Values.oidc.externalIdClaim }}
                     externalIdClaim={{ .Values.oidc.externalIdClaim | quote }}
                     {{- end }}
-                    rolesClaim={{ .Values.oidc.rolesClaim | quote }}
+                    rolesClaim={{ default "" .Values.oidc.rolesClaim | quote }}
                     {{- if .Values.oidc.scopes }}
                     scopes={{ .Values.oidc.scopes }}
                     {{- else }}
@@ -127,11 +111,11 @@ data:
                     {{- end }}
                     {{- if .Values.oidc.accessToken.enable }}
                     access-token {
-                        issuer={{ .Values.oidc.accessToken.issuer | quote }}
-                        audience={{ .Values.oidc.accessToken.audience | quote }}
-                        keyRetrievalUri={{ .Values.oidc.accessToken.keyRetrievalUri | quote }}
-                        jwsAlg={{ .Values.oidc.accessToken.jwsAlg | quote }}
-                        secretKey={{ .Values.oidc.accessToken.secretKey | quote }}
+                        issuer={{ default "" .Values.oidc.accessToken.issuer | quote }}
+                        audience={{ default "" .Values.oidc.accessToken.audience | quote }}
+                        keyRetrievalUri={{ default "" .Values.oidc.accessToken.keyRetrievalUri | quote }}
+                        jwsAlg={{ default "" .Values.oidc.accessToken.jwsAlg | quote }}
+                        secretKey={{ default "" .Values.oidc.accessToken.secretKey | quote }}
                         }
                     {{- end }}
                     {{- if .Values.oidc.proxyHost }}
