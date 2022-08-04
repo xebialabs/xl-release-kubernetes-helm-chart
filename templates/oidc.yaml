@@ -70,19 +70,19 @@ data:
                     {{- end }}
                     {{- if .Values.oidc.clientAuthJwt.enable }}
                     clientAuthJwt {
-                        jwsAlg={{ .Values.oidc.clientAuthJwt.jwsAlg | quote }}
-                        tokenKeyId={{ .Values.oidc.clientAuthJwt.tokenKeyId | quote }}
+                        jwsAlg={{ default "" .Values.oidc.clientAuthJwt.jwsAlg | quote }}
+                        tokenKeyId={{ default "" .Values.oidc.clientAuthJwt.tokenKeyId | quote }}
                         {{- if .Values.oidc.clientAuthJwt.keyStore.enable }}
                         keyStore {
-                            path={{ .Values.oidc.clientAuthJwt.keyStore.path | quote }}
-                            password={{ .Values.oidc.clientAuthJwt.keyStore.password | quote }}
-                            type={{ .Values.oidc.clientAuthJwt.keyStore.type | quote }}
+                            path={{ default "" .Values.oidc.clientAuthJwt.keyStore.path | quote }}
+                            password={{ default "" .Values.oidc.clientAuthJwt.keyStore.password | quote }}
+                            type={{ default "" .Values.oidc.clientAuthJwt.keyStore.type | quote }}
                         }
                         {{- end }}
                         {{- if .Values.oidc.clientAuthJwt.key.enable }}
                         key {
-                            alias={{ .Values.oidc.clientAuthJwt.key.alias | quote }}
-                            password={{ .Values.oidc.clientAuthJwt.key.password | quote }}
+                            alias={{ default "" .Values.oidc.clientAuthJwt.key.alias | quote }}
+                            password={{ default "" .Values.oidc.clientAuthJwt.key.password | quote }}
                         }
                         {{- end }}
                     }
