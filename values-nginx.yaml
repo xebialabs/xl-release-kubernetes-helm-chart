@@ -48,9 +48,9 @@ release:
 
 oidc:
   enabled: false
-  external: false
   clientId:
   clientSecret:
+  clientAuthMethod:
   issuer:
   keyRetrievalUri:
   accessTokenUri:
@@ -61,7 +61,19 @@ oidc:
   userNameClaim:
   fullNameClaim:
   emailClaim:
+  externalIdClaim:
   rolesClaim:
+  scopes:
+  idTokenJWSAlg:
+  accessToken:
+    enable: false
+    issuer:
+    audience:
+    keyRetrievalUri:
+    jwsAlg:
+    secretKey:
+  proxyHost:
+  proxyPort:
 
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.

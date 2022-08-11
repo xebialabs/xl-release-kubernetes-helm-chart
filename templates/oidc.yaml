@@ -64,18 +64,46 @@ data:
                 oidc {
                     clientId={{ .Values.oidc.clientId | quote }}
                     clientSecret={{ .Values.oidc.clientSecret | quote }}
+                    {{- if .Values.oidc.clientAuthMethod }}
+                    clientAuthMethod={{ .Values.oidc.clientAuthMethod | quote }}
+                    {{- end }}
                     issuer={{ .Values.oidc.issuer | quote }}
-                    keyRetrievalUri={{ .Values.oidc.keyRetrievalUri | quote }}
-                    accessTokenUri={{ .Values.oidc.accessTokenUri | quote }}
-                    userAuthorizationUri={{ .Values.oidc.userAuthorizationUri | quote }}
-                    logoutUri={{ .Values.oidc.logoutUri | quote }}
+                    keyRetrievalUri={{ default "" .Values.oidc.keyRetrievalUri | quote }}
+                    accessTokenUri={{ default "" .Values.oidc.accessTokenUri | quote }}
+                    userAuthorizationUri={{ default "" .Values.oidc.userAuthorizationUri | quote }}
+                    logoutUri={{ default "" .Values.oidc.logoutUri | quote }}
                     redirectUri={{ .Values.oidc.redirectUri | quote }}
                     postLogoutRedirectUri={{ .Values.oidc.postLogoutRedirectUri | quote }}
-                    userNameClaim={{ .Values.oidc.userNameClaim | quote }}
-                    fullNameClaim={{ .Values.oidc.fullNameClaim | quote }}
-                    emailClaim={{ .Values.oidc.emailClaim | quote }}
-                    rolesClaim={{ .Values.oidc.rolesClaim | quote }}
-                    scopes =["openid"]
+                    userNameClaim={{ default "" .Values.oidc.userNameClaim | quote }}
+                    fullNameClaim={{ default "" .Values.oidc.fullNameClaim | quote }}
+                    emailClaim={{ default "" .Values.oidc.emailClaim | quote }}
+                    {{- if .Values.oidc.externalIdClaim }}
+                    externalIdClaim={{ .Values.oidc.externalIdClaim | quote }}
+                    {{- end }}
+                    rolesClaim={{ default "" .Values.oidc.rolesClaim | quote }}
+                    {{- if .Values.oidc.scopes }}
+                    scopes={{ .Values.oidc.scopes }}
+                    {{- else }}
+                    scopes=["openid"]
+                    {{- end }}
+                    {{- if .Values.oidc.idTokenJWSAlg }}
+                    idTokenJWSAlg={{ .Values.oidc.idTokenJWSAlg | quote }}
+                    {{- end }}
+                    {{- if .Values.oidc.accessToken.enable }}
+                    access-token {
+                        issuer={{ default "" .Values.oidc.accessToken.issuer | quote }}
+                        audience={{ default "" .Values.oidc.accessToken.audience | quote }}
+                        keyRetrievalUri={{ default "" .Values.oidc.accessToken.keyRetrievalUri | quote }}
+                        jwsAlg={{ default "" .Values.oidc.accessToken.jwsAlg | quote }}
+                        secretKey={{ default "" .Values.oidc.accessToken.secretKey | quote }}
+                        }
+                    {{- end }}
+                    {{- if .Values.oidc.proxyHost }}
+                    proxyHost={{ .Values.oidc.proxyHost | quote }}
+                    {{- end }}
+                    {{- if .Values.oidc.proxyPort }}
+                    proxyPort={{ .Values.oidc.proxyPort | quote }}
+                    {{- end }}
                 }
             }
         }
