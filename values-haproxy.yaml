@@ -46,7 +46,7 @@ release:
       enabled: true
       paths: {}
 
-## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
+# Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 haproxy-ingress:
   install: true
@@ -263,6 +263,7 @@ oidc:
   enabled: false
   clientId:
   clientSecret:
+  clientAuthMethod:
   issuer:
   keyRetrievalUri:
   accessTokenUri:
@@ -273,4 +274,16 @@ oidc:
   userNameClaim:
   fullNameClaim:
   emailClaim:
+  externalIdClaim:
   rolesClaim:
+  scopes:
+  idTokenJWSAlg:
+  accessToken:
+    enable: false
+    issuer:
+    audience:
+    keyRetrievalUri:
+    jwsAlg:
+    secretKey:
+  proxyHost:
+  proxyPort:
