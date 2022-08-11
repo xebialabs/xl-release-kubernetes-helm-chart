@@ -249,6 +249,7 @@ oidc:
   enabled: false
   clientId:
   clientSecret:
+  clientAuthMethod:
   issuer:
   keyRetrievalUri:
   accessTokenUri:
@@ -259,4 +260,16 @@ oidc:
   userNameClaim:
   fullNameClaim:
   emailClaim:
+  externalIdClaim:
   rolesClaim:
+  scopes:
+  idTokenJWSAlg:
+  accessToken:
+    enable: false
+    issuer:
+    audience:
+    keyRetrievalUri:
+    jwsAlg:
+    secretKey:
+  proxyHost:
+  proxyPort:
