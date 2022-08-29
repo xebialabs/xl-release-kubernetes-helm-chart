@@ -113,6 +113,20 @@ oidc:
   external: false
   clientId:
   clientSecret:
+  clientAuthMethod:
+  clientAuthJwt:
+    enable: false
+    jwsAlg:
+    tokenKeyId:
+    keyStore:
+      enable: false
+      path:
+      password:
+      type:
+    key:
+      enable: false
+      alias:
+      password:
   issuer:
   keyRetrievalUri:
   accessTokenUri:
@@ -123,9 +137,19 @@ oidc:
   userNameClaim:
   fullNameClaim:
   emailClaim:
+  externalIdClaim:
   rolesClaim:
-  scopes: ["openid"]
-
+  scopes:
+  idTokenJWSAlg:
+  accessToken:
+    enable: false
+    issuer:
+    audience:
+    keyRetrievalUri:
+    jwsAlg:
+    secretKey:
+  proxyHost:
+  proxyPort:
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
