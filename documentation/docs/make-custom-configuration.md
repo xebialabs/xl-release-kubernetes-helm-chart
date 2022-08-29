@@ -50,4 +50,4 @@ It is in the `/opt/xebialabs/xl-release-server/default-conf/xl-release.conf.temp
 
     Just in CR file put `spec.oidc.enabled: false`.
 
-4. Sava and apply changes from the CR file.
+4. Save and apply changes from the CR file.
