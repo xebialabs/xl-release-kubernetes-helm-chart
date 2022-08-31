@@ -74,7 +74,7 @@ releaseIntegrationServer {
                 }
                 gcpGke {
                     name = 'gcp-gke-test-cluster'
-                    storageClass = 'standard-rwx'
+                    storageClass = 'nfs-client'
                     accountName = 'gcp-gke-test-cluster@apollo-playground.iam.gserviceaccount.com'
                     projectName = 'apollo-playground'
                     regionZone = 'us-central1-a'
