@@ -271,6 +271,7 @@ spec:
             {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+      terminationGracePeriodSeconds: {{ .Values.release.terminationGracePeriodSeconds }}
       volumes:
         {{- if .Values.Persistence.Enabled }}
         - name: reports-dir
