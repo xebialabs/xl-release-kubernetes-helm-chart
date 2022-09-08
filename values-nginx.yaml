@@ -27,7 +27,7 @@ ImagePullPolicy: "Always"
 # ImagePullSecret: xlRelease
 
 release:
-  terminationGracePeriodSeconds: 120
+  terminationGracePeriodSeconds: 200
   configurationManagement:
     configuration:
       enabled: true
