@@ -20,6 +20,7 @@ TinyToolsImageTag: "22.2.0"
 ImagePullPolicy: "Always"
 
 release:
+  terminationGracePeriodSeconds: 200
   configurationManagement:
     configuration:
       enabled: true
