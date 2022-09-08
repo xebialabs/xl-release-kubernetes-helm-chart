@@ -76,18 +76,7 @@ spec:
             - sh
             - -c
             - >
-              {{- range $.Values.release.configurationManagement.configuration.resetFiles }}
-              rm -fv /opt/xebialabs/xl-release-server/conf/{{ . }};
-              {{- end }}
-              echo "Finished reset of the conf files"; 
-              mkdir /opt/xebialabs/xl-release-server/xlr-configuration-management/; 
-              ORIGINAL_PWD=$(pwd);
-              cd /opt/xebialabs/xl-release-server/xlr-configuration-management/; 
-              cp /opt/xebialabs/xlr-configuration-management/* .; chmod +x *.sh; 
-              [ -x ./op-configuration-management.sh ] && ./op-configuration-management.sh;
-              cd $ORIGINAL_PWD;
-              echo "Finished release configuration management";
-              /opt/xebialabs/tini -s -- /opt/xebialabs/xl-release-server/bin/run-in-container.sh
+              /opt/xebialabs/tini -- /opt/xebialabs/xlr-configuration-management/op-based-run.sh
           {{- end }}
           volumeMounts:
             {{- if .Values.oidc.enabled }}
@@ -265,6 +254,7 @@ spec:
             {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+      terminationGracePeriodSeconds: {{ .Values.release.terminationGracePeriodSeconds }}
       volumes:
         {{- if .Values.Persistence.Enabled }}
         - name: reports-dir
@@ -283,6 +273,7 @@ spec:
         - name: xlr-configuration-management-volume
           configMap:
             name: xlr-configuration-management-script
+            defaultMode: 0777
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
