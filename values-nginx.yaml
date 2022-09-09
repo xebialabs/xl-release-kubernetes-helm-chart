@@ -27,6 +27,7 @@ ImagePullPolicy: "Always"
 # ImagePullSecret: xlRelease
 
 release:
+  terminationGracePeriodSeconds: 200
   configurationManagement:
     configuration:
       enabled: true
@@ -159,7 +160,7 @@ rabbitmq:
     repository: bitnami/rabbitmq
     tag: 3.8.11-debian-10-r0
     # pullSecrets:
-    #   - myRegistryKeySecretName 
+    #   - myRegistryKeySecretName
   auth:
     username: guest
     password: guest
