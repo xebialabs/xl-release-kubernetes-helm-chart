@@ -256,6 +256,7 @@ spec:
             {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+      terminationGracePeriodSeconds: {{ .Values.release.terminationGracePeriodSeconds }}
       volumes:
         {{- if .Values.Persistence.Enabled }}
         - name: reports-dir
@@ -274,6 +275,7 @@ spec:
         - name: xlr-configuration-management-volume
           configMap:
             name: xlr-configuration-management-script
+            defaultMode: 0777
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
