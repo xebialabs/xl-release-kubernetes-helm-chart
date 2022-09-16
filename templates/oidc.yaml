@@ -134,9 +134,9 @@ data:
                     userAuthorizationUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/auth"
                     logoutUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/logout"
                     {{- end }}
-                    {{- range .Values.ingress.hosts }}
-                    redirectUri="http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/oidc-login"
-                    postLogoutRedirectUri="http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/oidc-login"
+                    {{- range .Values.route.hosts }}
+                    redirectUri="http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}/oidc-login"
+                    postLogoutRedirectUri="http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}/oidc-login"
                     {{- end }}
                     userNameClaim="preferred_username"
                     fullNameClaim="name"
