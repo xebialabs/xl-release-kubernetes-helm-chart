@@ -7,7 +7,7 @@ This is internal documentation. This document can be used only if it was recomme
 :::
 
 :::caution
-From 10.2 version helm chart is not used directly. Use operator installation instead.
+From 10.2 version helm chart is not used directly. Use operator based installation instead.
 :::
 
 # Introduction
