@@ -2,6 +2,10 @@
 sidebar_position: 10
 ---
 
+:::caution
+This is internal documentation. This document can be used only if it was recommended by the Support Team.
+:::
+
 # Release Installation on a Air-gapped K8S Cluster 
 
 ## Requirements
