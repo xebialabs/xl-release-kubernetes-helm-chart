@@ -1,28 +1,23 @@
-{{- if and .Values.Persistence.Enabled -}}
+{{- if and .Values.persistence.single .Values.persistence.enabled (not .Values.persistence.existingClaim)  -}}
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-{{- if .Values.Persistence.Annotations }}
+  name: data-{{ include "common.names.fullname" . }}
+  labels: {{- include "common.labels.matchLabels" . | nindent 10 }}
+  {{- if .Values.persistence.annotations }}
   annotations:
-{{ toYaml .Values.Persistence.Annotations | indent 4 }}
-{{- end }}
-  name: {{ template "xl-release.fullname" . }}
-  labels:
-    app: {{ template "xl-release.name" . }}
-    chart: {{ template "xl-release.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.persistence.annotations "context" $) | nindent 10 }}
+  {{- end }}
 spec:
   accessModes:
-    - {{ .Values.Persistence.AccessMode | quote }}
+    {{- range .Values.persistence.accessModes }}
+      - {{ . | quote }}
+    {{- end }}
   resources:
     requests:
-      storage: {{ .Values.Persistence.Size | quote }}
-{{- if .Values.Persistence.StorageClass }}
-{{- if (eq "-" .Values.Persistence.StorageClass) }}
-  storageClassName: ""
-{{- else }}
-  storageClassName: "{{ .Values.Persistence.StorageClass }}"
-{{- end }}
-{{- end }}
-{{- end }}
+      storage: {{ .Values.persistence.size | quote }}
+  {{ include "common.storage.class" (dict "persistence" .Values.persistence "global" .Values.global) }}
+  {{- if .Values.persistence.selector }}
+  selector: {{- include "common.tplvalues.render" (dict "value" .Values.persistence.selector "context" $) | nindent 10 }}
+  {{- end -}}
+{{- end -}}

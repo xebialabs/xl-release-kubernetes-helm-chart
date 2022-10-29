@@ -1,45 +1,242 @@
 {{/* vim: set filetype=mustache: */}}
+
 {{/*
-Expand the name of the chart.
+Return the proper Release image name
 */}}
-{{- define "xl-release.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "release.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
+BusyBox image
 */}}
-{{- define "xl-release.fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- define "release.busyBox.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.busyBox.image "global" .Values.global) }}
+{{- end }}
+
+{{/*
+ Create the name of the service account to use
+ */}}
+{{- define "release.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "common.names.fullname" .) .Values.serviceAccount.name }}
 {{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
-{{- if contains $name .Release.Name -}}
-{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
+    {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Create chart name and version as used by the chart label.
+Get the password secret.
 */}}
-{{- define "xl-release.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- define "release.secretPassword" -}}
+    {{- if .Values.auth.adminPassword -}}
+        {{ .Values.auth.adminPassword }}
+    {{- else -}}
+        {{ randAlphaNum 10 }}
+    {{- end -}}
 {{- end -}}
 
 {{/*
-Remove Nginx regex from NOTES.txt.
+Remove Nginx regex from path.
 */}}
-{{- define "path.fullname" -}}
-{{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
-{{- if and .Values.ingress.Enabled }}
-{{- if contains $ingressclass "nginx" }}
-{{- $name := ( split "(" .Values.ingress.path)._0 -}}
-{{- printf "%s" $name -}}/
+{{- define "release.path.fullname" -}}
+    {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
+    {{- if and .Values.ingress.enabled }}
+        {{- if contains $ingressclass "nginx" }}
+            {{- $name := ( split "(" .Values.ingress.path)._0 }}
+            {{- if $name }}
+                {{- printf "%s/" $name }}
+            {{- else }}
+                {{- print "" }}
+            {{- end }}
+        {{- else -}}
+            {{- print "" }}
+        {{- end -}}
+    {{- else -}}
+        {{- print "" }}
+    {{- end -}}
 {{- end -}}
+
+{{/*
+Get the server URL
+*/}}
+{{- define "release.serverUrl" -}}
+    {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
+    {{- $hostname := .Values.ingress.hostname }}
+    {{- $protocol := "http" }}
+    {{- if .Values.ingress.tls }}
+        {{- $protocol = "https" }}
+    {{- end }}
+    {{- if and .Values.ingress.enabled }}
+        {{- if and (contains $ingressclass "nginx") (ne .Values.ingress.path "/") }}
+            {{- $path := include "release.path.fullname" $ }}
+            {{- if $path }}
+                {{- printf "%s://%s%s" $protocol $hostname $path }}
+            {{- else }}
+                {{- printf "%s://%s" $protocol $hostname }}
+            {{- end }}
+        {{- else }}
+            {{- printf "%s://%s" $protocol $hostname }}
+        {{- end }}
+    {{- end }}
+{{- end -}}
+
+{{/*
+Get the main db URL
+*/}}
+{{- define "release.mainDbUrl" -}}
+    {{- if .Values.external.db.enabled -}}
+        {{- .Values.external.db.mainUrl -}}
+    {{- else -}}
+        {{- if .Values.postgresql.install -}}
+            jdbc:postgresql://{{ .Release.Name }}-postgresql:{{ .Values.postgresql.service.port }}/xlr-db
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the main db username
+*/}}
+{{- define "release.mainUsername" -}}
+    {{- if .Values.external.db.enabled }}
+        {{ .Values.external.db.mainUsername }}
+    {{- else }}
+        {{- if .Values.postgresql.install }}
+            xlr
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the main db password
+*/}}
+{{- define "release.mainPassword" -}}
+    {{- if .Values.external.db.enabled }}
+        {{ .Values.external.db.mainPassword }}
+    {{- else }}
+        {{- if .Values.postgresql.install }}
+            xlr
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the report db URL
+*/}}
+{{- define "release.reportDbUrl" -}}
+    {{- if .Values.external.db.enabled -}}
+        {{ .Values.external.db.reportUrl }}
+    {{- else -}}
+        {{- if .Values.postgresql.install -}}
+            jdbc:postgresql://{{ .Release.Name }}-postgresql:{{ .Values.postgresql.service.port }}/xlr-report-db
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the report db username
+*/}}
+{{- define "release.reportUsername" -}}
+    {{- if .Values.external.db.enabled }}
+        {{ .Values.external.db.reportUsername }}
+    {{- else }}
+        {{- if .Values.postgresql.install }}
+            xlr-report
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the report db password
+*/}}
+{{- define "release.reportPassword" -}}
+    {{- if .Values.external.db.enabled }}
+        {{ .Values.external.db.reportPassword }}
+    {{- else }}
+        {{- if .Values.postgresql.install }}
+            xlr-report
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the mq URL
+*/}}
+{{- define "release.mqUrl" -}}
+    {{- if .Values.external.mq.enabled -}}
+        {{ .Values.external.mq.url }}
+    {{- else -}}
+        {{- if .Values.rabbitmq.install -}}
+            "amqp://{{ .Release.Name }}-rabbitmq.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.rabbitmq.service.ports.amqp }}/"
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the mq queue name
+*/}}
+{{- define "release.mqQueueName" -}}
+    {{- if .Values.external.mq.enabled -}}
+        {{ .Values.external.mq.queueName }}
+    {{- else -}}
+        {{- if .Values.rabbitmq.install -}}
+            "xlr-tasks-queue"
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the mq username
+*/}}
+{{- define "release.mqUsername" -}}
+    {{- if .Values.external.mq.enabled }}
+        {{ .Values.external.mq.username }}
+    {{- else }}
+        {{- if .Values.rabbitmq.install }}
+            {{ .Values.rabbitmq.auth.username }}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Get the mq password
+*/}}
+{{- define "release.mqPassword" -}}
+    {{- if .Values.external.mq.enabled }}
+        {{ .Values.external.mq.password }}
+    {{- else }}
+        {{- if .Values.rabbitmq.install }}
+            {{ .Values.rabbitmq.auth.password }}
+        {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{/*
+Compile all warnings into a single message, and call fail.
+*/}}
+{{- define "release.validateValues" -}}
+{{- $messages := list -}}
+{{- $messages := append $messages (include "release.validateValues.ingress.tls" .) -}}
+{{- $messages := without $messages "" -}}
+{{- $message := join "\n" $messages -}}
+
+{{- if $message -}}
+{{-   printf "\nVALUES VALIDATION:\n%s" $message | fail -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validate values of Release - TLS configuration for Ingress
+*/}}
+{{- define "release.validateValues.ingress.tls" -}}
+{{- if and .Values.ingress.enabled .Values.ingress.tls (not (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.annotations ))) (not .Values.ingress.selfSigned) (empty .Values.ingress.extraTls) }}
+release: ingress.tls
+    You enabled the TLS configuration for the default ingress hostname but
+    you did not enable any of the available mechanisms to create the TLS secret
+    to be used by the Ingress Controller.
+    Please use any of these alternatives:
+      - Use the `ingress.extraTls` and `ingress.secrets` parameters to provide your custom TLS certificates.
+      - Relay on cert-manager to create it by setting the corresponding annotations
+      - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
 {{- end -}}
 {{- end -}}

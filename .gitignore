@@ -1,8 +1,9 @@
-.idea
+.idea/
 *.iml
-.gradle
+.gradle/
 charts
-build
+build/
 Chart.lock
 .DS_Store
 bin/
+values-*.yaml

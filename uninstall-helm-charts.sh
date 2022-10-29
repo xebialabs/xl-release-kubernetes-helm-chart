@@ -1,1 +1,1 @@
-helm delete xlr-production
+helm uninstall dair
