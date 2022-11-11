@@ -21,13 +21,13 @@
 
 - custom namespace
 - update of config should change the configuration
-- update of license should change the license
-- update Notes.txt
-- add validation of the values
 - add template for other conf files
-- keystore generation inside helm
 - check tls and installation of tls secrets
 - check keycloak
 - use of headless service and plain service
 - using haproxy
 - changing ingress class
+- openshift compatibility
+- update of license should change the license
+- if license is empty
+- plugin support
