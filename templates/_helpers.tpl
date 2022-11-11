@@ -216,13 +216,15 @@ Compile all warnings into a single message, and call fail.
 */}}
 {{- define "release.validateValues" -}}
 {{- $messages := list -}}
-{{- $messages := append $messages (include "release.validateValues.ingress.tls" .) -}}
-{{- $messages := without $messages "" -}}
+{{- $messages = append $messages (include "release.validateValues.ingress.tls" .) -}}
+{{- $messages = append $messages (include "release.validateValues.keystore.passphrase" .) -}}
+{{- $messages = without $messages "" -}}
 {{- $message := join "\n" $messages -}}
 
-{{- if $message -}}
+{{- if and $message .Values.k8sSetup.validateValues -}}
 {{-   printf "\nVALUES VALIDATION:\n%s" $message | fail -}}
 {{- end -}}
+
 {{- end -}}
 
 {{/*
@@ -238,5 +240,15 @@ release: ingress.tls
       - Use the `ingress.extraTls` and `ingress.secrets` parameters to provide your custom TLS certificates.
       - Relay on cert-manager to create it by setting the corresponding annotations
       - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validate values of Release - keystore.passphrase
+*/}}
+{{- define "release.validateValues.keystore.passphrase" -}}
+{{- if not .Values.keystore.passphrase }}
+release: keystore.passphrase
+    The `keystore.passphrase` is empty. It is mandatory to set.
 {{- end -}}
 {{- end -}}

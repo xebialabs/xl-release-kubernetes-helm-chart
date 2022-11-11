@@ -1,3 +1,6 @@
+
+{{- include "release.validateValues" . -}}
+
 ## To get the application URL, run:
 {{ include "release.serverUrl" . }}
 
@@ -6,13 +9,15 @@ kubectl port-forward service/{{ include "common.names.fullname" . }} 5516:{{ .Va
 
 ## To get the admin password for xl-release, run:
 kubectl get secret --namespace {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.releasePassword}" | base64 --decode; echo
-{{ if or .Values.postgresql.install .Values.external.db.enabled }}
+
+{{- if or .Values.postgresql.install .Values.external.db.enabled -}}
 ## To get the password for main database, run:
 kubectl get secret --namespace  {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.mainDatabasePassword}" | base64 --decode; echo
 ## To get the password for report database, run:
 kubectl get secret --namespace  {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.reportDatabasePassword}" | base64 --decode; echo
-{{ end }}
-{{- if or .Values.rabbitmq.install .Values.external.mq.enabled }}
+{{- end -}}
+
+{{- if or .Values.rabbitmq.install .Values.external.mq.enabled -}}
 ## To get the password for rabbitMQ, run:
 kubectl get secret --namespace  {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.rabbitmqPassword}" | base64 --decode; echo
-{{- end }}
+{{- end -}}

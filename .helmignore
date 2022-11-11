@@ -19,8 +19,12 @@
 .project
 .idea/
 *.tmproj
+*.iml
 
 .gradle/
 documentation/
 docs/
 old-chart/
+build/
+values-*.yaml
+*.sh

@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: v22.3.1
 description: A Helm chart for Digital.ai Release
 name: dai-release
-version: 23.1.0-1026.113
+version: 23.1.0-1109.1200
 sources:
   - https://github.com/xebialabs/xl-release-kubernetes-helm-chart
   - https://github.com/xebialabs/xl-release
@@ -21,7 +21,7 @@ dependencies:
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
-    version: 1.17.1
+    version: 1.17.X
 
   - name: haproxy-ingress
     version: 0.13.9
@@ -29,17 +29,17 @@ dependencies:
     condition: haproxy-ingress.install
 
   - name: nginx-ingress-controller
-    version: 9.3.18
+    version: 9.3.19
     repository: "https://charts.bitnami.com/bitnami"
     condition: nginx-ingress-controller.install
 
   - name: postgresql
-    version: 11.9.12
+    version: 12.1.0
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.install
 
   - name: rabbitmq
-    version: 11.1.0
+    version: 11.1.1
     repository: "https://charts.bitnami.com/bitnami"
     condition: rabbitmq.install
 
