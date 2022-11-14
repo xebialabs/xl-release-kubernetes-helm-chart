@@ -1034,15 +1034,18 @@ nginx-ingress-controller:
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
   install: true
-  initdbScriptsSecret: "{{ .Release.Name }}-release-postgresql"
+  primary:
+    initdb:
+      scriptsSecret: "{{ .Release.Name }}-release-postgresql"
   persistence:
     enabled: true
     accessMode: ReadWriteOnce
     storageClass: ""
     size: 8Gi
     existingClaim: ""
-  postgresqlUsername: postgres
-  postgresqlPassword: postgres
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
   postgresqlMaxConnections: "150"
   service:
     port: 5432

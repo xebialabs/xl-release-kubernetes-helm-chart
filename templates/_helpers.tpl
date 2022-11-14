@@ -98,10 +98,10 @@ Get the main db URL
 Get the main db username
 */}}
 {{- define "release.mainUsername" -}}
-    {{- if .Values.external.db.enabled }}
+    {{- if .Values.external.db.enabled -}}
         {{ .Values.external.db.mainUsername }}
-    {{- else }}
-        {{- if .Values.postgresql.install }}
+    {{- else -}}
+        {{- if .Values.postgresql.install -}}
             xlr
         {{- end -}}
     {{- end -}}
@@ -111,10 +111,10 @@ Get the main db username
 Get the main db password
 */}}
 {{- define "release.mainPassword" -}}
-    {{- if .Values.external.db.enabled }}
+    {{- if .Values.external.db.enabled -}}
         {{ .Values.external.db.mainPassword }}
-    {{- else }}
-        {{- if .Values.postgresql.install }}
+    {{- else -}}
+        {{- if .Values.postgresql.install -}}
             xlr
         {{- end -}}
     {{- end -}}
@@ -137,10 +137,10 @@ Get the report db URL
 Get the report db username
 */}}
 {{- define "release.reportUsername" -}}
-    {{- if .Values.external.db.enabled }}
+    {{- if .Values.external.db.enabled -}}
         {{ .Values.external.db.reportUsername }}
-    {{- else }}
-        {{- if .Values.postgresql.install }}
+    {{- else -}}
+        {{- if .Values.postgresql.install -}}
             xlr-report
         {{- end -}}
     {{- end -}}
@@ -150,10 +150,10 @@ Get the report db username
 Get the report db password
 */}}
 {{- define "release.reportPassword" -}}
-    {{- if .Values.external.db.enabled }}
+    {{- if .Values.external.db.enabled -}}
         {{ .Values.external.db.reportPassword }}
-    {{- else }}
-        {{- if .Values.postgresql.install }}
+    {{- else -}}
+        {{- if .Values.postgresql.install -}}
             xlr-report
         {{- end -}}
     {{- end -}}
@@ -189,10 +189,10 @@ Get the mq queue name
 Get the mq username
 */}}
 {{- define "release.mqUsername" -}}
-    {{- if .Values.external.mq.enabled }}
+    {{- if .Values.external.mq.enabled -}}
         {{ .Values.external.mq.username }}
-    {{- else }}
-        {{- if .Values.rabbitmq.install }}
+    {{- else -}}
+        {{- if .Values.rabbitmq.install -}}
             {{ .Values.rabbitmq.auth.username }}
         {{- end -}}
     {{- end -}}
@@ -202,10 +202,10 @@ Get the mq username
 Get the mq password
 */}}
 {{- define "release.mqPassword" -}}
-    {{- if .Values.external.mq.enabled }}
+    {{- if .Values.external.mq.enabled -}}
         {{ .Values.external.mq.password }}
-    {{- else }}
-        {{- if .Values.rabbitmq.install }}
+    {{- else -}}
+        {{- if .Values.rabbitmq.install -}}
             {{ .Values.rabbitmq.auth.password }}
         {{- end -}}
     {{- end -}}
