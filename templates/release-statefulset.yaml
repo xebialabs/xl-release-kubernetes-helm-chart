@@ -264,6 +264,12 @@ spec:
           resources: {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
+            - name: configuration
+              mountPath: /opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template
+              subPath: xl-release.conf.template
+            - name: plugin-management-cli
+              mountPath: /opt/xebialabs/xl-release-server/bin/plugin-manager-cli-in-container.sh
+              subPath: plugin-manager-cli-in-container.sh
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/conf
               subPath: conf
@@ -273,6 +279,9 @@ spec:
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/hotfix
               subPath: hotfix
+            - name: data
+              mountPath: /opt/xebialabs/xl-release-server/hotfix/lib
+              subPath: lib
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/reports
               subPath: reports
@@ -289,6 +298,13 @@ spec:
             items:
               - key: xl-release.conf.template
                 path: xl-release.conf.template
+        - name: plugin-management-cli
+          configMap:
+            name: {{ printf "%s-config" (include "common.names.fullname" .) }}
+            items:
+              - key: plugin-manager-cli-in-container.sh
+                path: plugin-manager-cli-in-container.sh
+            defaultMode: 0775
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $)  | nindent 8 }}
         {{- end }}

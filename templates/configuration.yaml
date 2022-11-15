@@ -13,3 +13,101 @@ metadata:
 data:
   xl-release.conf.template: |-
     {{- include "common.tplvalues.render" (dict "value" .Values.configuration "context" $) | nindent 4 }}
+  plugin-manager-cli-in-container.sh: |-
+    #!/bin/sh
+    #
+    # Shell script to start the XL Release Server
+    #
+    absdirname ()
+    {
+      _dir="`dirname \"$1\"`"
+      cd "$_dir"
+      echo "`pwd`"
+    }
+    resolvelink() {
+      _dir=`dirname "$1"`
+      _dest=`readlink "$1"`
+      case "$_dest" in
+      /* ) echo "$_dest" ;;
+      *  ) echo "$_dir/$_dest" ;;
+      esac
+    }
+    function copy_db_driver {
+      echo "Copying a database driver"
+      case ${XL_DB_URL} in
+        jdbc:h2:*)
+          cp ${APP_ROOT}/db-libs/h2* ${APP_HOME}/lib
+          ;;
+        jdbc:derby:*)
+          echo "Derby jdbc driver is provided by default in the classpath"
+          ;;
+        jdbc:oracle:*)
+          echo "oracle jdbc driver is not provided by default in the classpath, please make sure you provide one. Please refer readme for more details"
+          ;;
+        jdbc:mysql:*)
+          cp ${APP_ROOT}/db-libs/mysql* ${APP_HOME}/lib
+          ;;
+        jdbc:postgresql:*)
+          cp ${APP_ROOT}/db-libs/postgresql* ${APP_HOME}/lib
+          ;;
+        jdbc:sqlserver:*)
+          cp ${APP_ROOT}/db-libs/mssql* ${APP_HOME}/lib
+          ;;
+        jdbc:db2:*)
+          echo "db2 jdbc driver is not provided by default in the classpath, please make sure you provide one. Please refer readme for more details"
+          ;;
+        *)
+            echo "Database type could not be inferred from url '${XL_REPO_DB_URL}', supported db types are 'h2', 'derby', 'oracle', 'mysql', 'postgresql', 'sqlserver', 'db2'"
+            exit 1
+            ;;
+      esac
+    }
+    # Get Java executable
+    if [ -z "$JAVA_HOME" ] ; then
+      JAVACMD=java
+    else
+      JAVACMD="${JAVA_HOME}/bin/java"
+    fi
+
+    # Get XL Release server home dir
+    if [ -z "$XL_RELEASE_SERVER_HOME" ] ; then
+      self="$0"
+      if [ -h "$self" ]; then
+        self=`resolvelink "$self"`
+      fi
+      BIN_DIR=`absdirname "$self"`
+      XL_RELEASE_SERVER_HOME=`dirname "$BIN_DIR"`
+    elif [ ! -d "$XL_RELEASE_SERVER_HOME" ] ; then
+      echo "Directory $XL_RELEASE_SERVER_HOME does not exist"
+      exit 1
+    fi
+
+    copy_db_driver
+
+    cd "$XL_RELEASE_SERVER_HOME"
+
+    wrapper_conf_file=$XL_RELEASE_SERVER_HOME/conf/xlr-wrapper-linux.conf
+
+    # Build XL Release server classpath
+    classpath_dirs=`sed -n 's/^wrapper.java.classpath.\([0-9]*\)=\(.*[^*]\)$/\2/p' "$wrapper_conf_file" | tr '\n' ':' | sed 's/.$//'`
+
+    echo $XL_RELEASE_SERVER_CLASSPATH
+
+    XL_RELEASE_SERVER_CLASSPATH="${classpath_dirs}"
+
+    all_files_to_list=`sed -n 's/^wrapper.java.classpath.\([0-9]*\)=\(.*\)\/\*$/\2 /p' "$wrapper_conf_file" | tr '\n' ' '`
+    all_files_to_list="$all_files_to_list -name '*.jar'"
+    all_files=`echo $all_files_to_list | xargs find`
+    for each in $all_files
+    do
+      if [ -f $each ]; then
+        case "$each" in
+          *.jar)
+            XL_RELEASE_SERVER_CLASSPATH=${XL_RELEASE_SERVER_CLASSPATH}:${each}
+            ;;
+        esac
+      fi
+    done
+
+    # Run XL Release server
+    $JAVACMD -classpath "${XL_RELEASE_SERVER_CLASSPATH}" "com.xebialabs.xlrelease.PluginManagerCliBootstrapper" "$@"
