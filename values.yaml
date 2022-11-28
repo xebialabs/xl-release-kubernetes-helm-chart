@@ -308,7 +308,8 @@ configuration: |-
     metrics {
       enabled = ${XL_METRICS_ENABLED}
     }
-
+  
+    {{- if or .Values.keycloak.install .Values.oidc.enabled }}
     security {
       auth {
         providers {
@@ -399,6 +400,7 @@ configuration: |-
         }
       }
     }
+    {{- end }}
   }
 
 ## @param extraConfiguration [string] Configuration file content: extra configuration to be appended to Release configuration
