@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: v22.3.1
 description: A Helm chart for Digital.ai Release
 name: dai-release
-version: 23.1.0-1109.1200
+version: 23.1.0-1115.1200
 sources:
   - https://github.com/xebialabs/xl-release-kubernetes-helm-chart
   - https://github.com/xebialabs/xl-release
