@@ -157,22 +157,63 @@ After the install command completes successfully, you will see operator and othe
 Use `xl kube upgrade` to upgrade. It is similar to installation steps. Here the already installed cluster resources are overwritten/upgraded with the newly supplied values.
 
 During upgrade for the question `Edit list of custom resource keys that will migrate to the new Release CR:` append to the list following keys:
+
+### For Default image registry
 ```
-spec.TinyToolsImageRepository
-spec.nginx-ingress-controller.defaultBackend.image.registry
-spec.nginx-ingress-controller.defaultBackend.image.repository
-spec.nginx-ingress-controller.image.registry
-spec.nginx-ingress-controller.image.repository
-spec.haproxy-ingress.controller.image.repository
-spec.keycloak.image.repository
-spec.keycloak.postgresql.image.registry
-spec.keycloak.postgresql.image.repository
-spec.postgresql.image.registry
-spec.postgresql.image.repository
-spec.rabbitmq.image.registry
-spec.rabbitmq.image.repository
-spec.rabbitmq.volumePermissions.image.registry
-spec.rabbitmq.volumePermissions.image.repository
+.spec.TinyToolsImageRepository
+.spec.nginx-ingress-controller.defaultBackend.image.registry
+.spec.nginx-ingress-controller.defaultBackend.image.repository
+.spec.nginx-ingress-controller.image.registry
+.spec.nginx-ingress-controller.image.repository
+.spec.haproxy-ingress.controller.image.repository
+.spec.keycloak.image.repository
+.spec.keycloak.postgresql.image.registry
+.spec.keycloak.postgresql.image.repository
+.spec.postgresql.image.registry
+.spec.postgresql.image.repository
+.spec.rabbitmq.image.registry
+.spec.rabbitmq.image.repository
+.spec.rabbitmq.volumePermissions.image.registry
+.spec.rabbitmq.volumePermissions.image.repository
+```
+### For custom docker registry (public)
+```
+.spec.TinyToolsImageRepository
+.spec.nginx-ingress-controller.defaultBackend.image.repository
+.spec.nginx-ingress-controller.image.repository
+.spec.nginx-ingress-controller.global.imageRegistry
+.spec.haproxy-ingress.controller.image.repository
+.spec.keycloak.image.repository
+.spec.keycloak.postgresql.image.registry
+.spec.keycloak.postgresql.image.repository
+.spec.postgresql.image.repository
+.spec.postgresql.global.imageRegistry
+.spec.rabbitmq.image.repository
+.spec.rabbitmq.global.imageRegistry
+.spec.rabbitmq.volumePermissions.image.repository
+```
+
+### For custom docker registry (private)
+```
+.spec.TinyToolsImageRepository
+.spec.nginx-ingress-controller.defaultBackend.image.repository
+.spec.nginx-ingress-controller.image.repository
+.spec.nginx-ingress-controller.global.imageRegistry
+.spec.haproxy-ingress.controller.image.repository
+.spec.keycloak.image.repository
+.spec.keycloak.postgresql.image.registry
+.spec.keycloak.postgresql.image.repository
+.spec.postgresql.image.repository
+.spec.postgresql.global.imageRegistry
+.spec.rabbitmq.image.repository
+.spec.rabbitmq.global.imageRegistry
+.spec.rabbitmq.volumePermissions.image.repository
+
+.spec.nginx-ingress-controller.global.imagePullSecrets
+.spec.keycloak.imagePullSecrets.name
+.spec.keycloak.postgresql.imagePullSecrets.name
+.spec.postgresql.global.imagePullSecrets
+.spec.rabbitmq.global.imagePullSecrets
 ```
 
 ### Example of running upgrade using custom docker image registry option
