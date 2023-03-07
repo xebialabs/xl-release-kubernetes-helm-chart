@@ -6,23 +6,23 @@ version: 22.0
 
 dependencies:
 - name: haproxy-ingress
-  version: 0.13.4
+  version: 0.14.2
   repository: "https://haproxy-ingress.github.io/charts"
   condition: haproxy-ingress.install
 
 - name: nginx-ingress-controller
-  version: 9.2.0
-  repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
+  version: 9.3.32
+  repository: "https://charts.bitnami.com/bitnami"
   condition: nginx-ingress-controller.install
 
 - name: postgresql
-  version: 10.12.8
-  repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
+  version: 11.9.13
+  repository: "https://charts.bitnami.com/bitnami"
   condition: postgresql.install
 
 - name: rabbitmq
-  version: 8.26.1
-  repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
+  version: 11.10.2
+  repository: "https://charts.bitnami.com/bitnami"
   condition: rabbitmq.install
 
 - name: keycloak
