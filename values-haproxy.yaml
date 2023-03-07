@@ -12,7 +12,7 @@ replicaCount: 3
 ## XL-Release image version
 ## Ref: https://hub.docker.com/r/xebialabs/xl-release/tags
 ImageRepository: "xebialabs/xl-release"
-ImageTag: "22.0"
+ImageTag: "22.3"
 
 ## xebialabs/tiny-tools image version
 ## Ref: https://hub.docker.com/r/xebialabs/tiny-tools/tags
@@ -161,6 +161,7 @@ haproxy-ingress:
     kind: DaemonSet
     service:
       type: NodePort
+    ingressClass:  haproxy-dai-xlr
 
 nginx-ingress-controller:
   install: false
@@ -204,27 +205,36 @@ KeystorePassphrase:
 
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
+
 postgresql:
   install: true
-  initdbScriptsSecret: "postgresql-init-sql-xlr"
+  global:
+    postgresql:
+      auth:
+        postgresPassword: "postgres"
+  auth:
+    enablePostgresUser: true
+    postgresPassword: "postgres"
+  primary:
+    initdb:
+      scriptsSecret: "postgresql-init-sql-xlr"
+      user: "postgres"
+      password: "postgres"
+    persistence:
+      enabled: true
+      storageClass: "hostpath"
+      size: 8Gi
+      existingClaim: ""
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
+    service:
+      type: ClusterIP
+      port: 5432
   image:
     debug: true
     pullSecrets: []
-  persistence:
-    enabled: true
-    storageClass: "-"
-    size: 8Gi
-    existingClaim: ""
-  postgresqlUsername: postgres
-  postgresqlPassword: ""
-  postgresqlMaxConnections: "150"
-  service:
-    type: ClusterIP
-    port: 5432
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 250m
 
 GenerateXlConfig: true
 MetricsEnabled: false
@@ -305,6 +315,7 @@ rabbitmq:
   loadDefinition:
     enabled: true
     existingSecret: xlr-load-definition
+    file: /app/xlr-load_definition.json
   extraConfiguration: |
     load_definitions = /app/xlr-load_definition.json
     raft.wal_max_size_bytes = 1048576
