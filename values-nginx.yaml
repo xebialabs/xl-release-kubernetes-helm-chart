@@ -218,6 +218,7 @@ KeystorePassphrase:
 postgresql:
   install: true
   global:
+    storageClass: ""
     postgresql:
       auth:
         postgresPassword: "postgres"
@@ -231,7 +232,7 @@ postgresql:
       password: "postgres"
     persistence:
       enabled: true
-      storageClass: "hostpath"
+      storageClass: ""
       size: 8Gi
       existingClaim: ""
     resources:
