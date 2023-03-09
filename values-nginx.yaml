@@ -218,10 +218,10 @@ KeystorePassphrase:
 postgresql:
   install: true
   global:
-    storageClass: ""
     postgresql:
       auth:
         postgresPassword: "postgres"
+    storageClass: "-"
   auth:
     enablePostgresUser: true
     postgresPassword: "postgres"
@@ -232,7 +232,7 @@ postgresql:
       password: "postgres"
     persistence:
       enabled: true
-      storageClass: ""
+      storageClass: "-"
       size: 8Gi
       existingClaim: ""
     resources:

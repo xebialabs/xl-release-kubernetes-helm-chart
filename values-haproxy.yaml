@@ -212,6 +212,7 @@ postgresql:
     postgresql:
       auth:
         postgresPassword: "postgres"
+    storageClass: "-"
   auth:
     enablePostgresUser: true
     postgresPassword: "postgres"
@@ -222,7 +223,7 @@ postgresql:
       password: "postgres"
     persistence:
       enabled: true
-      storageClass: "hostpath"
+      storageClass: "-"
       size: 8Gi
       existingClaim: ""
     resources:
