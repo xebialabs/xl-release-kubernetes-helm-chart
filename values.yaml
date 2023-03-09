@@ -190,7 +190,7 @@ postgresql:
     postgresql:
       auth:
         postgresPassword: "postgres"
-    storageClass: "aws-efs"
+    storageClass: "-"
   primary:
     initdb:
       scriptsSecret: "postgresql-init-sql-xlr"
@@ -198,7 +198,7 @@ postgresql:
       password: "postgres"
     persistence:
       enabled: true
-      storageClass: "aws-efs"
+      storageClass: "-"
       size: 8Gi
       existingClaim: ""
     resources:
