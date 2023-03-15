@@ -226,6 +226,8 @@ postgresql:
     enablePostgresUser: true
     postgresPassword: "postgres"
   primary:
+    extendedConfiguration: |
+      max_connections = 300
     initdb:
       scriptsSecret: "postgresql-init-sql-xlr"
       user: "postgres"
