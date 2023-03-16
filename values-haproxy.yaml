@@ -5,6 +5,7 @@
 ## Platform on which to install the chart (PlainK8s/AWSEKS/AzureAKS/GoogleGKE)
 K8sSetup:
   Platform: PlainK8s
+  validateValues: false
 
 # No. of XL-Release master pods to run.
 replicaCount: 3
@@ -48,7 +49,7 @@ release:
       paths: {}
 
 keycloak:
-  install: true
+  install: false
   extraEnv: |
     - name: PROXY_ADDRESS_FORWARDING
       value: "true"
@@ -110,7 +111,7 @@ keycloak:
     type: LoadBalancer
 
 oidc:
-  enabled: true
+  enabled: false
   external: false
   clientId:
   clientSecret:
