@@ -1,1 +1,1 @@
-helm delete dair -n digital-ai-release 
+helm delete dair -n digital-ai-release
