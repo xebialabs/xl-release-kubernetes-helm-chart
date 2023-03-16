@@ -31,6 +31,13 @@ spec:
       {{- end }}
       {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) }}
       initContainers:
+        - name: newrelic
+          image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
+          command: ["wget", "https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar", "-P", "/opt/newrelic" ]
+          volumeMounts:
+            - name: reports-dir
+              mountPath: "/opt/newrelic"
+              subPath: newrelic
         {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
         - name: wait-for-db
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
@@ -119,6 +126,15 @@ spec:
             - name: xlr-configuration-management-volume
               mountPath: /opt/xebialabs/xlr-configuration-management
             {{- end }}
+            - name: newrelicyaml-volume
+              mountPath: /opt/newrelic/newrelic.yml
+              subPath: newrelic.yml
+            - name: reports-dir
+              mountPath: "/opt/newrelic"
+              subPath: newrelic
+            #- name: xl-release-wrapper-volume
+            #  mountPath: /opt/xebialabs/xl-release-server/conf/xlr-wrapper-linux.conf
+            #  subPath: xlr-wrapper-linux.conf
           {{- if .Values.HealthProbes }}
           livenessProbe:
             httpGet:
@@ -281,6 +297,14 @@ spec:
             name: xlr-configuration-management-script
             defaultMode: 0777
         {{- end }}
+        - name: newrelicyaml-volume
+          configMap:
+            name: newrelic
+            defaultMode: 0777
+        #- name: xl-release-wrapper-volume
+        #  configMap:
+        #    name: xl-release-wrapper-config-map
+        #    defaultMode: 0777
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
