@@ -33,7 +33,7 @@ spec:
       initContainers:
         - name: newrelic
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
-          command: ["wget", "https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar", "-P", "/opt/newrelic" ]
+          command: ["sh","-c","rm -rf /opt/newrelic/newrelic.jar;  wget -O /opt/newrelic/newrelic.jar https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar"]
           volumeMounts:
             - name: reports-dir
               mountPath: "/opt/newrelic"
