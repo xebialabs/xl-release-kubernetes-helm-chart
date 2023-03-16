@@ -69,8 +69,13 @@ spec:
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
           imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
           ports:
+            {{- if .Values.http2.enabled }}
+            - name: http2
+              containerPort: 5543       
+            {{- else }}       
             - name: http
-              containerPort: 5516
+              containerPort: 5516    
+            {{- end }}
           {{- if .Values.release.configurationManagement.configuration.enabled }}
           command:
             - sh
@@ -86,8 +91,8 @@ spec:
             {{- end }}
             {{- if .Values.ssl.enabled }}
             - name: http-ssl-keystore
-              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/localhost.p12
-              subPath: localhost.p12
+              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+              subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
             {{- end }}
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
@@ -126,16 +131,26 @@ spec:
             {{- end }}
           {{- if .Values.HealthProbes }}
           livenessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: http2
+            {{- else }}
             httpGet:
               path: /
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           readinessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: http2
+            {{- else }}
             httpGet:
               path: /
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
@@ -159,7 +174,14 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- if .Values.UseExistingDB.Enabled }}
+            {{- if .Values.http2.enabled }}
+            - name: APP_PORT
+              value: "5543"
+            {{- else }}
+            - name: APP_PORT
+              value: "5516"    
+            {{- end }}  
+            {{- if .Values.UseExistingDB.Enabled }}          
             - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
             - name: XL_DB_USERNAME
@@ -255,7 +277,7 @@ spec:
             - name: SSL
               value: "{{ .Values.ssl.enabled}}"
             - name: HTTP_SSL_KEYSTORE_PATH
-              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/localhost.p12
+              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
             - name: HTTP_SSL_KEYSTORE_PASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.ssl.keystorePassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "sslKeystorePassword" "context" $ ) | nindent 14 }}
             - name: HTTP_SSL_KEYSTORE_KEYPASSWORD

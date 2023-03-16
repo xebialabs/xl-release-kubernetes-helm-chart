@@ -195,3 +195,21 @@ Params:
   {{- true -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Returns the name of the secret key if exists, in other case it gives the default value
+
+Usage:
+{{ include "secrets.key" (dict "secretRef" .Values.secretObjectRef "default" "defaultValue") }}
+
+Params:
+  - secretRef - dict - Required - Name of the 'Secret' resource where the password is stored.
+  - default - String - Required - Default value if, there is no secret reference under secretRef
+*/}}
+{{- define "secrets.key" -}}
+{{- if and .secretRef (not (kindIs "string" .secretRef)) .secretRef.secretKeyRef.key -}}
+{{ .secretRef.secretKeyRef.key }}
+{{- else -}}
+{{ .default }}
+{{- end -}}  
+{{- end -}}
