@@ -58,6 +58,20 @@ Usage:
   {{- end -}}
 {{- end -}}
 
+{{- define "render.secret-name" -}}
+  {{- if .value -}}
+    {{- if kindIs "string" .value -}}
+{{ .defaultName }}
+    {{- else -}}
+{{ .value.secretKeyRef.name }}   
+    {{- end -}}
+  {{- else -}}
+    {{- if .default -}}
+{{ .defaultName }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- define "render.value-secret" -}}
   {{- if .value -}}
     {{- if kindIs "string" .value -}}
@@ -86,6 +100,18 @@ valueFrom:
     {{- else -}}
       {{- if .default -}}
         {{ .key }}: {{ .default | b64enc | quote }}
+      {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{- define "render.value-if-not-secret-decode" -}}
+    {{- if .value -}}
+        {{- if kindIs "string" .value -}}
+            {{ .key }}: {{ .value | b64dec | b64enc | quote }}
+        {{- end -}}
+    {{- else -}}
+      {{- if .default -}}
+        {{ .key }}: {{ .default | b64dec | b64enc | quote }}
       {{- end -}}
     {{- end -}}
 {{- end -}}

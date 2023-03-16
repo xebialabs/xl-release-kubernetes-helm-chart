@@ -84,6 +84,11 @@ spec:
               mountPath: /opt/xebialabs/xl-release-server/default-conf/op-xl-release.conf.template
               subPath: op-xl-release.conf.template
             {{- end }}
+            {{- if .Values.ssl.enabled }}
+            - name: http-ssl-keystore
+              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/localhost.p12
+              subPath: localhost.p12
+            {{- end }}
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
               subPath: reports
@@ -244,6 +249,18 @@ spec:
               {{- include "render.value-secret" (dict "value" .Values.oidc.accessToken.secretKey "defaultName" (include "xl-release.fullname" .) "defaultKey" "oidcAccessTokenSecretKey" "context" $ ) | nindent 14 }}
             {{- end -}}
             {{- end }}
+            - name: XLR_HTTP2_ENABLED
+              value: "{{ .Values.http2.enabled}}"
+            {{- if .Values.ssl.enabled }}
+            - name: SSL
+              value: "{{ .Values.ssl.enabled}}"
+            - name: HTTP_SSL_KEYSTORE_PATH
+              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/localhost.p12
+            - name: HTTP_SSL_KEYSTORE_PASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystorePassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "sslKeystorePassword" "context" $ ) | nindent 14 }}
+            - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystoreKeypassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "sslKeystoreKeypassword" "context" $ ) | nindent 14 }}
+            {{- end }}
             {{- if .Values.release.configurationManagement.environment.enabled }}
             {{- range $key, $val := .Values.release.configurationManagement.environment.variables }}
             - name: {{ $key }}
@@ -266,6 +283,11 @@ spec:
         - name: release-conf
           configMap:
             name: xl-release-conf
+        {{- end }}
+        {{- if .Values.ssl.enabled }}
+        - name: http-ssl-keystore
+          secret:
+            secretName: "{{- include "render.secret-name" (dict  "value" .Values.ssl.keystore "defaultName" (include "xl-release.fullname" .) "context" $ ) }}"
         {{- end }}
         {{- if .Values.release.configurationManagement.configuration.enabled }}
         - name: xlr-configuration-management-volume
