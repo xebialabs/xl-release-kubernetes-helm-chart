@@ -1,8 +1,8 @@
 apiVersion: v2
-appVersion: v10.3
+appVersion: v23.1
 description: A Helm chart for XL Release
 name: digitalai-release-ocp
-version: 22.0
+version: "23.1"
 
 dependencies:
 
