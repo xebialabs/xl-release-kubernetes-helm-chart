@@ -58,6 +58,20 @@ Usage:
   {{- end -}}
 {{- end -}}
 
+{{- define "render.secret-name" -}}
+  {{- if .value -}}
+    {{- if kindIs "string" .value -}}
+{{ .defaultName }}
+    {{- else -}}
+{{ .value.secretKeyRef.name }}
+    {{- end -}}
+  {{- else -}}
+    {{- if .default -}}
+{{ .defaultName }}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+
 {{- define "render.value-secret" -}}
   {{- if .value -}}
     {{- if kindIs "string" .value -}}
@@ -86,6 +100,18 @@ valueFrom:
     {{- else -}}
       {{- if .default -}}
         {{ .key }}: {{ .default | b64enc | quote }}
+      {{- end -}}
+    {{- end -}}
+{{- end -}}
+
+{{- define "render.value-if-not-secret-decode" -}}
+    {{- if .value -}}
+        {{- if kindIs "string" .value -}}
+            {{ .key }}: {{ .value | b64dec | b64enc | quote }}
+        {{- end -}}
+    {{- else -}}
+      {{- if .default -}}
+        {{ .key }}: {{ .default | b64dec | b64enc | quote }}
       {{- end -}}
     {{- end -}}
 {{- end -}}
@@ -167,5 +193,23 @@ Params:
 {{- $secret := (lookup "v1" "Secret" .context.Release.Namespace .secret) -}}
 {{- if $secret -}}
   {{- true -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Returns the name of the secret key if exists, in other case it gives the default value
+
+Usage:
+{{ include "secrets.key" (dict "secretRef" .Values.secretObjectRef "default" "defaultValue") }}
+
+Params:
+  - secretRef - dict - Required - Name of the 'Secret' resource where the password is stored.
+  - default - String - Required - Default value if, there is no secret reference under secretRef
+*/}}
+{{- define "secrets.key" -}}
+{{- if and .secretRef (not (kindIs "string" .secretRef)) .secretRef.secretKeyRef.key -}}
+{{ .secretRef.secretKeyRef.key }}
+{{- else -}}
+{{ .default }}
 {{- end -}}
 {{- end -}}

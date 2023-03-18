@@ -5,3 +5,4 @@ charts
 build
 Chart.lock
 .DS_Store
+bin/
