@@ -31,13 +31,21 @@ spec:
       {{- end }}
       {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) }}
       initContainers:
-        - name: newrelic
-          image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
-          command: ["sh","-c","rm -rf /opt/newrelic/newrelic.jar;  wget -O /opt/newrelic/newrelic.jar https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar"]
+        {{- if .Values.release.configurationManagement.initContainers.enabled }}
+        {{- range .Values.release.configurationManagement.initContainers.containers}}
+        - name: {{  .name}}
+          image: {{ .image}}
+          command: ["sh", "-c", "{{ .command }}"]
+          {{- if .initContainerVolumeMounts.enabled}}
+          {{- range  .initContainerVolumeMounts.volumeMounts}}
           volumeMounts:
             - name: reports-dir
-              mountPath: "/opt/newrelic"
-              subPath: newrelic
+              mountPath: {{ .mountPath}}
+              subPath:  {{ .subPath}}
+          {{- end}}
+          {{- end}}
+        {{- end }}
+        {{- end }}
         {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
         - name: wait-for-db
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
@@ -126,15 +134,6 @@ spec:
             - name: xlr-configuration-management-volume
               mountPath: /opt/xebialabs/xlr-configuration-management
             {{- end }}
-            - name: newrelicyaml-volume
-              mountPath: /opt/newrelic/newrelic.yml
-              subPath: newrelic.yml
-            - name: reports-dir
-              mountPath: "/opt/newrelic"
-              subPath: newrelic
-            #- name: xl-release-wrapper-volume
-            #  mountPath: /opt/xebialabs/xl-release-server/conf/xlr-wrapper-linux.conf
-            #  subPath: xlr-wrapper-linux.conf
           {{- if .Values.HealthProbes }}
           livenessProbe:
             httpGet:
@@ -297,14 +296,6 @@ spec:
             name: xlr-configuration-management-script
             defaultMode: 0777
         {{- end }}
-        - name: newrelicyaml-volume
-          configMap:
-            name: newrelic
-            defaultMode: 0777
-        #- name: xl-release-wrapper-volume
-        #  configMap:
-        #    name: xl-release-wrapper-config-map
-        #    defaultMode: 0777
     {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}

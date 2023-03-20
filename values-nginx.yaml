@@ -46,6 +46,17 @@ release:
     volumeMounts:
       enabled: true
       paths: {}
+    initContainers:
+      enabled: false
+      containers:
+        - name:
+          image:
+          command:
+          initContainerVolumeMounts:
+            enabled: false
+            volumeMounts:
+              - mountPath:
+                subPath:
 
 keycloak:
   install: true
