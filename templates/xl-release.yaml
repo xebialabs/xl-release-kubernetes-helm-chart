@@ -40,7 +40,7 @@ spec:
           {{- range  .initContainerVolumeMounts.volumeMounts}}
           volumeMounts:
             - name: reports-dir
-              mountPath: {{ .mountPath}}
+              mountPath: /opt/xebialabs/xl-release-server/{{ .mountPath}}
               subPath:  {{ .subPath}}
           {{- end}}
           {{- end}}
