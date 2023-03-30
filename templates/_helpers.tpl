@@ -63,7 +63,7 @@ Usage:
     {{- if kindIs "string" .value -}}
 {{ .defaultName }}
     {{- else -}}
-{{ .value.secretKeyRef.name }}   
+{{ .value.valueFrom.secretKeyRef.name }}   
     {{- end -}}
   {{- else -}}
     {{- if .default -}}
@@ -207,8 +207,8 @@ Params:
   - default - String - Required - Default value if, there is no secret reference under secretRef
 */}}
 {{- define "secrets.key" -}}
-{{- if and .secretRef (not (kindIs "string" .secretRef)) .secretRef.secretKeyRef.key -}}
-{{ .secretRef.secretKeyRef.key }}
+{{- if and .secretRef (not (kindIs "string" .secretRef)) .secretRef.valueFrom.secretKeyRef.key -}}
+{{ .secretRef.valueFrom.secretKeyRef.key }}
 {{- else -}}
 {{ .default }}
 {{- end -}}  
