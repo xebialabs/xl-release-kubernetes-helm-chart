@@ -20,6 +20,10 @@
 .idea/
 *.tmproj
 
+buildSrc/
+build/
 .gradle/
+gradle/
+integration-tests
 documentation/
 docs/

@@ -27,6 +27,14 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+http2:
+  enabled: false
+ssl:
+  enabled: false
+  keystorePassword: 
+  keystoreKeypassword: 
+  keystore:
+  
 release:
   terminationGracePeriodSeconds: 200
   configurationManagement:

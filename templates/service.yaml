@@ -13,7 +13,14 @@ spec:
     release: {{ .Release.Name }}
   type: ClusterIP
   ports:
+    {{- if .Values.http2.enabled }}
+    - name: xlr-http2
+      port: 443
+      targetPort: http2
+      protocol: TCP
+    {{- else }}
     - name: xlr-http
       port: 80
       targetPort: http
       protocol: TCP
+    {{- end }}

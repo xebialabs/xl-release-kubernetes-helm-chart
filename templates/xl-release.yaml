@@ -69,8 +69,13 @@ spec:
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
           imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
           ports:
+            {{- if .Values.http2.enabled }}
+            - name: http2
+              containerPort: 5543       
+            {{- else }}       
             - name: http
-              containerPort: 5516
+              containerPort: 5516    
+            {{- end }}
           {{- if .Values.release.configurationManagement.configuration.enabled }}
           command:
             - sh
@@ -83,6 +88,11 @@ spec:
             - name: release-conf
               mountPath: /opt/xebialabs/xl-release-server/default-conf/op-xl-release.conf.template
               subPath: op-xl-release.conf.template
+            {{- end }}
+            {{- if .Values.ssl.enabled }}
+            - name: http-ssl-keystore
+              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+              subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
             {{- end }}
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
@@ -121,16 +131,26 @@ spec:
             {{- end }}
           {{- if .Values.HealthProbes }}
           livenessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: http2
+            {{- else }}
             httpGet:
               path: /
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           readinessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: http2
+            {{- else }}
             httpGet:
               path: /
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
@@ -154,7 +174,14 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- if .Values.UseExistingDB.Enabled }}
+            {{- if .Values.http2.enabled }}
+            - name: APP_PORT
+              value: "5543"
+            {{- else }}
+            - name: APP_PORT
+              value: "5516"    
+            {{- end }}  
+            {{- if .Values.UseExistingDB.Enabled }}          
             - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
             - name: XL_DB_USERNAME
@@ -244,6 +271,18 @@ spec:
               {{- include "render.value-secret" (dict "value" .Values.oidc.accessToken.secretKey "defaultName" (include "xl-release.fullname" .) "defaultKey" "oidcAccessTokenSecretKey" "context" $ ) | nindent 14 }}
             {{- end -}}
             {{- end }}
+            - name: XLR_HTTP2_ENABLED
+              value: "{{ .Values.http2.enabled}}"
+            {{- if .Values.ssl.enabled }}
+            - name: SSL
+              value: "{{ .Values.ssl.enabled}}"
+            - name: HTTP_SSL_KEYSTORE_PATH
+              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+            - name: HTTP_SSL_KEYSTORE_PASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystorePassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "sslKeystorePassword" "context" $ ) | nindent 14 }}
+            - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystoreKeypassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "sslKeystoreKeypassword" "context" $ ) | nindent 14 }}
+            {{- end }}
             {{- if .Values.release.configurationManagement.environment.enabled }}
             {{- range $key, $val := .Values.release.configurationManagement.environment.variables }}
             - name: {{ $key }}
@@ -266,6 +305,11 @@ spec:
         - name: release-conf
           configMap:
             name: xl-release-conf
+        {{- end }}
+        {{- if .Values.ssl.enabled }}
+        - name: http-ssl-keystore
+          secret:
+            secretName: "{{- include "render.secret-name" (dict  "value" .Values.ssl.keystore "defaultName" (include "xl-release.fullname" .) "context" $ ) }}"
         {{- end }}
         {{- if .Values.release.configurationManagement.configuration.enabled }}
         - name: xlr-configuration-management-volume
