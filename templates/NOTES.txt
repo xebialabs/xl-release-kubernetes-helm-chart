@@ -1,3 +1,5 @@
+{{- include "release.validateValues" . -}}
+
 ## To get the application URL, run:
 {{- if .Values.route.Enabled }}
 {{- range .Values.route.hosts }}
