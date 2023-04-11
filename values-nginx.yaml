@@ -274,9 +274,11 @@ UseExistingDB:
   # XLR_DB_URL:
   # XLR_DB_USER:
   # XLR_DB_PASS:
+  # XLR_DB_MAX_POOL_SIZE:
   # XLR_REPORT_DB_URL:
   # XLR_REPORT_DB_USER:
   # XLR_REPORT_DB_PASS:
+  # XLR_REPORT_DB_MAX_POOL_SIZE:
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
