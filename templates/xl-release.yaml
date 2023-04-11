@@ -177,7 +177,7 @@ spec:
             - name: XL_DB_PASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_DB_PASS "defaultName" (include "xl-release.fullname" .) "defaultKey" "databasePassword" "context" $ ) | nindent 14 }}
             - name: XL_DB_MAX_POOL_SIZE
-              value: {{ .Values.UseExistingDB.XLR_DB_MAX_POOL_SIZE }}
+              value: {{ .Values.UseExistingDB.XLR_DB_MAX_POOL_SIZE | quote }}
             - name: XL_REPORT_DB_URL
               value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
             - name: XL_REPORT_DB_USERNAME
@@ -185,7 +185,7 @@ spec:
             - name: XL_REPORT_DB_PASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_REPORT_DB_PASS "defaultName" (include "xl-release.fullname" .) "defaultKey" "reportDatabasePassword" "context" $ ) | nindent 14 }}
             - name: XL_REPORT_DB_MAX_POOL_SIZE
-              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_MAX_POOL_SIZE }}
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_MAX_POOL_SIZE | quote }}
             {{- else }}
             {{- if .Values.postgresql.install }}
             - name: XL_DB_URL
