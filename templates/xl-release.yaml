@@ -31,6 +31,21 @@ spec:
       {{- end }}
       {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) }}
       initContainers:
+        {{- if .Values.release.configurationManagement.initContainers.enabled }}
+        {{- range .Values.release.configurationManagement.initContainers.containers}}
+        - name: {{  .name}}
+          image: {{ .image}}
+          command: ["sh", "-c", "{{ .command }}"]
+          {{- if .initContainerVolumeMounts.enabled}}
+          {{- range  .initContainerVolumeMounts.volumeMounts}}
+          volumeMounts:
+            - name: reports-dir
+              mountPath: /opt/xebialabs/xl-release-server/{{ .mountPath}}
+              subPath:  {{ .subPath}}
+          {{- end}}
+          {{- end}}
+        {{- end }}
+        {{- end }}
         {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
         - name: wait-for-db
           image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
@@ -188,12 +203,16 @@ spec:
               {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_DB_USER "defaultName" (include "xl-release.fullname" .) "defaultKey" "databaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_DB_PASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_DB_PASS "defaultName" (include "xl-release.fullname" .) "defaultKey" "databasePassword" "context" $ ) | nindent 14 }}
+            - name: XL_DB_MAX_POOL_SIZE
+              value: {{ .Values.UseExistingDB.XLR_DB_MAX_POOL_SIZE | quote }}
             - name: XL_REPORT_DB_URL
               value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
             - name: XL_REPORT_DB_USERNAME
               {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_REPORT_DB_USER "defaultName" (include "xl-release.fullname" .) "defaultKey" "reportDatabaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_REPORT_DB_PASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_REPORT_DB_PASS "defaultName" (include "xl-release.fullname" .) "defaultKey" "reportDatabasePassword" "context" $ ) | nindent 14 }}
+            - name: XL_REPORT_DB_MAX_POOL_SIZE
+              value: {{ .Values.UseExistingDB.XLR_REPORT_DB_MAX_POOL_SIZE | quote }}
             {{- else }}
             {{- if .Values.postgresql.install }}
             - name: XL_DB_URL

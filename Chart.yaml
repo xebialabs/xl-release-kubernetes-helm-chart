@@ -2,7 +2,7 @@ apiVersion: v2
 appVersion: v23.1
 description: A Helm chart for XL Release
 name: digitalai-release
-version: "23.1"
+version: 23.1
 
 dependencies:
 - name: haproxy-ingress
