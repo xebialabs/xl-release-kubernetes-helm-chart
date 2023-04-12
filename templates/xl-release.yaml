@@ -69,8 +69,13 @@ spec:
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
           imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
           ports:
+            {{- if .Values.http2.enabled }}
+            - name: http2
+              containerPort: 5543       
+            {{- else }}       
             - name: http
-              containerPort: 5516
+              containerPort: 5516    
+            {{- end }}
           {{- if .Values.release.configurationManagement.configuration.enabled }}
           command:
             - sh
@@ -81,8 +86,13 @@ spec:
           volumeMounts:
             {{- if .Values.oidc.enabled }}
             - name: release-conf
-              mountPath: /opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template
-              subPath: xl-release.conf.template
+              mountPath: /opt/xebialabs/xl-release-server/default-conf/op-xl-release.conf.template
+              subPath: op-xl-release.conf.template
+            {{- end }}
+            {{- if .Values.ssl.enabled }}
+            - name: http-ssl-keystore
+              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+              subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
             {{- end }}
             - name: reports-dir
               mountPath: /opt/xebialabs/xl-release-server/reports
@@ -121,26 +131,33 @@ spec:
             {{- end }}
           {{- if .Values.HealthProbes }}
           livenessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: http2
+            {{- else }}
             httpGet:
               path: /
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.HealthProbesLivenessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           readinessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: http2
+            {{- else }}
             httpGet:
               path: /
               port: http
+            {{- end }}
             initialDelaySeconds: {{ .Values.HealthProbesReadinessTimeout }}
             periodSeconds: {{ .Values.HealthPeriodScans }}
             failureThreshold: {{ .Values.HealthProbeFailureThreshold }}
           {{- end }}
           env:
             - name: ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: release-password
+              {{- include "render.value-secret" (dict  "value" .Values.AdminPassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "release-password" "default" true "context" $ ) | nindent 14 }}
             - name: XL_CLUSTER_MODE
               value: full
             {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
@@ -157,31 +174,26 @@ spec:
             {{- end }}
             {{- end }}
             {{- end }}
-            {{- if .Values.UseExistingDB.Enabled }}
+            {{- if .Values.http2.enabled }}
+            - name: APP_PORT
+              value: "5543"
+            {{- else }}
+            - name: APP_PORT
+              value: "5516"    
+            {{- end }}  
+            {{- if .Values.UseExistingDB.Enabled }}          
             - name: XL_DB_URL
               value: {{ .Values.UseExistingDB.XLR_DB_URL }}
             - name: XL_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: databaseUsername
+              {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_DB_USER "defaultName" (include "xl-release.fullname" .) "defaultKey" "databaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: databasePassword
+              {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_DB_PASS "defaultName" (include "xl-release.fullname" .) "defaultKey" "databasePassword" "context" $ ) | nindent 14 }}
             - name: XL_REPORT_DB_URL
               value: {{ .Values.UseExistingDB.XLR_REPORT_DB_URL }}
             - name: XL_REPORT_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: reportDatabaseUsername
+              {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_REPORT_DB_USER "defaultName" (include "xl-release.fullname" .) "defaultKey" "reportDatabaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_REPORT_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: reportDatabasePassword
+              {{- include "render.value-secret" (dict  "value" .Values.UseExistingDB.XLR_REPORT_DB_PASS "defaultName" (include "xl-release.fullname" .) "defaultKey" "reportDatabasePassword" "context" $ ) | nindent 14 }}
             {{- else }}
             {{- if .Values.postgresql.install }}
             - name: XL_DB_URL
@@ -199,10 +211,7 @@ spec:
             {{- end }}
             {{- end }}
             - name: XL_LICENSE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: xlr-License
+              {{- include "render.value-secret" (dict  "value" .Values.xlrLicense "defaultName" (include "xl-release.fullname" .) "defaultKey" "xlr-License" "context" $ ) | nindent 14 }}
             - name: XL_METRICS_ENABLED
               value: "{{ .Values.MetricsEnabled}}"
             - name: GENERATE_XL_CONFIG
@@ -227,15 +236,9 @@ spec:
             {{- else }}
             {{- if .Values.UseExistingMQ.Enabled }}
             - name: XLR_TASK_QUEUE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: rabbitmqUsername
+              {{- include "render.value-secret" (dict  "value" .Values.UseExistingMQ.XLR_TASK_QUEUE_USERNAME "defaultName" (include "xl-release.fullname" .) "defaultKey" "rabbitmqUsername" "context" $ ) | nindent 14 }}
             - name: XLR_TASK_QUEUE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: rabbitmqPassword
+              {{- include "render.value-secret" (dict  "value" .Values.UseExistingMQ.XLR_TASK_QUEUE_PASSWORD "defaultName" (include "xl-release.fullname" .) "defaultKey" "rabbitmqPassword" "context" $ ) | nindent 14 }}
             - name: XLR_TASK_QUEUE_URL
               value: {{ .Values.UseExistingMQ.XLR_TASK_QUEUE_URL | quote }}
             - name: XLR_TASK_QUEUE_NAME
@@ -243,15 +246,43 @@ spec:
             {{- end }}
             {{- end }}
             - name: REPOSITORY_KEYSTORE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: repositoryKeystore
+              {{- include "render.value-secret" (dict  "value" .Values.RepositoryKeystore "defaultName" (include "xl-release.fullname" .) "defaultKey" "repositoryKeystore" "context" $ ) | nindent 14 }}
             - name: REPOSITORY_KEYSTORE_PASSPHRASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "xl-release.fullname" . }}
-                  key: keystorePassphrase
+              {{- include "render.value-secret" (dict  "value" .Values.KeystorePassphrase "defaultName" (include "xl-release.fullname" .) "defaultKey" "keystorePassphrase" "context" $ ) | nindent 14 }}
+            {{- if .Values.oidc.external }}
+            - name: OP_GENERATE_XL_CONFIG
+              value: "{{ .Values.GenerateXlConfig}}"
+            - name: OIDC_CLIENT_ID
+              {{- include "render.value-secret" (dict  "value" .Values.oidc.clientId "defaultName" (include "xl-release.fullname" .) "defaultKey" "oidcClientId" "context" $ ) | nindent 14 }}
+            - name: OIDC_CLIENT_SECRET
+              {{- include "render.value-secret" (dict  "value" .Values.oidc.clientSecret "defaultName" (include "xl-release.fullname" .) "defaultKey" "oidcClientSecret" "context" $ ) | nindent 14 }}
+            {{- if .Values.oidc.clientAuthJwt.enable -}}
+            {{- if .Values.oidc.clientAuthJwt.keyStore.password -}}
+            - name: OIDC_CLIENT_AUTH_JWT_KEYSTORE_PASSWORD
+              {{- include "render.value-secret" (dict "value" .Values.oidc.clientAuthJwt.keyStore.password "defaultName" (include "xl-release.fullname" .) "defaultKey" "oidcClientAuthJwtKeyStorePassword" "context" $ ) | nindent 14 }}
+            {{- end -}}
+            {{- if .Values.oidc.clientAuthJwt.key.password -}}
+            - name: OIDC_CLIENT_AUTH_JWT_KEY_PASSWORD
+              {{- include "render.value-secret" (dict "value" .Values.oidc.clientAuthJwt.key.password "defaultName" (include "xl-release.fullname" .) "defaultKey" "oidcClientAuthJwtKeyPassword" "context" $ ) | nindent 14 }}
+            {{- end -}}
+            {{- end -}}
+            {{- if and .Values.oidc.accessToken.enable .Values.oidc.accessToken.secretKey -}}
+            - name: OIDC_ACCESS_TOKEN_SECRET_KEY
+              {{- include "render.value-secret" (dict "value" .Values.oidc.accessToken.secretKey "defaultName" (include "xl-release.fullname" .) "defaultKey" "oidcAccessTokenSecretKey" "context" $ ) | nindent 14 }}
+            {{- end -}}
+            {{- end }}
+            - name: XLR_HTTP2_ENABLED
+              value: "{{ .Values.http2.enabled}}"
+            {{- if .Values.ssl.enabled }}
+            - name: SSL
+              value: "{{ .Values.ssl.enabled}}"
+            - name: HTTP_SSL_KEYSTORE_PATH
+              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+            - name: HTTP_SSL_KEYSTORE_PASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystorePassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "sslKeystorePassword" "context" $ ) | nindent 14 }}
+            - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystoreKeypassword "defaultName" (include "xl-release.fullname" .) "defaultKey" "sslKeystoreKeypassword" "context" $ ) | nindent 14 }}
+            {{- end }}
             {{- if .Values.release.configurationManagement.environment.enabled }}
             {{- range $key, $val := .Values.release.configurationManagement.environment.variables }}
             - name: {{ $key }}
@@ -274,6 +305,11 @@ spec:
         - name: release-conf
           configMap:
             name: xl-release-conf
+        {{- end }}
+        {{- if .Values.ssl.enabled }}
+        - name: http-ssl-keystore
+          secret:
+            secretName: "{{- include "render.secret-name" (dict  "value" .Values.ssl.keystore "defaultName" (include "xl-release.fullname" .) "context" $ ) }}"
         {{- end }}
         {{- if .Values.release.configurationManagement.configuration.enabled }}
         - name: xlr-configuration-management-volume

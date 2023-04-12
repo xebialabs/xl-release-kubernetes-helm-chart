@@ -6,3 +6,6 @@ build
 Chart.lock
 .DS_Store
 bin/
+test.yaml
+values-haproxy-*.yaml
+values-nginx-*.yaml
