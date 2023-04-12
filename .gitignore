@@ -5,3 +5,6 @@ charts
 build
 Chart.lock
 .DS_Store
+bin/
+test.yaml
+values-*.yaml

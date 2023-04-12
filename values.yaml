@@ -2,6 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+## Platform on which to install the chart (PlainK8s/AWSEKS/AzureAKS/GoogleGKE)
+K8sSetup:
+  Platform: Openshift
+  validateValues: false
+
 # No. of XL-Release master pods to run.
 replicaCount: 3
 
@@ -18,6 +23,14 @@ TinyToolsImageTag: "22.2.0"
 ## Specify a imagePullPolicy
 ## Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'
 ImagePullPolicy: "Always"
+
+http2:
+  enabled: false
+ssl:
+  enabled: false
+  keystorePassword:
+  keystoreKeypassword:
+  keystore:
 
 release:
   terminationGracePeriodSeconds: 200
@@ -39,6 +52,16 @@ release:
     volumeMounts:
       enabled: true
       paths: {}
+    initContainers:
+      enabled: true
+      containers:
+        - name: newrelic
+          image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
+          command: [ "sh","-c","rm -rf /opt/newrelic/newrelic.jar;  wget -O /opt/newrelic/newrelic.jar https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar" ]
+          volumeMounts:
+            - name: reports-dir
+              mountPath: "/opt/newrelic"
+              subPath: newrelic
 
 keycloak:
   install: true
