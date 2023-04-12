@@ -20,7 +20,7 @@ data:
     if [ -z "$OIDC_CLIENT_ID" ]; then
       echo "Not generating xl-release.conf.template as no OIDC configuration"
     else
-      if [[ ${OP_GENERATE_XL_CONFIG,,} != "true" ]]; then
+      if [[ ${OP_GENERATE_XL_CONFIG} != "true" ]]; then
           echo "Not generating xl-release.conf.template as OP_GENERATE_XL_CONFIG != 'true'"
           cp ${APP_HOME}/default-conf/op-xl-release.conf.template > ${APP_HOME}/default-conf/xl-release.conf.template
       elif [ -e ${APP_HOME}/default-conf/op-xl-release.conf.template ]; then

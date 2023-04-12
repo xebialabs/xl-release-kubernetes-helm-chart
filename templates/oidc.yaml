@@ -24,6 +24,12 @@ data:
         }
     }
 
+    server {
+        http2 {
+            enabled = ${XLR_HTTP2_ENABLED}
+        }
+    }
+
     license {
         kind = ${XL_LICENSE_KIND}
         product = "xl-release"
