@@ -60,10 +60,10 @@ Usage:
 
 {{- define "render.secret-name" -}}
   {{- if .value -}}
-    {{- if kindIs "string" .value -}}
-{{ .defaultName }}
-    {{- else -}}
-{{ .value.valueFrom.secretKeyRef.name }}   
+    {{- if kindIs "map" .value -}}
+{{ .value.valueFrom.secretKeyRef.name }}
+    {{- else if kindIs "string" .value -}}
+{{ .defaultName }}  
     {{- end -}}
   {{- else -}}
     {{- if .default -}}
@@ -207,9 +207,9 @@ Params:
   - default - String - Required - Default value if, there is no secret reference under secretRef
 */}}
 {{- define "secrets.key" -}}
-{{- if and .secretRef (not (kindIs "string" .secretRef)) .secretRef.valueFrom.secretKeyRef.key -}}
+{{- if and .secretRef (not (kindIs "string" .secretRef)) -}}
 {{ .secretRef.valueFrom.secretKeyRef.key }}
 {{- else -}}
 {{ .default }}
-{{- end -}}  
+{{- end -}}
 {{- end -}}
