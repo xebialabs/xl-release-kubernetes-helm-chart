@@ -63,7 +63,9 @@ Usage:
     {{- if kindIs "map" .value -}}
 {{ .value.valueFrom.secretKeyRef.name }}
     {{- else if kindIs "string" .value -}}
-{{ .defaultName }}  
+{{ .defaultName }}
+    {{- else -}}
+{{- fail "Invalid argument value to function render.secret-name" -}}     
     {{- end -}}
   {{- else -}}
     {{- if .default -}}
@@ -209,7 +211,9 @@ Params:
 {{- define "secrets.key" -}}
 {{- if and .secretRef (not (kindIs "string" .secretRef)) -}}
 {{ .secretRef.valueFrom.secretKeyRef.key }}
-{{- else -}}
+{{- else if kindIs "string" .secretRef -}}
 {{ .default }}
+{{- else -}}
+{{- fail "Invalid argument value to function secrets.key" -}} 
 {{- end -}}
 {{- end -}}
