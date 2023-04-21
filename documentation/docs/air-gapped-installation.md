@@ -12,7 +12,7 @@ This is internal documentation. This document can be used only if it was recomme
 
 - Running k8s cluster
 - `kubectl` connected to the cluster
-- `xl-cli` installed - version 23.3.5 or above
+- `xl-cli` installed - version 22.3.5 or above
 - Release operator version above following:
     - 22.3.1
 
@@ -27,12 +27,14 @@ Check what you need with `xl kube help`, for example:
 
 Install, upgrade or clean Digital.ai Deploy or Digital.ai Release on a Kubernetes cluster using operator technology.
 
-Installation blueprint files are used from https://dist.xebialabs.com/public/xl-op-blueprints/23.3.5/.
+Installation blueprint files are used from https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/
 
 You need to have kubectl installed and configured for the target Kubernetes cluster.
 ```
 
-You can see from here that `xl kube` needs blueprints from location [https://dist.xebialabs.com/public/xl-op-blueprints/23.3.5/](https://dist.xebialabs.com/public/xl-op-blueprints/23.3.5/).
+You can see from here that `xl kube` needs blueprints from location [https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/](https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/)
+(Note: 23.1.x denotes the appropriate version of `xl-op-blueprints` pointed by `xl`. Use the specific version in your case.)
+
 You need to download and put all files from that location to the server where you will execute `xl kube`.
 
 :::TIP
@@ -48,11 +50,11 @@ The kubernetes cluster running in airgapped environment cannot download any imag
 
 #### Prerequisite Images
 Push the images according to your planned installation to your image repository.
-For example, for version 23.3.5, following is the list of the images that you will need:
+For example, for version 23.1.x, following is the list of the images that you will need:
 
-- docker.io/xebialabs/xl-release:23.3.5
+- docker.io/xebialabs/xl-release:23.1.x
 - docker.io/xebialabs/tiny-tools:22.2.0
-- docker.io/xebialabs/release-operator:23.3.5
+- docker.io/xebialabs/release-operator:23.1.x
 - gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
 
 #### If you are using nginx include
@@ -104,11 +106,11 @@ This example creates a secret `regcred` which will be used for pull secrets for 
 
 ### Use `xl kube install` to install using custom docker image registry option 
 
-When using custom docker registry, the repository name will be of the format `myrepo_host/myrepo` and operator image will be in the format `myrepo_host/myrepo/deploy-operator:image_tag`
+When using custom docker registry, the operator image will be in the format `myrepo_host/myrepo/release-operator:image_tag`
 
 Here is example of the installation on minikube with a local docker registry running at `localhost:5000`
 
-In the below example the repository name looks like `localhost:5000/myrepo`, so operator image would be like `localhost:5000/myrepo/deploy-operator:22.3.1`. Remember to override default answer and specify in this format.
+In the below example the registry name is `localhost:5000`, the repository name is `myrepo`, so operator image would be like `localhost:5000/myrepo/release-operator:23.1.x`. Remember to override default answer and specify in this format. And also use the actual image tag version in place of `23.1.x`
 
 ```
 ❯ xl kube install -l ./xl-op-blueprints
@@ -119,7 +121,9 @@ In the below example the repository name looks like `localhost:5000/myrepo`, so 
 ? Product server you want to perform install for: dai-release [Digital.ai Release]
 ? Select the type of Image Registry: public [Custom Public Registry (Overrides defaults to use a specific custom public registry)]
 ? Enter the custom docker image registry name: localhost:5000
-? Enter the repository name (eg: <imageRegistryName>/<repositoryName> from <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/xebialabsunsupported
+? Enter the repository name (eg: <repositoryName> from <repositoryName>/<imageName>:<tagName>): myrepo
+? Enter the image name (eg: <imageName> from <repositoryName>/<imageName>:<tagName>): xl-release
+? Enter the image tag (eg: <tagName> from <repositoryName>/<imageName>:<tagName>): 23.1.x
 ? Enter PVC size for Release (Gi): 1
 ? Select between supported Access Modes: ReadWriteMany [ReadWriteMany]
 ? Select between supported ingress types: nginx [NGINX]
@@ -127,7 +131,7 @@ In the below example the repository name looks like `localhost:5000/myrepo`, so 
 ? Provide DNS name for accessing UI of the server: test.com
 ? Provide administrator password: OJnEi1BMBRuDm3ny
 ? Type of the OIDC configuration: no-oidc [No OIDC Configuration]
-? Enter the operator image to use (eg: <repositoryName>/<imageName>:<tagName>): myrepo_host/myrepo/release-operator:22.3.1
+? Enter the operator image to use (eg: <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:23.1.x
 ? Select source of the license: file [Path to the license file (the file can be in clean text or base64 encoded)]
 ? Provide license file for the server: ./xl-release-license.lic
 ? Select source of the repository keystore: generate [Generate the repository keystore during installation (you need to have keytool utility installed in your path)]
@@ -223,9 +227,9 @@ During upgrade for the question `Edit list of custom resource keys that will mig
 ...
 ? Select the type of Image Registry: public [Custom Public Registry (Overrides defaults to use a specific custom public registry)]
 ? Enter the custom docker image registry name: localhost:5000
-? Enter the repository name (eg: <imageRegistryName>/<repositoryName> from <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo
+? Enter the repository name (eg: <repositoryName> from <repositoryName>/<imageName>:<tagName>): myrepo
 ...
-? Enter the operator image to use (eg: <repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:22.3.1
+? Enter the operator image to use (eg: <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:22.3.1
 ...
 ? Edit list of custom resource keys that will migrate to the new Release CR: 
 ...
