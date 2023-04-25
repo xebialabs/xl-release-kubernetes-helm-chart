@@ -12,9 +12,8 @@ This is internal documentation. This document can be used only if it was recomme
 
 - Running k8s cluster
 - `kubectl` connected to the cluster
-- `xl-cli` installed - version 22.3.5 or above
-- Release operator version above following:
-    - 22.3.1
+- `xl-cli` installed - version 23.1.x (any version above 22.3.5)
+- Release operator - version 23.1.x (any version above 22.3.1)
 
 ## Installation steps
 
@@ -78,6 +77,37 @@ For example, for version 23.1.x, following is the list of the images that you wi
 
 - docker.io/bitnami/rabbitmq:3.9.8-debian-10-r6
 - docker.io/bitnami/bitnami-shell:10-debian-10-r233
+
+#### Prerequisite Images for upgrade from 23.1.x
+Push the images according to your planned upgrade to your image repository.
+For example, for upgrade from version 23.1.x to 23.3.x, following is the list of the images that you will need:
+
+- docker.io/xebialabs/xl-release:23.3.x
+- docker.io/xebialabs/tiny-tools:22.2.0
+- docker.io/xebialabs/release-operator:23.3.x
+- gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
+
+#### If you are using nginx include
+
+- docker.io/bitnami/nginx:1.22.1-debian-11-r44
+- docker.io/bitnami/nginx-ingress-controller:1.6.4-debian-11-r5
+
+#### If you are using haproxy include
+
+- quay.io/jcmoraisjr/haproxy-ingress:v0.14.2
+
+#### If you are using embedded keycloak include
+
+- docker.io/jboss/keycloak:17.0.1
+
+#### If you are using embedded postgresql include
+
+- docker.io/bitnami/postgresql:14.5.0-debian-11-r35
+
+#### If you are using embedded rabbitmq include
+
+- docker.io/bitnami/rabbitmq:3.11.10-debian-11-r0
+- docker.io/bitnami/bitnami-shell:11-debian-11-r92
 
 ### How to push image to internally accessible docker registry
 
