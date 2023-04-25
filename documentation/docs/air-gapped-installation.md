@@ -12,9 +12,8 @@ This is internal documentation. This document can be used only if it was recomme
 
 - Running k8s cluster
 - `kubectl` connected to the cluster
-- `xl-cli` installed - version 22.3.5 or above
-- Release operator version above following:
-    - 22.3.1
+- `xl-cli` installed - version 23.3.x (any version above 23.1.x)
+- Release operator - version 23.3.x (any version above 23.1.x)
 
 ## Installation steps
 
@@ -27,13 +26,13 @@ Check what you need with `xl kube help`, for example:
 
 Install, upgrade or clean Digital.ai Deploy or Digital.ai Release on a Kubernetes cluster using operator technology.
 
-Installation blueprint files are used from https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/
+Installation blueprint files are used from https://dist.xebialabs.com/public/xl-op-blueprints/23.3.x/
 
 You need to have kubectl installed and configured for the target Kubernetes cluster.
 ```
 
-You can see from here that `xl kube` needs blueprints from location [https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/](https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/)
-(Note: 23.1.x denotes the appropriate version of `xl-op-blueprints` pointed by `xl`. Use the specific version in your case.)
+You can see from here that `xl kube` needs blueprints from location [https://dist.xebialabs.com/public/xl-op-blueprints/23.3.x/](https://dist.xebialabs.com/public/xl-op-blueprints/23.3.x/)
+(Note: 23.3.x denotes the appropriate version of `xl-op-blueprints` pointed by `xl`. Use the specific version in your case.)
 
 You need to download and put all files from that location to the server where you will execute `xl kube`.
 
@@ -50,34 +49,34 @@ The kubernetes cluster running in airgapped environment cannot download any imag
 
 #### Prerequisite Images
 Push the images according to your planned installation to your image repository.
-For example, for version 23.1.x, following is the list of the images that you will need:
+For example, for version 23.3.x, following is the list of the images that you will need:
 
-- docker.io/xebialabs/xl-release:23.1.x
+- docker.io/xebialabs/xl-release:23.3.x
 - docker.io/xebialabs/tiny-tools:22.2.0
-- docker.io/xebialabs/release-operator:23.1.x
+- docker.io/xebialabs/release-operator:23.3.x
 - gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
 
 #### If you are using nginx include
 
-- docker.io/bitnami/nginx:1.21.3-debian-10-r48
-- docker.io/bitnami/nginx-ingress-controller:1.0.4-debian-10-r13
+- docker.io/bitnami/nginx:1.22.1-debian-11-r44
+- docker.io/bitnami/nginx-ingress-controller:1.6.4-debian-11-r5
 
 #### If you are using haproxy include
 
-- quay.io/jcmoraisjr/haproxy-ingress:v0.13.4
+- quay.io/jcmoraisjr/haproxy-ingress:v0.14.2
 
 #### If you are using embedded keycloak include
 
-- docker.io/jboss/keycloak:16.1.1
+- docker.io/jboss/keycloak:17.0.1
 
 #### If you are using embedded postgresql include
 
-- docker.io/bitnami/postgresql:11.13.0-debian-10-r73
+- docker.io/bitnami/postgresql:14.5.0-debian-11-r35
 
 #### If you are using embedded rabbitmq include
 
-- docker.io/bitnami/rabbitmq:3.9.8-debian-10-r6
-- docker.io/bitnami/bitnami-shell:10-debian-10-r233
+- docker.io/bitnami/rabbitmq:3.11.10-debian-11-r0
+- docker.io/bitnami/bitnami-shell:11-debian-11-r92
 
 ### How to push image to internally accessible docker registry
 
@@ -110,7 +109,7 @@ When using custom docker registry, the operator image will be in the format `myr
 
 Here is example of the installation on minikube with a local docker registry running at `localhost:5000`
 
-In the below example the registry name is `localhost:5000`, the repository name is `myrepo`, so operator image would be like `localhost:5000/myrepo/release-operator:23.1.x`. Remember to override default answer and specify in this format. And also use the actual image tag version in place of `23.1.x`
+In the below example the registry name is `localhost:5000`, the repository name is `myrepo`, so operator image would be like `localhost:5000/myrepo/release-operator:23.3.x`. Remember to override default answer and specify in this format. And also use the actual image tag version in place of `23.3.x`
 
 ```
 ❯ xl kube install -l ./xl-op-blueprints
@@ -123,7 +122,7 @@ In the below example the registry name is `localhost:5000`, the repository name 
 ? Enter the custom docker image registry name: localhost:5000
 ? Enter the repository name (eg: <repositoryName> from <repositoryName>/<imageName>:<tagName>): myrepo
 ? Enter the image name (eg: <imageName> from <repositoryName>/<imageName>:<tagName>): xl-release
-? Enter the image tag (eg: <tagName> from <repositoryName>/<imageName>:<tagName>): 23.1.x
+? Enter the image tag (eg: <tagName> from <repositoryName>/<imageName>:<tagName>): 23.3.x
 ? Enter PVC size for Release (Gi): 1
 ? Select between supported Access Modes: ReadWriteMany [ReadWriteMany]
 ? Select between supported ingress types: nginx [NGINX]
@@ -131,7 +130,7 @@ In the below example the registry name is `localhost:5000`, the repository name 
 ? Provide DNS name for accessing UI of the server: test.com
 ? Provide administrator password: OJnEi1BMBRuDm3ny
 ? Type of the OIDC configuration: no-oidc [No OIDC Configuration]
-? Enter the operator image to use (eg: <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:23.1.x
+? Enter the operator image to use (eg: <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:23.3.x
 ? Select source of the license: file [Path to the license file (the file can be in clean text or base64 encoded)]
 ? Provide license file for the server: ./xl-release-license.lic
 ? Select source of the repository keystore: generate [Generate the repository keystore during installation (you need to have keytool utility installed in your path)]
