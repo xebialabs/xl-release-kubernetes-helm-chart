@@ -69,19 +69,11 @@ spec:
         paths:
           - path: {{ $ingressPath }}
             pathType: ImplementationSpecific
-            {{- if .Values.http2.enabled }}
             backend:
               service:
                 name: {{ $fullName }}
                 port:
                   number: 443
-            {{- else }}
-            backend:
-              service:
-                name: {{ $fullName }}
-                port:
-                  number: 80
-            {{- end }}
   {{- end }}
 {{- end }}
 {{- end -}}
