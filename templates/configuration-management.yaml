@@ -11,18 +11,23 @@ data:
     {{- range $.Values.release.configurationManagement.configuration.resetFiles }}
     rm -fv /opt/xebialabs/xl-release-server/conf/{{ . }};
     {{- end }}
-    echo "Finished reset of the conf files"; 
-    mkdir /opt/xebialabs/xl-release-server/xlr-configuration-management/; 
+    echo "Finished reset of the conf files";
+    mkdir /opt/xebialabs/xl-release-server/xlr-configuration-management/;
     ORIGINAL_PWD=$(pwd);
-    cd /opt/xebialabs/xl-release-server/xlr-configuration-management/; 
+    cd /opt/xebialabs/xl-release-server/xlr-configuration-management/;
     cp /opt/xebialabs/xlr-configuration-management/* .; chmod +x *.sh;
-    
+
     if [ -z "$OIDC_CLIENT_ID" ]; then
+      {{- if .Values.oidc.enabled }}
+      echo "Generating xl-release.conf.template for internal Keycloak"
+      cp ${APP_HOME}/default-conf/op-xl-release.conf.template ${APP_HOME}/default-conf/xl-release.conf.template
+      {{- else }}
       echo "Not generating xl-release.conf.template as no OIDC configuration"
+      {{- end }}
     else
       if [[ ${OP_GENERATE_XL_CONFIG} != "true" ]]; then
           echo "Not generating xl-release.conf.template as OP_GENERATE_XL_CONFIG != 'true'"
-          cp ${APP_HOME}/default-conf/op-xl-release.conf.template > ${APP_HOME}/default-conf/xl-release.conf.template
+          cp ${APP_HOME}/default-conf/op-xl-release.conf.template ${APP_HOME}/default-conf/xl-release.conf.template
       elif [ -e ${APP_HOME}/default-conf/op-xl-release.conf.template ]; then
           echo "Generate configuration file default-conf/xl-release.conf.template from environment parameters"
           sed -e "s#\${OIDC_CLIENT_ID}#${OIDC_CLIENT_ID}#g" \
@@ -30,7 +35,7 @@ data:
               ${APP_HOME}/default-conf/op-xl-release.conf.template > ${APP_HOME}/default-conf/xl-release.conf.template
       fi
     fi
-    
+
     [ -x ./op-configuration-management.sh ] && ./op-configuration-management.sh;
     cd $ORIGINAL_PWD;
     echo "Finished release configuration management";
