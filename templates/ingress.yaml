@@ -73,7 +73,13 @@ spec:
               service:
                 name: {{ $fullName }}
                 port:
+
+                {{- if .Values.http2.enabled }}
+                  number: 443
+                {{- else }}
                   number: 80
+                {{- end }}
+
   {{- end }}
 {{- end }}
 {{- end -}}
