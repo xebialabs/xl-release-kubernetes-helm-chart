@@ -12,9 +12,8 @@ This is internal documentation. This document can be used only if it was recomme
 
 - Running k8s cluster
 - `kubectl` connected to the cluster
-- `xl-cli` installed - version 23.3.5 or above
-- Release operator version above following:
-    - 22.3.1
+- `xl-cli` installed - version 23.1.x (any version above 22.3.5)
+- Release operator - version 23.1.x (any version above 22.3.1)
 
 ## Installation steps
 
@@ -27,12 +26,14 @@ Check what you need with `xl kube help`, for example:
 
 Install, upgrade or clean Digital.ai Deploy or Digital.ai Release on a Kubernetes cluster using operator technology.
 
-Installation blueprint files are used from https://dist.xebialabs.com/public/xl-op-blueprints/23.3.5/.
+Installation blueprint files are used from https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/
 
 You need to have kubectl installed and configured for the target Kubernetes cluster.
 ```
 
-You can see from here that `xl kube` needs blueprints from location [https://dist.xebialabs.com/public/xl-op-blueprints/23.3.5/](https://dist.xebialabs.com/public/xl-op-blueprints/23.3.5/).
+You can see from here that `xl kube` needs blueprints from location [https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/](https://dist.xebialabs.com/public/xl-op-blueprints/23.1.x/)
+(Note: 23.1.x denotes the appropriate version of `xl-op-blueprints` pointed by `xl`. Use the specific version in your case.)
+
 You need to download and put all files from that location to the server where you will execute `xl kube`.
 
 :::TIP
@@ -48,11 +49,11 @@ The kubernetes cluster running in airgapped environment cannot download any imag
 
 #### Prerequisite Images
 Push the images according to your planned installation to your image repository.
-For example, for version 23.3.5, following is the list of the images that you will need:
+For example, for version 23.1.x, following is the list of the images that you will need:
 
-- docker.io/xebialabs/xl-release:23.3.5
+- docker.io/xebialabs/xl-release:23.1.x
 - docker.io/xebialabs/tiny-tools:22.2.0
-- docker.io/xebialabs/release-operator:23.3.5
+- docker.io/xebialabs/release-operator:23.1.x
 - gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
 
 #### If you are using nginx include
@@ -76,6 +77,37 @@ For example, for version 23.3.5, following is the list of the images that you wi
 
 - docker.io/bitnami/rabbitmq:3.9.8-debian-10-r6
 - docker.io/bitnami/bitnami-shell:10-debian-10-r233
+
+#### Prerequisite Images for upgrade from 23.1.x
+Push the images according to your planned upgrade to your image repository.
+For example, for upgrade from version 23.1.x to 23.3.x, following is the list of the images that you will need:
+
+- docker.io/xebialabs/xl-release:23.3.x
+- docker.io/xebialabs/tiny-tools:22.2.0
+- docker.io/xebialabs/release-operator:23.3.x
+- gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
+
+#### If you are using nginx include
+
+- docker.io/bitnami/nginx:1.22.1-debian-11-r44
+- docker.io/bitnami/nginx-ingress-controller:1.6.4-debian-11-r5
+
+#### If you are using haproxy include
+
+- quay.io/jcmoraisjr/haproxy-ingress:v0.14.2
+
+#### If you are using embedded keycloak include
+
+- docker.io/jboss/keycloak:17.0.1
+
+#### If you are using embedded postgresql include
+
+- docker.io/bitnami/postgresql:14.5.0-debian-11-r35
+
+#### If you are using embedded rabbitmq include
+
+- docker.io/bitnami/rabbitmq:3.11.10-debian-11-r0
+- docker.io/bitnami/bitnami-shell:11-debian-11-r92
 
 ### How to push image to internally accessible docker registry
 
@@ -104,11 +136,11 @@ This example creates a secret `regcred` which will be used for pull secrets for 
 
 ### Use `xl kube install` to install using custom docker image registry option 
 
-When using custom docker registry, the repository name will be of the format `myrepo_host/myrepo` and operator image will be in the format `myrepo_host/myrepo/deploy-operator:image_tag`
+When using custom docker registry, the operator image will be in the format `myrepo_host/myrepo/release-operator:image_tag`
 
 Here is example of the installation on minikube with a local docker registry running at `localhost:5000`
 
-In the below example the repository name looks like `localhost:5000/myrepo`, so operator image would be like `localhost:5000/myrepo/deploy-operator:22.3.1`. Remember to override default answer and specify in this format.
+In the below example the registry name is `localhost:5000`, the repository name is `myrepo`, so operator image would be like `localhost:5000/myrepo/release-operator:23.1.x`. Remember to override default answer and specify in this format. And also use the actual image tag version in place of `23.1.x`
 
 ```
 ❯ xl kube install -l ./xl-op-blueprints
@@ -117,9 +149,11 @@ In the below example the repository name looks like `localhost:5000/myrepo`, so 
 ? Do you want to use an custom Kubernetes namespace (current default is 'digitalai'): No
 ? Do you want to create custom Kubernetes namespace digitalai, it does not exist: Yes
 ? Product server you want to perform install for: dai-release [Digital.ai Release]
-? Select the type of Image Registry: public [Custom Public Registry (Overrides defaults to use a specific custom public registry)]
+? Select type of image registry: public [Custom Public Registry (Uses a specific custom registry)]
 ? Enter the custom docker image registry name: localhost:5000
-? Enter the repository name (eg: <imageRegistryName>/<repositoryName> from <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/xebialabsunsupported
+? Enter the repository name (eg: <repositoryName> from <repositoryName>/<imageName>:<tagName>): myrepo
+? Enter the image name (eg: <imageName> from <repositoryName>/<imageName>:<tagName>): xl-release
+? Enter the image tag (eg: <tagName> from <repositoryName>/<imageName>:<tagName>): 23.1.x
 ? Enter PVC size for Release (Gi): 1
 ? Select between supported Access Modes: ReadWriteMany [ReadWriteMany]
 ? Select between supported ingress types: nginx [NGINX]
@@ -127,7 +161,7 @@ In the below example the repository name looks like `localhost:5000/myrepo`, so 
 ? Provide DNS name for accessing UI of the server: test.com
 ? Provide administrator password: OJnEi1BMBRuDm3ny
 ? Type of the OIDC configuration: no-oidc [No OIDC Configuration]
-? Enter the operator image to use (eg: <repositoryName>/<imageName>:<tagName>): myrepo_host/myrepo/release-operator:22.3.1
+? Enter the operator image to use (eg: <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:23.1.x
 ? Select source of the license: file [Path to the license file (the file can be in clean text or base64 encoded)]
 ? Provide license file for the server: ./xl-release-license.lic
 ? Select source of the repository keystore: generate [Generate the repository keystore during installation (you need to have keytool utility installed in your path)]
@@ -155,6 +189,26 @@ After the install command completes successfully, you will see operator and othe
 ## Upgrade steps
 
 Use `xl kube upgrade` to upgrade. It is similar to installation steps. Here the already installed cluster resources are overwritten/upgraded with the newly supplied values.
+
+### Example of running upgrade using custom docker image registry option
+
+```
+❯ xl kube upgrade -l ./xl-op-blueprints
+...
+? Select type of image registry: public [Custom Public Registry (Uses a specific custom registry)]
+? Enter the custom docker image registry name: localhost:5000
+? Enter the repository name (eg: <repositoryName> from <repositoryName>/<imageName>:<tagName>): myrepo
+...
+? Enter the operator image to use (eg: <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:22.3.1
+...
+? Edit list of custom resource keys that will migrate to the new Release CR: 
+...
+? Do you want to proceed to the deployment with these values? Yes
+For current process files will be generated in the: digitalai/dai-release/digitalai/20221020-004412/kubernetes
+Generated answers file successfully: digitalai/generated_answers_dai-release_digitalai_upgrade-20221020-004412.yaml
+Starting upgrade processing.
+...
+```
 
 During upgrade for the question `Edit list of custom resource keys that will migrate to the new Release CR:` append to the list following keys:
 
@@ -214,26 +268,6 @@ During upgrade for the question `Edit list of custom resource keys that will mig
 .spec.keycloak.postgresql.imagePullSecrets.name
 .spec.postgresql.global.imagePullSecrets
 .spec.rabbitmq.global.imagePullSecrets
-```
-
-### Example of running upgrade using custom docker image registry option
-
-```
-❯ xl kube upgrade -l ./xl-op-blueprints
-...
-? Select the type of Image Registry: public [Custom Public Registry (Overrides defaults to use a specific custom public registry)]
-? Enter the custom docker image registry name: localhost:5000
-? Enter the repository name (eg: <imageRegistryName>/<repositoryName> from <imageRegistryName>/<repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo
-...
-? Enter the operator image to use (eg: <repositoryName>/<imageName>:<tagName>): localhost:5000/myrepo/release-operator:22.3.1
-...
-? Edit list of custom resource keys that will migrate to the new Release CR: 
-...
-? Do you want to proceed to the deployment with these values? Yes
-For current process files will be generated in the: digitalai/dai-release/digitalai/20221020-004412/kubernetes
-Generated answers file successfully: digitalai/generated_answers_dai-release_digitalai_upgrade-20221020-004412.yaml
-Starting upgrade processing.
-...
 ```
 
 ## Image repository related fields that are getting updated in Installation and Upgrade process by xl cli when using a custom image registry
