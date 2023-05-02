@@ -52,6 +52,7 @@ ssl:
   keystoreKeypassword: <ReleaseKeystoreKeyPassword>
   keystore: <ReleaseKeystore-converted-to-base64-encoded>
 ```
+
 ### Sample release helm values yaml snippet for http2 using keystore secret
 The keystore value can also be provided using a generic kubernetes secret. Like below.
 ```
@@ -63,11 +64,6 @@ ssl:
       secretKeyRef:
         name: <ReleaseKeystoreSecretName>
         key: ssl-keystore.p12
-```
-### Installing helm chart
-After including the above fields for http2 in the values yaml, run helm install command as follows.
-```
-helm install -f <values-file> <helm-release-name> . 
 ```
 
 ### Accessing the release UI
@@ -81,5 +77,3 @@ kubectl port-forward pod/<release-pod-name> 5543:5543
 ```
 After port forwarding, release UI will be accessible from https://localhost:5543
 
-### Additional info
-HTTPS(or SSL enabled transport) is required for http2. XL-Release can be configured to start on http2 endpoint with some configuration changes to `xl-release.conf` and `xl-release-server.conf`. These changes have been baked into the XL-Release docker image. And they can be enabled by some env variables and configuration setting for the docker image. Based on the fields in helm values yaml, the appropriate docker env variables are set and ssl certs are also volume mounted to xl-release image.(for http2).
