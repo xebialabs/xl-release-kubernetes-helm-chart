@@ -67,7 +67,7 @@ For example, for version 23.1.x, following is the list of the images that you wi
 
 #### If you are using embedded keycloak include
 
-- docker.io/jboss/keycloak:16.1.1
+- docker.io/jboss/keycloak:17.0.1
 
 #### If you are using embedded postgresql include
 
