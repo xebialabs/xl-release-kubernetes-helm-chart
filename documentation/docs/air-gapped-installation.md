@@ -208,10 +208,9 @@ During upgrade for the question `Edit list of custom resource keys that will mig
 .spec.rabbitmq.image.repository
 .spec.rabbitmq.global.imageRegistry
 .spec.rabbitmq.volumePermissions.image.repository
-
 .spec.nginx-ingress-controller.global.imagePullSecrets
-.spec.keycloak.imagePullSecrets.name
-.spec.keycloak.postgresql.imagePullSecrets.name
+.spec.keycloak.imagePullSecrets
+.spec.keycloak.postgresql.imagePullSecrets
 .spec.postgresql.global.imagePullSecrets
 .spec.rabbitmq.global.imagePullSecrets
 ```
