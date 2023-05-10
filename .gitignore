@@ -7,4 +7,5 @@ Chart.lock
 .DS_Store
 bin/
 test.yaml
-values-*.yaml
+values-haproxy-*.yaml
+values-nginx-*.yaml
