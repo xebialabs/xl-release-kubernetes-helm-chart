@@ -40,6 +40,7 @@ When you use XL-CLI, you can specify the created keystore in 2 ways:
 * generic secret
 
 #### Create base64 encoded string of Keystore file
+Run the following command:
 ```
 cat ssl-keystore.p12 | base64 -w 0
 ```
@@ -76,9 +77,7 @@ C:\Users\Administrator>xl-client-23.1.0-rc.2-windows-amd64.exe kube install
 ? Provide keystore file for the server: C:\Users\Administrator\certs\localhost.p12
 ? Provide the server keystore password: test
 ? Provide the server keystore key passphrase: test
-? Select between supported ingress types: nginx
-? Do you want to enable an TLS/SSL configuration (if yes, requires existing TLS secret in the namespace): No
-? Provide DNS name for accessing UI of the server: release.digitalai-testing.com
+? Select between supported ingress types: none [None - Ingress will not be set up during installation]
 ? Provide administrator password: admin
 ? Type of the OIDC configuration: no-oidc [No OIDC Configuration]
 ? Enter the operator image to use (eg: <repositoryName>/<imageName>:<tagName>): xebialabsunsupported/release-operator:23.1.0-rc.2
@@ -101,7 +100,6 @@ C:\Users\Administrator>xl-client-23.1.0-rc.2-windows-amd64.exe kube install
         | AdminPassword                  | admin                                              |
         | CleanBefore                    | false                                              |
         | CreateNamespace                | true                                               |
-        | EnableIngressTls               | false                                              |
         | EnablePostgresql               | true                                               |
         | EnableRabbitmq                 | true                                               |
         | ExternalOidcConf               | external: false                                    |
@@ -110,8 +108,7 @@ C:\Users\Administrator>xl-client-23.1.0-rc.2-windows-amd64.exe kube install
         | ImageNameRelease               | xl-release                                         |
         | ImageRegistryType              | default                                            |
         | ImageTag                       | 23.1.0-rc.2                                        |
-        | IngressHost                    | release.digitalai-testing.com                      |
-        | IngressType                    | nginx                                              |
+        | IngressType                    | none                                               |
         | IsCustomImageRegistry          | false                                              |
         | K8sSetup                       | AWSEKS                                             |
         | KeystorePassphrase             | 4rSuEqVf21G6wS3g                                   |
@@ -182,11 +179,9 @@ C:\Users\Administrator>xl-client-23.1.0-rc.2-windows-amd64.exe kube install
 ? Do you want to enable http2 for release: Yes
 ? Select source of the keystore for the server: secret [Generic Secret containing keystore file with key as ssl-keystore.p12]
 ? Provide the generic secret name with the release server keystore added as key ssl-keystore.p12: http2-tls-secret
-? Provide the server keystore password: changeit
-? Provide the server keystore key passphrase: changeit
-? Select between supported ingress types: nginx
-? Do you want to enable an TLS/SSL configuration (if yes, requires existing TLS secret in the namespace): No
-? Provide DNS name for accessing UI of the server: release.digitalai-testing.com
+? Provide the server keystore password: test
+? Provide the server keystore key passphrase: test
+? Select between supported ingress types: none [None - Ingress will not be set up during installation]
 ? Provide administrator password: admin
 ? Type of the OIDC configuration: no-oidc [No OIDC Configuration]
 ? Enter the operator image to use (eg: <repositoryName>/<imageName>:<tagName>): xebialabsunsupported/release-operator:23.1.0-rc.2
@@ -209,7 +204,6 @@ C:\Users\Administrator>xl-client-23.1.0-rc.2-windows-amd64.exe kube install
         | AdminPassword                  | admin                                              |
         | CleanBefore                    | false                                              |
         | CreateNamespace                | true                                               |
-        | EnableIngressTls               | false                                              |
         | EnablePostgresql               | true                                               |
         | EnableRabbitmq                 | true                                               |
         | ExternalOidcConf               | external: false                                    |
@@ -218,8 +212,7 @@ C:\Users\Administrator>xl-client-23.1.0-rc.2-windows-amd64.exe kube install
         | ImageNameRelease               | xl-release                                         |
         | ImageRegistryType              | default                                            |
         | ImageTag                       | 23.1.0-rc.2                                        |
-        | IngressHost                    | release.digitalai-testing.com                      |
-        | IngressType                    | nginx                                              |
+        | IngressType                    | none                                               |
         | IsCustomImageRegistry          | false                                              |
         | K8sSetup                       | AWSEKS                                             |
         | KeystorePassphrase             | JILR8MbG18U479RG                                   |
@@ -237,8 +230,8 @@ C:\Users\Administrator>xl-client-23.1.0-rc.2-windows-amd64.exe kube install
         | RabbitmqPvcSize                | 1                                                  |
         | RabbitmqReplicaCount           | 1                                                  |
         | RabbitmqStorageClass           | my-efs                                             |
-        | ReleaseKeystoreKeyPassword     | changeit                                           |
-        | ReleaseKeystorePassword        | changeit                                           |
+        | ReleaseKeystoreKeyPassword     | test                                               |
+        | ReleaseKeystorePassword        | test                                               |
         | ReleaseKeystoreSecretName      | http2-tls-secret                                   |
         | ReleaseKeystoreSource          | secret                                             |
         | RemoteRunnerUseDefaultLocation | true                                               |
