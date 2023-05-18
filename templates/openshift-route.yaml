@@ -1,0 +1,40 @@
+{{- if and .Values.route.enabled (eq .Values.K8sSetup.Platform "Openshift") }}
+{{- $fullName := include "xl-release.fullname" . -}}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ $fullName }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- if .Values.route.annotations }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.route.annotations "context" $) | nindent 4 }}
+    {{- end }}
+    {{- if .Values.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- end }}
+spec:
+  host: {{ .Values.route.hostname }}
+  path: {{ .Values.route.path }}
+  to:
+    kind: Service
+    name: {{ $fullName }}
+  port:
+    targetPort: xlr-http
+{{- if $.Values.route.tls.enabled }}
+  tls:
+  {{- with $.Values.route.tls }}
+    key: |-
+{{ .key | indent 6 }}
+    certificate: |-
+{{ .certificate | indent 6 }}
+    caCertificate: |-
+{{ .caCertificate | indent 6 }}
+    insecureEdgeTerminationPolicy: {{ .insecureEdgeTerminationPolicy }}
+    termination: {{ .termination }}
+  {{- end }}
+{{- end }}
+{{- end }}

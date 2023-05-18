@@ -26,43 +26,43 @@ k8sSetup:
 
 # Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
 license: ""
+licenseAcceptEula: false
 
 generateXlConfig: true
 useIpAsHostname: false
 forceRemoveMissingTypes: false
+clusterMode: full
+forceUpgrade: true
+enableEmbeddedQueue: false
+
+http2:
+  enabled: false
+ssl:
+  enabled: false
+  keystorePassword:
+  keystoreKeypassword:
+  keystore:
 
 external:
   db:
     enabled: false
-    mainUrl: ""
-    mainUsername: ""
-    mainPassword: ""
-    reportUrl: ""
-    reportUsername: ""
-    reportPassword: ""
+    main:
+      url: ""
+      username: ""
+      password: ""
+      maxPoolSize: ""
+    report:
+      url: ""
+      username: ""
+      password: ""
+      maxPoolSize: ""
 
-    # If you want to use a existing database.
-    # Set 'postgresql.install' to 'false', Only when we use existing Database for both Release and keycloak.
-    # Set 'UseExistingDB.Enabled' to 'true'.
-    # Uncomment the following lines and provide the values.
-    # XLR_DB_URL:
-    # XLR_DB_USER:
-    # XLR_DB_PASS:
-    # XLR_REPORT_DB_URL:
-    # XLR_REPORT_DB_USER:
-    # XLR_REPORT_DB_PASS:
   mq:
     enabled: false
     url: ""
     queueName: ""
     username: ""
     password: ""
-    # If you want to use a existing Message Queue, change 'rabbitmq.install' to 'false'.
-    # Set 'UseExistingMQ.Enabled' to 'true'.Uncomment the following lines and provide the values.
-    # XLR_TASK_QUEUE_USERNAME:
-    # XLR_TASK_QUEUE_PASSWORD:
-    # XLR_TASK_QUEUE_NAME:
-    # XLR_TASK_QUEUE_URL:
 
 keystore:
   # Set passphrase for the keystore
@@ -129,7 +129,7 @@ oidc:
   clientId:
   clientSecret:
   emailClaim:
-  enabled: true
+  enabled: false
   external: false
   externalIdClaim:
   fullNameClaim:
@@ -246,6 +246,7 @@ extraEnvVarsSecret: ""
 ## Container Ports
 containerPorts:
   releaseHttp: 5516
+  releaseHttps: 5543
 
 ## @param extraContainerPorts Extra ports to be included in container spec, primarily informational
 ## E.g:
@@ -274,6 +275,12 @@ configuration: |-
         }
       }
     }
+  
+    server {
+        http2 {
+            enabled = ${XLR_HTTP2_ENABLED}
+        }
+    }
 
     license {
       kind = ${XL_LICENSE_KIND}
@@ -285,7 +292,7 @@ configuration: |-
       db-password="${XL_DB_PASSWORD}"
       db-url="${XL_DB_URL}"
       db-username=${XL_DB_USERNAME}
-      max-pool-size=10
+      max-pool-size=${XL_DB_MAX_POOL_SIZE}
     }
 
     # TODO Release does not support (H2) running in one schema.
@@ -294,6 +301,7 @@ configuration: |-
       db-password="${XL_REPORT_DB_PASSWORD}"
       db-url="${XL_REPORT_DB_URL}"
       db-username=${XL_REPORT_DB_USERNAME}
+      max-pool-size=${XL_REPORT_DB_MAX_POOL_SIZE}
     }
 
     # Task queue
@@ -315,8 +323,10 @@ configuration: |-
         providers {
           oidc {
             {{- if .Values.oidc.external }}
-            clientId={{ .Values.oidc.clientId | quote }}
-            clientSecret={{ .Values.oidc.clientSecret | quote }}
+            clientId=""
+            clientId=${?OIDC_CLIENT_ID}
+            clientSecret=""
+            clientSecret=${?OIDC_CLIENT_SECRET}
             {{- if .Values.oidc.clientAuthMethod }}
             clientAuthMethod={{ .Values.oidc.clientAuthMethod | quote }}
             {{- end }}
@@ -327,14 +337,16 @@ configuration: |-
                 {{- if .Values.oidc.clientAuthJwt.keyStore.enable }}
                 keyStore {
                     path={{ default "" .Values.oidc.clientAuthJwt.keyStore.path | quote }}
-                    password={{ default "" .Values.oidc.clientAuthJwt.keyStore.password | quote }}
+                    password=""
+                    password=${?OIDC_CLIENT_AUTH_JWT_KEYSTORE_PASSWORD}
                     type={{ default "" .Values.oidc.clientAuthJwt.keyStore.type | quote }}
                 }
                 {{- end }}
                 {{- if .Values.oidc.clientAuthJwt.key.enable }}
                 key {
                     alias={{ default "" .Values.oidc.clientAuthJwt.key.alias | quote }}
-                    password={{ default "" .Values.oidc.clientAuthJwt.key.password | quote }}
+                    password=""
+                    password=${?OIDC_CLIENT_AUTH_JWT_KEY_PASSWORD}
                 }
                 {{- end }}
             }
@@ -367,7 +379,8 @@ configuration: |-
                 audience={{ default "" .Values.oidc.accessToken.audience | quote }}
                 keyRetrievalUri={{ default "" .Values.oidc.accessToken.keyRetrievalUri | quote }}
                 jwsAlg={{ default "" .Values.oidc.accessToken.jwsAlg | quote }}
-                secretKey={{ default "" .Values.oidc.accessToken.secretKey | quote }}
+                secretKey=""
+                secretKey=${?OIDC_ACCESS_TOKEN_SECRET_KEY}
                 }
             {{- end }}
             {{- if .Values.oidc.proxyHost }}
@@ -386,10 +399,8 @@ configuration: |-
             userAuthorizationUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/auth"
             logoutUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/logout"
             {{- end }}
-            {{- range .Values.ingress.hosts }}
-            redirectUri="http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/oidc-login"
-            postLogoutRedirectUri="http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/oidc-login"
-            {{- end }}
+            redirectUri="{{ include "release.serverUrl" . }}/oidc-login"
+            postLogoutRedirectUri="{{ include "release.serverUrl" . }}/oidc-login"
             userNameClaim="preferred_username"
             fullNameClaim="name"
             emailClaim="email"
@@ -465,6 +476,7 @@ image:
   ##   - myRegistryKeySecretName
   ##
   pullSecrets: []
+
   ## Configure the ingress resource that allows you to access the
   ## Release installation. Set up the URL
   ## ref: https://kubernetes.io/docs/user-guide/ingress/
@@ -472,7 +484,7 @@ image:
 ingress:
   ## @param ingress.enabled Enable ingress resource for Management console
   ##
-  enabled: true
+  enabled: false
 
   ## @param ingress.path Path for the default host. You may need to set this to '/*' in order to use this with ALB ingress controllers.
   ##
@@ -499,15 +511,15 @@ ingress:
     # ingress.kubernetes.io/tls-acme: "true"
 
     ## nginx
-    kubernetes.io/ingress.class: "nginx-dair"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/affinity: cookie
-    nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
-
+    #kubernetes.io/ingress.class: "nginx-dair"
+    #nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    #nginx.ingress.kubernetes.io/rewrite-target: /
+    #nginx.ingress.kubernetes.io/affinity: cookie
+    #nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    #nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    #nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    #nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    #
     ## haproxy
     #kubernetes.io/ingress.class: "haproxy-dair"
     #ingress.kubernetes.io/rewrite-target: /
@@ -585,6 +597,30 @@ ingress:
   ##
   ingressClassName: ""
 
+route:
+  ## @param route.enabled Enable route resource
+  ##
+  enabled: false
+  ## @param route.path Path for the default host.
+  ##
+  path: /
+  ## @param route.hostname Default host for the route resource
+  ##
+  hostname: ""
+  ## @param route.annotations Additional annotations for the route resource.
+  annotations:
+    haproxy.router.openshift.io/cookie_name: JSESSIONID
+    haproxy.router.openshift.io/disable_cookies: "false"
+    haproxy.router.openshift.io/rewrite-target: /
+  tls:
+    enabled: false
+    key: ""
+    certificate: ""
+    caCertificate: ""
+    insecureEdgeTerminationPolicy: ""
+    termination: edge
+
+
 ## @section RBAC parameters
 ##
 
@@ -642,7 +678,7 @@ persistence:
   ## @param persistence.accessModes PVC Access Modes for Release data volume
   ##
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   ## @param persistence.existingClaim Provide an existing PersistentVolumeClaims
   ## The value is evaluated as a template
   ## So, for example, the name can depend on .Release or .Chart
@@ -676,15 +712,18 @@ service:
   ##
   ports:
     releaseHttp: 80
+    releaseHttps: 443
   ## Service ports name
   ##
   portNames:
     releaseHttp: "release-http"
+    releaseHttps: "release-https"
 
   ## Node ports to expose
   ##
   nodePorts:
     releaseHttp: ""
+    releaseHttps: ""
   ## @param service.extraPorts Extra ports to expose in the service
   ## E.g.:
   ## extraPorts:
@@ -976,7 +1015,7 @@ keycloak:
     - name: DB_VENDOR
       value: postgres
     - name: DB_ADDR
-      value: {{ .Release.Name }}-postgresql
+      value: {{ include "postgresql.subchart" . }}
     - name: DB_PORT
       value: "5432"
     - name: DB_DATABASE
@@ -990,7 +1029,7 @@ keycloak:
   extraVolumes: |
     - name: realm-config
       configMap:
-        name: {{ .Release.Name }}-release-keycloak
+        name: {{ include "common.names.fullname" . }}-release-keycloak
   extraVolumeMounts: |
     - name: realm-config
       mountPath: "/realm/"
@@ -1015,7 +1054,7 @@ keycloak:
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
 nginx-ingress-controller:
-  install: true
+  install: false
   extraArgs:
     ingress-class: "nginx-dair"
   ingressClassResource:
@@ -1038,17 +1077,18 @@ postgresql:
   install: true
   primary:
     initdb:
-      scriptsSecret: "{{ .Release.Name }}-release-postgresql"
-  persistence:
-    enabled: true
-    accessMode: ReadWriteOnce
-    storageClass: ""
-    size: 8Gi
-    existingClaim: ""
+      scriptsSecret: '{{ include "postgresql.primary.fullname" . }}-release'
+    extendedConfiguration: |
+      max_connections = 150
+    persistence:
+      enabled: true
+      accessMode: ReadWriteOnce
+      storageClass: ""
+      size: 8Gi
+      existingClaim: ""
   auth:
     enablePostgresUser: true
     postgresPassword: postgres
-  postgresqlMaxConnections: "150"
   service:
     port: 5432
     type: ClusterIP
@@ -1073,7 +1113,7 @@ rabbitmq:
   loadDefinition:
     enabled: true
     file: /app/release_load_definition.json
-    existingSecret: "{{ .Release.Name }}-release-rabbitmq"
+    existingSecret: '{{ include "common.names.fullname" . }}-release'
   extraConfiguration: |
     raft.wal_max_size_bytes = 1048576
   persistence:

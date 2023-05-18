@@ -19,8 +19,14 @@ metadata:
 spec:
   clusterIP: None
   ports:
+    {{- if .Values.http2.enabled }}
+    - name: {{ .Values.service.portNames.releaseHttps }}
+      port: {{ .Values.service.ports.releaseHttps }}
+      targetPort: {{ .Values.service.portNames.releaseHttps }}
+    {{- else }}
     - name: {{ .Values.service.portNames.releaseHttp }}
       port: {{ .Values.service.ports.releaseHttp }}
       targetPort: {{ .Values.service.portNames.releaseHttp }}
+    {{- end }}
   selector: {{ include "common.labels.matchLabels" . | nindent 4 }}
   publishNotReadyAddresses: true

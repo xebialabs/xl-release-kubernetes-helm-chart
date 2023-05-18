@@ -73,12 +73,16 @@ spec:
       {{- if .Values.dnsPolicy }}
       dnsPolicy: {{ .Values.dnsPolicy }}
       {{- end }}
+      {{- if .Values.hostNetwork }}
+      hostNetwork: {{ .Values.hostNetwork }}
+      {{- end }}
       {{- if .Values.dnsConfig }}
       dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.dnsConfig "context" .) | nindent 8 }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- if or .Values.initContainers (and (not .Values.external.db.enabled) .Values.postgresql.install) (and (not .Values.external.mq.enabled) .Values.rabbitmq.install) }}
       initContainers:
+        {{- if not .Values.diagnosticMode.enabled }}
         {{- if and (not .Values.external.db.enabled) .Values.postgresql.install }}
         - name: wait-for-postgresql
           image: {{ include "release.busyBox.image" . }}
@@ -88,12 +92,12 @@ spec:
           args:
             - -ec
             - |
-              until nc -z -w 2 $POSTGRESQL_SVC $POSTGRESQL_PORT && echo postgresql ok; do
+              until nc -z -w 2 -v $POSTGRESQL_SVC $POSTGRESQL_PORT && echo postgresql ok; do
                 sleep 2;
               done;
           env:
             - name: POSTGRESQL_SVC
-              value: {{ .Release.Name }}-postgresql
+              value: {{ include "postgresql.subchart" . }}
             - name: POSTGRESQL_PORT
               value: {{ .Values.postgresql.service.port | quote }}
         {{- end }}
@@ -106,14 +110,15 @@ spec:
           args:
             - -ec
             - |
-              until nc -z -w 2 $RABBITMQ_SVC $RABBITMQ_PORT && echo database ok; do
+              until nc -z -w 2 -v $RABBITMQ_SVC $RABBITMQ_PORT && echo database ok; do
                 sleep 2;
               done;
           env:
             - name: RABBITMQ_SVC
-              value: {{ .Release.Name }}-rabbitmq
+              value: {{ include "rabbitmq.subchart" . }}
             - name: RABBITMQ_PORT
               value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
+        {{- end }}
         {{- end }}
         {{- if .Values.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
@@ -140,89 +145,110 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           env:
+            - name: ACCEPT_EULA
+              {{- if .Values.licenseAcceptEula }}
+              value: "y"
+              {{- else }}
+              value: "n"
+              {{- end }}
+            {{- if .Values.http2.enabled }}
+            - name: APP_PORT
+              value: {{ .Values.containerPorts.releaseHttps | quote }}
+            {{- else }}
+            - name: APP_PORT
+              value: {{ .Values.containerPorts.releaseHttp | quote }}
+            {{- end }}
             - name: ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: releasePassword
+              {{- include "render.value-secret" (dict  "value" (include "release.secretPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "releasePassword" "default" true "context" $ ) | nindent 14 }}
             - name: XL_CLUSTER_MODE
-              value: full
+              value: {{ .Values.clusterMode }}
             - name: FORCE_UPGRADE
-              value: "true"
+              value: {{ .Values.forceUpgrade | quote }}
             - name: ENABLE_EMBEDDED_QUEUE
-              value: "false"
+              value: {{ .Values.enableEmbeddedQueue | quote }}
             - name: SERVER_URL
               value: {{ include "release.serverUrl" . }}
              {{- if or .Values.external.db.enabled .Values.postgresql.install }}
             - name: XL_DB_URL
               value: {{ include "release.mainDbUrl" . }}
             - name: XL_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: mainDatabaseUsername
+              {{- include "render.value-secret" (dict  "value" (include "release.mainUsername" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "mainDatabaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: mainDatabasePassword
+              {{- include "render.value-secret" (dict  "value" (include "release.mainPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "mainDatabasePassword" "context" $ ) | nindent 14 }}
+            - name: XL_DB_MAX_POOL_SIZE
+              value: {{ default 10 .Values.external.db.main.maxPoolSize | quote }}
             - name: XL_REPORT_DB_URL
               value: {{ include "release.reportDbUrl" . }}
             - name: XL_REPORT_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: reportDatabaseUsername
+              {{- include "render.value-secret" (dict  "value" (include "release.reportUsername" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "reportDatabaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_REPORT_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: reportDatabasePassword
+              {{- include "render.value-secret" (dict  "value" (include "release.reportPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "reportDatabasePassword" "context" $ ) | nindent 14 }}
+            - name: XL_REPORT_DB_MAX_POOL_SIZE
+              value: {{ default 10 .Values.external.db.report.maxPoolSize | quote }}
              {{- end }}
             {{- if .Values.license }}
             - name: XL_LICENSE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: releaseLicense
+              {{- include "render.value-secret" (dict  "value" (.Values.license) "defaultName" (include "common.names.fullname" .) "defaultKey" "releaseLicense" "context" $ ) | nindent 14 }}
             {{- end }}
             - name: XL_METRICS_ENABLED
-              value: "{{ .Values.metrics.enabled}}"
+              value: {{ .Values.metrics.enabled | quote }}
             - name: GENERATE_XL_CONFIG
-              value: "{{ .Values.generateXlConfig}}"
+              value: {{ .Values.generateXlConfig | quote }}
             - name: USE_IP_AS_HOSTNAME
-              value: "{{ .Values.useIpAsHostname}}"
+              value: {{ .Values.useIpAsHostname | quote }}
             - name: FORCE_REMOVE_MISSING_TYPES
-              value: "{{ .Values.forceRemoveMissingTypes}}"
+              value: {{ .Values.forceRemoveMissingTypes | quote }}
              {{- if or .Values.rabbitmq.install .Values.external.mq.enabled }}
             - name: XLR_TASK_QUEUE_URL
               value: {{ include "release.mqUrl" . }}
             - name: XLR_TASK_QUEUE_NAME
               value: {{ include "release.mqQueueName" . }}
             - name: XLR_TASK_QUEUE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: rabbitmqUsername
+              {{- include "render.value-secret" (dict  "value" (include "release.mqUsername" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "rabbitmqUsername" "context" $ ) | nindent 14 }}
             - name: XLR_TASK_QUEUE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: rabbitmqPassword
+              {{- include "render.value-secret" (dict  "value" (include "release.mqPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "rabbitmqPassword" "context" $ ) | nindent 14 }}
              {{- end }}
             {{- if .Values.keystore.keystore }}
             - name: REPOSITORY_KEYSTORE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: repositoryKeystore
+              {{- include "render.value-secret" (dict  "value" (.Values.keystore.keystore) "defaultName" (include "common.names.fullname" .) "defaultKey" "repositoryKeystore" "context" $ ) | nindent 14 }}
             {{- end }}
             {{- if .Values.keystore.passphrase }}
             - name: REPOSITORY_KEYSTORE_PASSPHRASE
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "common.names.fullname" . }}
-                  key: keystorePassphrase
+              {{- include "render.value-secret" (dict  "value" (.Values.keystore.passphrase) "defaultName" (include "common.names.fullname" .) "defaultKey" "keystorePassphrase" "context" $ ) | nindent 14 }}
+            {{- end }}
+            {{- if .Values.oidc.external }}
+            - name: OP_GENERATE_XL_CONFIG
+              value: {{ .Values.GenerateXlConfig | quote }}
+            - name: OIDC_CLIENT_ID
+              {{- include "render.value-secret" (dict  "value" .Values.oidc.clientId "defaultName" (include "common.names.fullname" .) "defaultKey" "oidcClientId" "context" $ ) | nindent 14 }}
+            - name: OIDC_CLIENT_SECRET
+              {{- include "render.value-secret" (dict  "value" .Values.oidc.clientSecret "defaultName" (include "common.names.fullname" .) "defaultKey" "oidcClientSecret" "context" $ ) | nindent 14 }}
+            {{- if .Values.oidc.clientAuthJwt.enable -}}
+            {{- if .Values.oidc.clientAuthJwt.keyStore.password -}}
+            - name: OIDC_CLIENT_AUTH_JWT_KEYSTORE_PASSWORD
+              {{- include "render.value-secret" (dict "value" .Values.oidc.clientAuthJwt.keyStore.password "defaultName" (include "common.names.fullname" .) "defaultKey" "oidcClientAuthJwtKeyStorePassword" "context" $ ) | nindent 14 }}
+            {{- end -}}
+            {{- if .Values.oidc.clientAuthJwt.key.password -}}
+            - name: OIDC_CLIENT_AUTH_JWT_KEY_PASSWORD
+              {{- include "render.value-secret" (dict "value" .Values.oidc.clientAuthJwt.key.password "defaultName" (include "common.names.fullname" .) "defaultKey" "oidcClientAuthJwtKeyPassword" "context" $ ) | nindent 14 }}
+            {{- end -}}
+            {{- end -}}
+            {{- if and .Values.oidc.accessToken.enable .Values.oidc.accessToken.secretKey -}}
+            - name: OIDC_ACCESS_TOKEN_SECRET_KEY
+              {{- include "render.value-secret" (dict "value" .Values.oidc.accessToken.secretKey "defaultName" (include "common.names.fullname" .) "defaultKey" "oidcAccessTokenSecretKey" "context" $ ) | nindent 14 }}
+            {{- end -}}
+            {{- end }}
+            - name: XLR_HTTP2_ENABLED
+              value: {{ .Values.http2.enabled | quote }}
+            {{- if .Values.ssl.enabled }}
+            - name: SSL
+              value: {{ .Values.ssl.enabled | quote }}
+            - name: HTTP_SSL_KEYSTORE_PATH
+              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+            - name: HTTP_SSL_KEYSTORE_PASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystorePassword "defaultName" (include "common.names.fullname" .) "defaultKey" "sslKeystorePassword" "context" $ ) | nindent 14 }}
+            - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
+              {{- include "render.value-secret" (dict  "value" .Values.ssl.keystoreKeypassword "defaultName" (include "common.names.fullname" .) "defaultKey" "sslKeystoreKeypassword" "context" $ ) | nindent 14 }}
             {{- end }}
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
@@ -237,24 +263,39 @@ spec:
                 name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsSecret "context" $) }}
             {{- end }}
           ports:
+            {{- if .Values.http2.enabled }}
+            - name: {{ .Values.service.portNames.releaseHttps }}
+              containerPort: {{ .Values.containerPorts.releaseHttps }}
+            {{- else }}
             - name: {{ .Values.service.portNames.releaseHttp }}
               containerPort: {{ .Values.containerPorts.releaseHttp }}
+            {{- end }}
             {{- if .Values.extraContainerPorts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraContainerPorts "context" $) | nindent 12 }}
             {{- end }}
           {{- if not .Values.diagnosticMode.enabled }}
           {{- if .Values.health.enabled }}
           livenessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: {{ .Values.service.portNames.releaseHttps }}
+            {{- else }}
             httpGet:
               path: /
               port: {{ .Values.service.portNames.releaseHttp }}
+            {{- end }}
             initialDelaySeconds: {{ .Values.health.probesLivenessTimeout }}
             periodSeconds: {{ .Values.health.periodScans }}
             failureThreshold: {{ .Values.health.probeFailureThreshold }}
           readinessProbe:
+            {{- if .Values.http2.enabled }}
+            tcpSocket:
+              port: http2
+            {{- else }}
             httpGet:
               path: /
               port: {{ .Values.service.portNames.releaseHttp }}
+            {{- end }}
             initialDelaySeconds: {{ .Values.health.probesReadinessTimeout }}
             periodSeconds: {{ .Values.health.periodScans }}
             failureThreshold: {{ .Values.health.probeFailureThreshold }}
@@ -267,9 +308,6 @@ spec:
             - name: configuration
               mountPath: /opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template
               subPath: xl-release.conf.template
-            - name: plugin-management-cli
-              mountPath: /opt/xebialabs/xl-release-server/bin/plugin-manager-cli-in-container.sh
-              subPath: plugin-manager-cli-in-container.sh
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/conf
               subPath: conf
@@ -285,6 +323,11 @@ spec:
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/reports
               subPath: reports
+            {{- if .Values.ssl.enabled }}
+            - name: http-ssl-keystore
+              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+              subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+            {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
@@ -298,13 +341,11 @@ spec:
             items:
               - key: xl-release.conf.template
                 path: xl-release.conf.template
-        - name: plugin-management-cli
-          configMap:
-            name: {{ printf "%s-config" (include "common.names.fullname" .) }}
-            items:
-              - key: plugin-manager-cli-in-container.sh
-                path: plugin-manager-cli-in-container.sh
-            defaultMode: 0775
+        {{- if .Values.ssl.enabled }}
+        - name: http-ssl-keystore
+          secret:
+            secretName: "{{- include "render.secret-name" (dict "value" .Values.ssl.keystore "defaultName" (include "common.names.fullname" .) "context" $ ) }}"
+        {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $)  | nindent 8 }}
         {{- end }}

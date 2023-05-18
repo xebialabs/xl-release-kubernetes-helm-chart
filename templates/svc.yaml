@@ -46,6 +46,16 @@ spec:
   {{- end }}
   ports:
     {{- if .Values.service.portEnabled }}
+    {{- if .Values.http2.enabled }}
+    - name: {{ .Values.service.portNames.releaseHttps }}
+      port: {{ .Values.service.ports.releaseHttps }}
+      targetPort: {{ .Values.service.portNames.releaseHttps }}
+      {{- if (eq .Values.service.type "ClusterIP") }}
+      nodePort: null
+      {{- else if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts.releaseHttps)) }}
+      nodePort: {{ .Values.service.nodePorts.releaseHttps }}
+      {{- end }}
+    {{- else }}
     - name: {{ .Values.service.portNames.releaseHttp }}
       port: {{ .Values.service.ports.releaseHttp }}
       targetPort: {{ .Values.service.portNames.releaseHttp }}
@@ -54,6 +64,7 @@ spec:
       {{- else if and (or (eq .Values.service.type "NodePort") (eq .Values.service.type "LoadBalancer")) (not (empty .Values.service.nodePorts.releaseHttp)) }}
       nodePort: {{ .Values.service.nodePorts.releaseHttp }}
       {{- end }}
+    {{- end }}
     {{- end }}
     {{- if .Values.service.extraPorts }}
     {{- include "common.tplvalues.render" (dict "value" .Values.service.extraPorts "context" $) | nindent 4 }}

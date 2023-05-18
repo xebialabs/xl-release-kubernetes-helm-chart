@@ -1,0 +1,9 @@
+diagnosticMode:
+  enabled: true
+  command:
+    - sleep
+  args:
+    - infinity
+image:
+  repository: library/busybox
+  tag: stable

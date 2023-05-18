@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-release-keycloak
+  name: {{ include "common.names.fullname" . }}-release-keycloak
 data:
   digitalai-platform-realm.json: |-
     {
@@ -1012,7 +1012,7 @@ data:
         "alwaysDisplayInConsole" : false,
         "clientAuthenticatorType" : "client-secret",
         "secret" : "2c89c720-009c-428f-b815-4e488674176c",
-        "redirectUris" : [ "http://localhost:4516/login/external-login" ],
+        "redirectUris" : [ "{{ include "release.serverUrl" . }}/login/external-login" ],
         "webOrigins" : [ ],
         "notBefore" : 0,
         "bearerOnly" : false,
@@ -1246,9 +1246,7 @@ data:
         "alwaysDisplayInConsole" : false,
         "clientAuthenticatorType" : "client-secret",
         "secret" : "ab2088f6-2251-4233-9b22-e24db6a67483",
-        {{- range .Values.ingress.hosts }}
-        "redirectUris" : [ "http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/oidc-login" ],
-        {{- end }}
+        "redirectUris" : [ "{{ include "release.serverUrl" . }}/oidc-login" ],
         "webOrigins" : [ ],
         "notBefore" : 0,
         "bearerOnly" : false,

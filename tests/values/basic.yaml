@@ -1,0 +1,25 @@
+# Mandatory
+
+keystore:
+  passphrase: test123
+licenseAcceptEula: true
+
+# Optional
+
+terminationGracePeriodSeconds: 10
+
+persistence:
+  size: 100Mi
+  accessModes:
+    - ReadWriteOnce # use ReadWriteMany in case multiple replicas
+replicaCount: 1
+
+postgresql:
+  primary:
+    persistence:
+      size: 100Mi
+
+rabbitmq:
+  replicaCount: 1
+  persistence:
+    size: 100Mi

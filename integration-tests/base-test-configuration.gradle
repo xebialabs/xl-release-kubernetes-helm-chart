@@ -1,0 +1,110 @@
+def getTestProperties() {
+    def activeProviderName = project.hasProperty("activeProviderName") ? project.activeProviderName : null
+    def namespace = project.hasProperty("namespace") ? project.namespace : null
+    def doCleanup = project.hasProperty("doCleanup") ? Boolean.valueOf(project.doCleanup as String) : true
+    def destroyClusterOnShutdown = project.hasProperty("destroyClusterOnShutdown") ? Boolean.valueOf(project.destroyClusterOnShutdown as String) : false
+    def xlReleaseStartDockerRepository = project.hasProperty("xlReleaseStartDockerRepository") ? project.xlReleaseStartDockerRepository : "xebialabsunsupported"
+    def xlReleaseWorkerStartDockerRepository = project.hasProperty("xlReleaseWorkerStartDockerRepository") ? project.xlReleaseWorkerStartDockerRepository : xlReleaseStartDockerRepository
+    def xlReleaseStartVersion = project.hasProperty("xlReleaseStartVersion") ? project.xlReleaseStartVersion : xlReleaseVersion
+    def xlReleaseUpgradeVersion = project.hasProperty("xlReleaseUpgradeVersion") ? project.xlReleaseUpgradeVersion : xlReleaseVersion
+    def keycloakUrl = project.hasProperty("keycloakUrl") ? project.keycloakUrl as String : null
+    def ingressType = project.hasProperty("ingressType") ? project.ingressType as String : null
+
+    [
+        activeProviderName                  : activeProviderName,
+        namespace                           : namespace,
+        doCleanup                           : doCleanup,
+        destroyClusterOnShutdown            : destroyClusterOnShutdown,
+        xlReleaseStartDockerRepository      : xlReleaseStartDockerRepository,
+        xlReleaseWorkerStartDockerRepository: xlReleaseWorkerStartDockerRepository,
+        xlReleaseStartVersion               : xlReleaseStartVersion,
+        xlReleaseUpgradeVersion             : xlReleaseUpgradeVersion,
+        keycloakUrl                         : keycloakUrl,
+        ingressType                         : ingressType,
+    ]
+}
+
+def setupTestProperties(obj, Map<String, Serializable> testProperties) {
+    obj.destroyClusterOnShutdown = testProperties.destroyClusterOnShutdown
+}
+
+def testProperties = getTestProperties()
+
+Map<String, Object> serverOverlays = [
+    conf: [
+        fileTree(dir: "$rootDir/config/conf", includes: ["*.*"])
+    ]
+]
+
+releaseIntegrationServer {
+    cluster {
+        enable = true
+        profile = 'helm'
+        publicPort = 10001
+    }
+    if (testProperties.activeProviderName) {
+        clusterProfiles {
+            helm {
+                activeProviderName = testProperties.activeProviderName
+                doCleanup = testProperties.doCleanup
+                if (testProperties.namespace) {
+                    namespace = testProperties.namespace
+                }
+                if (testProperties.ingressType) {
+                    ingressType = testProperties.ingressType
+                }
+                awsEks {
+                    name = 'aws-eks-test-cluster'
+                    region = 'us-east-1'
+                    setupTestProperties(it, testProperties)
+                }
+                awsOpenshift {
+                    apiServerURL = 'https://api.acierto.lnfl.p1.openshiftapps.com:6443'
+                    host = 'router-default.apps.acierto.lnfl.p1.openshiftapps.com'
+                    name = 'aws-openshift-test-cluster'
+                    helmBranch = 'oc-master'
+                    oauthHostName = "oauth-openshift.apps.acierto.lnfl.p1.openshiftapps.com"
+                    setupTestProperties(it, testProperties)
+                }
+                azureAks {
+                    name = 'azure-aks-test-cluster'
+                    clusterNodeCount = 3
+                    location = 'northcentralus'
+                    setupTestProperties(it, testProperties)
+                }
+                gcpGke {
+                    name = 'gcp-gke-test-cluster'
+                    storageClass = 'nfs-client'
+                    accountName = 'gcp-gke-test-cluster@apollo-playground.iam.gserviceaccount.com'
+                    projectName = 'apollo-playground'
+                    regionZone = 'us-central1-a'
+                    clusterNodeCount = 3
+                    clusterNodeVmSize = 'e2-standard-2'
+                    setupTestProperties(it, testProperties)
+                }
+                onPremise {
+                    name = 'onprem-test-cluster'
+                    clusterNodeCpus = 4
+                    clusterNodeMemory = 15000
+                    setupTestProperties(it, testProperties)
+                }
+            }
+        }
+    }
+    operatorServer {
+        dockerImage = "xebialabsunsupported/xl-deploy"
+        overlays = [conf: [fileTree(dir: "$rootDir/config/conf", includes: ["*.*"])]]
+        version = xlDeployTrialVersion
+    }
+    servers {
+        server01 {
+            dockerImage = "${testProperties.xlReleaseStartDockerRepository}/xl-release"
+            pingRetrySleepTime = 10
+            pingTotalTries = 120
+            version = testProperties.xlReleaseStartVersion
+            overlays = serverOverlays
+        }
+        server02 {
+        }
+    }
+}
