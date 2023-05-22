@@ -217,8 +217,6 @@ spec:
               {{- include "render.value-secret" (dict  "value" (.Values.keystore.passphrase) "defaultName" (include "common.names.fullname" .) "defaultKey" "keystorePassphrase" "context" $ ) | nindent 14 }}
             {{- end }}
             {{- if .Values.oidc.external }}
-            - name: OP_GENERATE_XL_CONFIG
-              value: {{ .Values.GenerateXlConfig | quote }}
             - name: OIDC_CLIENT_ID
               {{- include "render.value-secret" (dict  "value" .Values.oidc.clientId "defaultName" (include "common.names.fullname" .) "defaultKey" "oidcClientId" "context" $ ) | nindent 14 }}
             - name: OIDC_CLIENT_SECRET
@@ -306,8 +304,7 @@ spec:
           {{- end }}
           volumeMounts:
             - name: configuration
-              mountPath: /opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template
-              subPath: xl-release.conf.template
+              mountPath: /opt/xebialabs/xl-release-server/default-conf
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/conf
               subPath: conf
@@ -338,9 +335,6 @@ spec:
         - name: configuration
           configMap:
             name: {{ printf "%s-config" (include "common.names.fullname" .) }}
-            items:
-              - key: xl-release.conf.template
-                path: xl-release.conf.template
         {{- if .Values.ssl.enabled }}
         - name: http-ssl-keystore
           secret:

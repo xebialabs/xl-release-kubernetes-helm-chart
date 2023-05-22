@@ -11,5 +11,7 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-  xl-release.conf.template: |-
-    {{- include "common.tplvalues.render" (dict "value" .Values.configuration "context" $) | nindent 4 }}
+  {{- range $k, $v := .Values.configuration }}
+  {{ $k }}:|-
+    {{- include "common.tplvalues.render" (dict "value" $v "context" $) | nindent 4 }}
+  {{- end }}

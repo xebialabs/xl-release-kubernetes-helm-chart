@@ -181,7 +181,7 @@ tasks {
                 from(buildXlrDir)
                 include("*.tgz")
                 into(buildXlrDir)
-                rename("dai-release-.*.tgz", "xlr.tgz")
+                rename("digitalai-release-.*.tgz", "xlr.tgz")
             }
             logger.lifecycle(standardOutput.toString())
             logger.error(errorOutput.toString())
