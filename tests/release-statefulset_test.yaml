@@ -1,0 +1,78 @@
+suite: Test Release Statefulset
+templates:
+  - release-statefulset.yaml
+  - NOTES.txt
+release:
+  name: test-release
+  namespace: test-namespace
+  revision: 1
+  upgrade: true
+tests:
+  #  - it: failed `keystore.passphrase` is empty
+  #    asserts:
+  #      - isKind:
+  #          of: StatefulSet
+  #      - failedTemplate:
+  #          errorMessage: |-
+  #            VALUES VALIDATION:
+  #
+  #            release: keystore.passphrase
+  #                The `keystore.passphrase` is empty. It is mandatory to set.
+  - it: basic should work
+    template: release-statefulset.yaml
+    values:
+      - ./values/basic.yaml
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: metadata.name
+          value: test-release-digitalai-release
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/xebialabsunsupported/xl-release:22.3.1
+  - it: release replicas
+    template: release-statefulset.yaml
+    values:
+      - ./values/basic.yaml
+      - ./values/replicated.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
+  - it: diagnostic enabled
+    template: release-statefulset.yaml
+    values:
+      - ./values/basic.yaml
+      - ./values/diagnostic-default.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - /opt/xebialabs/tini
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - --
+            - sleep
+            - infinity
+  - it: diagnostic enhancement enabled
+    template: release-statefulset.yaml
+    values:
+      - ./values/basic.yaml
+      - ./values/diagnostic-busybox.yaml
+    asserts:
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/library/busybox:stable
+      - equal:
+          path: spec.template.spec.containers[0].command
+          value:
+            - sleep
+      - equal:
+          path: spec.template.spec.containers[0].args
+          value:
+            - infinity

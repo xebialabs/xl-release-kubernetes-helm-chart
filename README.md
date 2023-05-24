@@ -1,271 +1,275 @@
+# dai-release
 
-# From 10.2 version helm chart is not used directly. Use operator based installation instead.
+![Version: 23.1.0-1026.113](https://img.shields.io/badge/Version-23.1.0--1026.113-informational?style=flat-square) ![AppVersion: v22.3.1](https://img.shields.io/badge/AppVersion-v22.3.1-informational?style=flat-square)
 
-# Helm Charts for Digital.ai Release on Kubernetes 
- This repository contains Helm Charts for Digital.ai (formerly Xebialabs) Release product. The Helm Chart automates and simplifies deploying Digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
+A Helm chart for Digital.ai Release
 
-## Prerequisites Details
-* Kubernetes v1.17+
-* A running Kubernetes cluster
-	- Dynamic storage provisioning enabled
-	- StorageClass for persistent storage. The [Installing StorageClass Helm Chart](#installing-storageclass-helm-chart) section provides steps to install storage class on OnPremise Kubernetes cluster and AWS Elastic Kubernetes Service(EKS) cluster.
-	- StorageClass which is expected to be used with Digital.ai Release should be set as default StorageClass
-- [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) installed and setup to use the cluster
-- [Helm](https://helm.sh/docs/intro/install/) 3 installed
-- License File for Digital.ai Release in base64 encoded format
-- Repository Keystorefile in base64 encoded format
+**Homepage:** <https://github.com/xebialabs/xl-release-kubernetes-helm-chart>
 
-## Chart Details
-This chart will deploy following components:
-* PostgreSQL single instance / pod 
+## Source Code
 
-(**NOTE:** For production grade installations it is recommended to use an external PostgreSQL). Alternatively users may want to install Postgres HA on Kubernetes. For more information, refer [Crunchy PostgreSQL Operator](https://www.crunchydata.com/products/crunchy-postgresql-for-kubernetes/)
-* RabbitMQ in highly available configuration
-* HAProxy ingress controller
-* Digital.ai Release in highly available configuration
+* <https://github.com/xebialabs/xl-release-kubernetes-helm-chart>
+* <https://github.com/xebialabs/xl-release>
 
+## Requirements
 
-## Tested Configuration
-- **Supported Platforms:** - OnPremise Kubernetes, AWS Elastic Kubernetes Service (EKS)
-- **Storage:** - Network File System (NFS), AWS Elastic File System (EFS)
-- **Messaging Queue:** - Rabbit MQ
-- **Database:** - Postgresql
-- **LoadBalancers:** - HAProxy Ingress Controller 
+| Repository | Name | Version |
+|------------|------|---------|
+| https://charts.bitnami.com/bitnami | common | 1.17.X |
+| https://charts.bitnami.com/bitnami | nginx-ingress-controller | 9.3.19 |
+| https://charts.bitnami.com/bitnami | postgresql | 12.1.0 |
+| https://charts.bitnami.com/bitnami | rabbitmq | 11.1.1 |
+| https://codecentric.github.io/helm-charts | keycloak | 18.3.0 |
+| https://haproxy-ingress.github.io/charts | haproxy-ingress | 0.13.9 |
 
-## Installing StorageClass Helm Chart
-If you are using storage class other than NFS and EFS then please proceed with installation steps 
-### NFS Client Provisioner for OnPremise Kubernetes cluster
-* For deploying helm chart, `nfs server` and `nfs mount path` are required.
-* Before installing NFS Provisioner helm chart, you need to add the stable helm repository to your helm client as shown below:
-```bash
-helm repo add stable https://charts.helm.sh/stable
-```
-* To install the chart with the release name `nfs-provisioner`:
-```bash
-helm install nfs-provisioner --set nfs.server=x.x.x.x --set nfs.path=/exported/path stable/nfs-client-provisioner
-```
-* The `nfs-provisioner` storage class must be marked with the default annotation so that PersistentVolumeClaim objects (without a StorageClass specified) will trigger dynamic provisioning.
-```bash
-kubectl patch storageclass nfs-provisioner -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-```
-* After deploying the nfs helm chart, execute the below command to get StorageClass name which can be used in values.yaml file for parameter `Persistence.StorageClass`
-```bash
-kubectl get storageclass
-```
-For more information on nfs-client-provisioner, refer [stable/nfs-client-provisioner](https://github.com/helm/charts/tree/master/stable/nfs-client-provisioner)
-### Elastic File System for AWS Elastic Kubernetes Service(EKS) cluster 
-Before deploying EFS helm chart, there are some steps which need to be performed. 
-* Create your EFS file system. Refer [Create Your Amazon EFS File System](https://docs.aws.amazon.com/efs/latest/ug/gs-step-two-create-efs-resources.html) for creating file system.
-* Create a mount target. Refer [Creating mount targets](https://docs.aws.amazon.com/efs/latest/ug/accessing-fs.html) for creating mount target.
-* Before installing EFS Provisioner helm chart, you need to add the stable helm repository to your helm client as shown below:
-```bash
-helm repo add stable https://charts.helm.sh/stable
-```
-* Provide the `efsFileSystemId` and `awsRegion` which can be obtained by executing above steps. Install the chart with the release name `aws-efs`:
-```bash
-helm install aws-efs stable/efs-provisioner --set efsProvisioner.efsFileSystemId=fs-12345678 --set efsProvisioner.awsRegion=us-east-2
-```
-* The `aws-efs` storage class must be marked with the default annotation so that PersistentVolumeClaim objects (without a StorageClass specified) will trigger dynamic provisioning.
-```bash
-kubectl patch storageclass aws-efs -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-```
-* There has to be only one storage class with default setting, so remove other storage classes with default settings.
-```bash
-kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
-```
-* After deploying the efs helm chart, execute the below command to get StorageClass name which can be used in values.yaml file for parameter `Persistence.StorageClass`
-```bash
-kubectl get storageclass
-```
-For more information on efs-provisioner, refer [stable/efs-provisioner](https://github.com/helm/charts/tree/master/stable/efs-provisioner)
-## Installing the Digital.ai Release Helm Chart
-Get the chart by cloning this repository:
-```bash
-git clone https://github.com/xebialabs/xl-release-kubernetes-helm-chart.git
-```
-The [Parameters](#parameters) section lists the parameters that can be configured before installation starts.
-Before installing helm charts, you need to update the dependencies of a chart:
-```bash
-helm dependency update xl-release-kubernetes-helm-chart
-```
-To install the chart with the release name `xlr-production`:
-```bash
-helm install xlr-production xl-release-kubernetes-helm-chart
-```
-## Access Digital.ai Release Dashboard
-By default, the NodePort service is exposed externally on the available k8s worker nodes and can be seen by running below command
-```bash
-kubectl get service
-```
-For production grade setups, we recommend using LoadBalancer as service type.
+## Values
 
-For OnPremise Cluster, you can access Digital.ai Release UI from an outside cluster with below link 
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` |  |
+| args | list | `[]` |  |
+| auth.adminPassword | string | `""` |  |
+| busyBox.image.pullPolicy | string | `"IfNotPresent"` |  |
+| busyBox.image.pullSecrets | list | `[]` |  |
+| busyBox.image.registry | string | `"docker.io"` |  |
+| busyBox.image.repository | string | `"library/busybox"` |  |
+| busyBox.image.tag | string | `"stable"` |  |
+| clusterDomain | string | `"cluster.local"` |  |
+| command | list | `[]` |  |
+| commonAnnotations | object | `{}` |  |
+| commonLabels | object | `{}` |  |
+| configuration | string | `"xl {\n  cluster {\n    # mode: \"default\", \"hot-standby\", \"full\"\n    mode = ${XL_CLUSTER_MODE}\n    name = \"xl-release_cluster\"\n    akka {\n      loglevel = \"INFO\"\n      actor.debug.receive = off\n      remote {\n          log-received-messages = off\n          log-sent-messages = off\n      }\n    }\n  }\n\n  license {\n    kind = ${XL_LICENSE_KIND}\n    product = \"xl-release\"\n  }\n\n  database {\n    db-driver-classname=\"${XL_DB_DRIVER}\"\n    db-password=\"${XL_DB_PASSWORD}\"\n    db-url=\"${XL_DB_URL}\"\n    db-username=${XL_DB_USERNAME}\n    max-pool-size=10\n  }\n\n  # TODO Release does not support (H2) running in one schema.\n  reporting {\n    db-driver-classname=\"${XL_DB_DRIVER}\"\n    db-password=\"${XL_REPORT_DB_PASSWORD}\"\n    db-url=\"${XL_REPORT_DB_URL}\"\n    db-username=${XL_REPORT_DB_USERNAME}\n  }\n\n  # Task queue\n  queue {\n    embedded=${ENABLE_EMBEDDED_QUEUE}\n    password=\"${XLR_TASK_QUEUE_PASSWORD}\"\n    queueName=\"${XLR_TASK_QUEUE_NAME}\"\n    url=\"${XLR_TASK_QUEUE_URL}\"\n    username=\"${XLR_TASK_QUEUE_USERNAME}\"\n  }\n\n  metrics {\n    enabled = ${XL_METRICS_ENABLED}\n  }\n\n  security {\n    auth {\n      providers {\n        oidc {\n          {{- if .Values.oidc.external }}\n          clientId={{ .Values.oidc.clientId | quote }}\n          clientSecret={{ .Values.oidc.clientSecret | quote }}\n          {{- if .Values.oidc.clientAuthMethod }}\n          clientAuthMethod={{ .Values.oidc.clientAuthMethod | quote }}\n          {{- end }}\n          {{- if .Values.oidc.clientAuthJwt.enable }}\n          clientAuthJwt {\n              jwsAlg={{ default \"\" .Values.oidc.clientAuthJwt.jwsAlg | quote }}\n              tokenKeyId={{ default \"\" .Values.oidc.clientAuthJwt.tokenKeyId | quote }}\n              {{- if .Values.oidc.clientAuthJwt.keyStore.enable }}\n              keyStore {\n                  path={{ default \"\" .Values.oidc.clientAuthJwt.keyStore.path | quote }}\n                  password={{ default \"\" .Values.oidc.clientAuthJwt.keyStore.password | quote }}\n                  type={{ default \"\" .Values.oidc.clientAuthJwt.keyStore.type | quote }}\n              }\n              {{- end }}\n              {{- if .Values.oidc.clientAuthJwt.key.enable }}\n              key {\n                  alias={{ default \"\" .Values.oidc.clientAuthJwt.key.alias | quote }}\n                  password={{ default \"\" .Values.oidc.clientAuthJwt.key.password | quote }}\n              }\n              {{- end }}\n          }\n          {{- end }}\n          issuer={{ .Values.oidc.issuer | quote }}\n          keyRetrievalUri={{ default \"\" .Values.oidc.keyRetrievalUri | quote }}\n          accessTokenUri={{ default \"\" .Values.oidc.accessTokenUri | quote }}\n          userAuthorizationUri={{ default \"\" .Values.oidc.userAuthorizationUri | quote }}\n          logoutUri={{ default \"\" .Values.oidc.logoutUri | quote }}\n          redirectUri={{ .Values.oidc.redirectUri | quote }}\n          postLogoutRedirectUri={{ .Values.oidc.postLogoutRedirectUri | quote }}\n          userNameClaim={{ default \"\" .Values.oidc.userNameClaim | quote }}\n          fullNameClaim={{ default \"\" .Values.oidc.fullNameClaim | quote }}\n          emailClaim={{ default \"\" .Values.oidc.emailClaim | quote }}\n          {{- if .Values.oidc.externalIdClaim }}\n          externalIdClaim={{ .Values.oidc.externalIdClaim | quote }}\n          {{- end }}\n          rolesClaim={{ default \"\" .Values.oidc.rolesClaim | quote }}\n          {{- if .Values.oidc.scopes }}\n          scopes={{ .Values.oidc.scopes }}\n          {{- else }}\n          scopes=[\"openid\"]\n          {{- end }}\n          {{- if .Values.oidc.idTokenJWSAlg }}\n          idTokenJWSAlg={{ .Values.oidc.idTokenJWSAlg | quote }}\n          {{- end }}\n          {{- if .Values.oidc.accessToken.enable }}\n          access-token {\n              issuer={{ default \"\" .Values.oidc.accessToken.issuer | quote }}\n              audience={{ default \"\" .Values.oidc.accessToken.audience | quote }}\n              keyRetrievalUri={{ default \"\" .Values.oidc.accessToken.keyRetrievalUri | quote }}\n              jwsAlg={{ default \"\" .Values.oidc.accessToken.jwsAlg | quote }}\n              secretKey={{ default \"\" .Values.oidc.accessToken.secretKey | quote }}\n              }\n          {{- end }}\n          {{- if .Values.oidc.proxyHost }}\n          proxyHost={{ .Values.oidc.proxyHost | quote }}\n          {{- end }}\n          {{- if .Values.oidc.proxyPort }}\n          proxyPort={{ .Values.oidc.proxyPort | quote }}\n          {{- end }}\n          {{- else }}\n          clientId=\"release\"\n          clientSecret=\"ab2088f6-2251-4233-9b22-e24db6a67483\"\n          {{- range .Values.keycloak.ingress.rules }}\n          issuer=\"http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform\"\n          keyRetrievalUri=\"http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/certs\"\n          accessTokenUri=\"http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/token\"\n          userAuthorizationUri=\"http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/auth\"\n          logoutUri=\"http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/logout\"\n          {{- end }}\n          {{- range .Values.ingress.hosts }}\n          redirectUri=\"http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/oidc-login\"\n          postLogoutRedirectUri=\"http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}/oidc-login\"\n          {{- end }}\n          userNameClaim=\"preferred_username\"\n          fullNameClaim=\"name\"\n          emailClaim=\"email\"\n          rolesClaim=\"groups\"\n          scopes =[\"openid\"]\n          {{- end }}\n        }\n      }\n    }\n  }\n}"` |  |
+| containerPorts.releaseHttp | int | `5516` |  |
+| containerSecurityContext.enabled | bool | `true` |  |
+| containerSecurityContext.runAsNonRoot | bool | `true` |  |
+| containerSecurityContext.runAsUser | int | `1001` |  |
+| diagnosticMode.args[0] | string | `"infinity"` |  |
+| diagnosticMode.command[0] | string | `"sleep"` |  |
+| diagnosticMode.enabled | bool | `false` |  |
+| dnsConfig | object | `{}` |  |
+| dnsPolicy | string | `""` |  |
+| external.db.enabled | bool | `false` |  |
+| external.db.mainPassword | string | `""` |  |
+| external.db.mainUrl | string | `""` |  |
+| external.db.mainUsername | string | `""` |  |
+| external.db.reportPassword | string | `""` |  |
+| external.db.reportUrl | string | `""` |  |
+| external.db.reportUsername | string | `""` |  |
+| external.mq.enabled | bool | `false` |  |
+| external.mq.password | string | `""` |  |
+| external.mq.queueName | string | `""` |  |
+| external.mq.url | string | `""` |  |
+| external.mq.username | string | `""` |  |
+| extraConfiguration | string | `"#{}"` |  |
+| extraContainerPorts | list | `[]` |  |
+| extraDeploy | list | `[]` |  |
+| extraEnvVars | list | `[]` |  |
+| extraEnvVarsCM | string | `""` |  |
+| extraEnvVarsSecret | string | `""` |  |
+| extraSecrets | object | `{}` |  |
+| extraSecretsPrependReleaseName | bool | `false` |  |
+| extraVolumeMounts | list | `[]` |  |
+| extraVolumes | list | `[]` |  |
+| forceRemoveMissingTypes | bool | `false` |  |
+| fullnameOverride | string | `""` |  |
+| generateXlConfig | bool | `true` |  |
+| global.imagePullSecrets | list | `[]` |  |
+| global.imageRegistry | string | `""` |  |
+| global.storageClass | string | `""` |  |
+| haproxy-ingress.controller.ingressClass | string | `"haproxy-dair"` |  |
+| haproxy-ingress.controller.kind | string | `"Deployment"` |  |
+| haproxy-ingress.controller.service.type | string | `"LoadBalancer"` |  |
+| haproxy-ingress.install | bool | `false` |  |
+| health.enabled | bool | `true` |  |
+| health.periodScans | int | `10` |  |
+| health.probeFailureThreshold | int | `12` |  |
+| health.probes | bool | `true` |  |
+| health.probesLivenessTimeout | int | `60` |  |
+| health.probesReadinessTimeout | int | `60` |  |
+| hostAliases | list | `[]` |  |
+| image.pullPolicy | string | `"IfNotPresent"` |  |
+| image.pullSecrets | list | `[]` |  |
+| image.registry | string | `"docker.io"` |  |
+| image.repository | string | `"xebialabsunsupported/xl-release"` |  |
+| image.tag | string | `"22.3.1"` |  |
+| ingress.annotations."kubernetes.io/ingress.class" | string | `"nginx-dair"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/affinity" | string | `"cookie"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/proxy-connect-timeout" | string | `"60"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/proxy-read-timeout" | string | `"60"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/proxy-send-timeout" | string | `"60"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/rewrite-target" | string | `"/"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/session-cookie-name" | string | `"JSESSIONID"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/ssl-redirect" | string | `"false"` |  |
+| ingress.enabled | bool | `true` |  |
+| ingress.extraHosts | list | `[]` |  |
+| ingress.extraPaths | list | `[]` |  |
+| ingress.extraRules | list | `[]` |  |
+| ingress.extraTls | list | `[]` |  |
+| ingress.hostname | string | `"-"` |  |
+| ingress.ingressClassName | string | `""` |  |
+| ingress.path | string | `"/"` |  |
+| ingress.pathType | string | `"ImplementationSpecific"` |  |
+| ingress.secrets | list | `[]` |  |
+| ingress.selfSigned | bool | `false` |  |
+| ingress.tls | bool | `false` |  |
+| initContainers | list | `[]` |  |
+| k8sSetup.platform | string | `"PlainK8s"` |  |
+| keycloak.extraEnv | string | `"- name: PROXY_ADDRESS_FORWARDING\n  value: \"true\"\n- name: KEYCLOAK_USER\n  value: admin\n- name: KEYCLOAK_PASSWORD\n  value: admin\n- name: JGROUPS_DISCOVERY_PROTOCOL\n  value: dns.DNS_PING\n- name: JGROUPS_DISCOVERY_PROPERTIES\n  value: 'dns_query={{ include \"keycloak.serviceDnsName\" . }}'\n- name: CACHE_OWNERS_COUNT\n  value: \"2\"\n- name: CACHE_OWNERS_AUTH_SESSIONS_COUNT\n  value: \"2\"\n- name: JAVA_OPTS\n  value: >-\n    -XX:+UseContainerSupport\n    -XX:MaxRAMPercentage=50.0\n    -Djava.net.preferIPv4Stack=true\n    -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS\n    -Djava.awt.headless=true\n- name: DB_VENDOR\n  value: postgres\n- name: DB_ADDR\n  value: {{ .Release.Name }}-postgresql\n- name: DB_PORT\n  value: \"5432\"\n- name: DB_DATABASE\n  value: keycloak\n- name: DB_USER\n  value: keycloak\n- name: DB_PASSWORD\n  value: keycloak\n- name: KEYCLOAK_IMPORT\n  value: /realm/digitalai-platform-realm.json\n"` |  |
+| keycloak.extraVolumeMounts | string | `"- name: realm-config\n  mountPath: \"/realm/\"\n  readOnly: true\n"` |  |
+| keycloak.extraVolumes | string | `"- name: realm-config\n  configMap:\n    name: {{ .Release.Name }}-release-keycloak\n"` |  |
+| keycloak.ingress.annotations."kubernetes.io/ingress.class" | string | `"nginx-dair"` |  |
+| keycloak.ingress.annotations."nginx.ingress.kubernetes.io/ssl-redirect" | string | `"false"` |  |
+| keycloak.ingress.enabled | bool | `true` |  |
+| keycloak.ingress.rules[0].host | string | `"-"` |  |
+| keycloak.ingress.rules[0].paths[0].path | string | `"/"` |  |
+| keycloak.ingress.rules[0].paths[0].pathType | string | `"Prefix"` |  |
+| keycloak.ingress.tls | list | `[]` |  |
+| keycloak.install | bool | `false` |  |
+| keycloak.postgresql.enabled | bool | `false` |  |
+| keycloak.service.type | string | `"LoadBalancer"` |  |
+| keystore.keystore | string | `"-"` |  |
+| keystore.passphrase | string | `"-"` |  |
+| kubeVersion | string | `""` |  |
+| license | string | `"-"` |  |
+| lifecycleHooks | object | `{}` |  |
+| metrics.enabled | bool | `false` |  |
+| nameOverride | string | `""` |  |
+| namespaceOverride | string | `""` |  |
+| networkPolicy.additionalRules | list | `[]` |  |
+| networkPolicy.allowExternal | bool | `true` |  |
+| networkPolicy.enabled | bool | `false` |  |
+| nginx-ingress-controller.extraArgs.ingress-class | string | `"nginx-dair"` |  |
+| nginx-ingress-controller.ingressClassResource.controllerClass | string | `"k8s.io/ingress-nginx-dair"` |  |
+| nginx-ingress-controller.ingressClassResource.name | string | `"nginx-dair"` |  |
+| nginx-ingress-controller.install | bool | `true` |  |
+| nginx-ingress-controller.replicaCount | int | `1` |  |
+| nginx-ingress-controller.resources.limits | object | `{}` |  |
+| nginx-ingress-controller.resources.requests | object | `{}` |  |
+| nginx-ingress-controller.service.type | string | `"LoadBalancer"` |  |
+| nodeAffinityPreset.key | string | `""` |  |
+| nodeAffinityPreset.type | string | `""` |  |
+| nodeAffinityPreset.values | list | `[]` |  |
+| nodeSelector | object | `{}` |  |
+| oidc.accessToken.audience | string | `nil` |  |
+| oidc.accessToken.enable | bool | `false` |  |
+| oidc.accessToken.issuer | string | `nil` |  |
+| oidc.accessToken.jwsAlg | string | `nil` |  |
+| oidc.accessToken.keyRetrievalUri | string | `nil` |  |
+| oidc.accessToken.secretKey | string | `nil` |  |
+| oidc.accessTokenUri | string | `nil` |  |
+| oidc.clientAuthJwt.enable | bool | `false` |  |
+| oidc.clientAuthJwt.jwsAlg | string | `nil` |  |
+| oidc.clientAuthJwt.key.alias | string | `nil` |  |
+| oidc.clientAuthJwt.key.enable | bool | `false` |  |
+| oidc.clientAuthJwt.key.password | string | `nil` |  |
+| oidc.clientAuthJwt.keyStore.enable | bool | `false` |  |
+| oidc.clientAuthJwt.keyStore.password | string | `nil` |  |
+| oidc.clientAuthJwt.keyStore.path | string | `nil` |  |
+| oidc.clientAuthJwt.keyStore.type | string | `nil` |  |
+| oidc.clientAuthJwt.tokenKeyId | string | `nil` |  |
+| oidc.clientAuthMethod | string | `nil` |  |
+| oidc.clientId | string | `nil` |  |
+| oidc.clientSecret | string | `nil` |  |
+| oidc.emailClaim | string | `nil` |  |
+| oidc.enabled | bool | `true` |  |
+| oidc.external | bool | `false` |  |
+| oidc.externalIdClaim | string | `nil` |  |
+| oidc.fullNameClaim | string | `nil` |  |
+| oidc.idTokenJWSAlg | string | `nil` |  |
+| oidc.issuer | string | `nil` |  |
+| oidc.keyRetrievalUri | string | `nil` |  |
+| oidc.logoutUri | string | `nil` |  |
+| oidc.postLogoutRedirectUri | string | `nil` |  |
+| oidc.proxyHost | string | `nil` |  |
+| oidc.proxyPort | string | `nil` |  |
+| oidc.redirectUri | string | `nil` |  |
+| oidc.rolesClaim | string | `nil` |  |
+| oidc.scopes[0] | string | `"openid"` |  |
+| oidc.userAuthorizationUri | string | `nil` |  |
+| oidc.userNameClaim | string | `nil` |  |
+| pdb.create | bool | `false` |  |
+| pdb.maxUnavailable | string | `""` |  |
+| pdb.minAvailable | int | `1` |  |
+| persistence.accessModes[0] | string | `"ReadWriteOnce"` |  |
+| persistence.annotations."helm.sh/resource-policy" | string | `"keep"` |  |
+| persistence.enabled | bool | `true` |  |
+| persistence.existingClaim | string | `""` |  |
+| persistence.selector | object | `{}` |  |
+| persistence.single | bool | `true` |  |
+| persistence.size | string | `"8Gi"` |  |
+| persistence.storageClass | string | `"-"` |  |
+| podAffinityPreset | string | `""` |  |
+| podAnnotations | object | `{}` |  |
+| podAntiAffinityPreset | string | `"soft"` |  |
+| podLabels | object | `{}` |  |
+| podManagementPolicy | string | `"OrderedReady"` |  |
+| podSecurityContext.enabled | bool | `true` |  |
+| podSecurityContext.fsGroup | int | `1001` |  |
+| postgresql.initdbScriptsSecret | string | `"{{ .Release.Name }}-release-postgresql"` |  |
+| postgresql.install | bool | `true` |  |
+| postgresql.persistence.accessMode | string | `"ReadWriteOnce"` |  |
+| postgresql.persistence.enabled | bool | `true` |  |
+| postgresql.persistence.existingClaim | string | `""` |  |
+| postgresql.persistence.size | string | `"8Gi"` |  |
+| postgresql.persistence.storageClass | string | `"-"` |  |
+| postgresql.postgresqlMaxConnections | string | `"150"` |  |
+| postgresql.postgresqlPassword | string | `"postgres"` |  |
+| postgresql.postgresqlUsername | string | `"postgres"` |  |
+| postgresql.resources.requests.cpu | string | `"250m"` |  |
+| postgresql.resources.requests.memory | string | `"256Mi"` |  |
+| postgresql.service.port | int | `5432` |  |
+| postgresql.service.type | string | `"ClusterIP"` |  |
+| postgresql.volumePermissions.enabled | bool | `true` |  |
+| priorityClassName | string | `""` |  |
+| rabbitmq.auth.erlangCookie | string | `"RELEASERABBITMQCLUSTER"` |  |
+| rabbitmq.auth.password | string | `"guest"` |  |
+| rabbitmq.auth.username | string | `"guest"` |  |
+| rabbitmq.extraConfiguration | string | `"raft.wal_max_size_bytes = 1048576\n"` |  |
+| rabbitmq.extraPlugins | string | `"rabbitmq_amqp1_0"` |  |
+| rabbitmq.forceBoot | bool | `true` |  |
+| rabbitmq.install | bool | `true` |  |
+| rabbitmq.loadDefinition.enabled | bool | `true` |  |
+| rabbitmq.loadDefinition.existingSecret | string | `"{{ .Release.Name }}-release-rabbitmq"` |  |
+| rabbitmq.loadDefinition.file | string | `"/app/release_load_definition.json"` |  |
+| rabbitmq.persistence.accessMode | string | `"ReadWriteOnce"` |  |
+| rabbitmq.persistence.enabled | bool | `true` |  |
+| rabbitmq.persistence.size | string | `"8Gi"` |  |
+| rabbitmq.persistence.storageClass | string | `"-"` |  |
+| rabbitmq.replicaCount | int | `3` |  |
+| rabbitmq.service.type | string | `"ClusterIP"` |  |
+| rabbitmq.volumePermissions.enabled | bool | `true` |  |
+| rbac.create | bool | `true` |  |
+| replicaCount | int | `3` |  |
+| resources.limits | object | `{}` |  |
+| resources.requests | object | `{}` |  |
+| schedulerName | string | `""` |  |
+| service.annotations | object | `{}` |  |
+| service.annotationsHeadless | object | `{}` |  |
+| service.clusterIP | string | `""` |  |
+| service.externalIPs | list | `[]` |  |
+| service.externalTrafficPolicy | string | `"Cluster"` |  |
+| service.extraPorts | list | `[]` |  |
+| service.labels | object | `{}` |  |
+| service.loadBalancerIP | string | `""` |  |
+| service.loadBalancerSourceRanges | list | `[]` |  |
+| service.nodePorts.releaseHttp | string | `""` |  |
+| service.portEnabled | bool | `true` |  |
+| service.portNames.releaseHttp | string | `"release-http"` |  |
+| service.ports.releaseHttp | int | `80` |  |
+| service.sessionAffinity | string | `"None"` |  |
+| service.sessionAffinityConfig | object | `{}` |  |
+| service.type | string | `"ClusterIP"` |  |
+| serviceAccount.annotations | object | `{}` |  |
+| serviceAccount.automountServiceAccountToken | bool | `true` |  |
+| serviceAccount.create | bool | `true` |  |
+| serviceAccount.name | string | `""` |  |
+| sidecars | list | `[]` |  |
+| statefulsetLabels | object | `{}` |  |
+| terminationGracePeriodSeconds | int | `200` |  |
+| tolerations | list | `[]` |  |
+| topologySpreadConstraints | list | `[]` |  |
+| updateStrategy.type | string | `"RollingUpdate"` |  |
+| useIpAsHostname | bool | `false` |  |
 
-[http://ingress-loadbalancer-DNS:NodePort/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
-
-Similarly for EKS, access Digital.ai Release UI using below link 
-
- [http://ingress-loadbalancer-DNS/xl-release/](http://ingress-loadbalancer-DNS:NodePort/xl-release/)
-
-The path should be unique across the Kubernetes cluster.(Ex "/xl-release/") 
-## Uninstalling the Digital.ai Release Helm Chart
-To uninstall/delete the `xlr-production` deployment:
-```bash
-helm delete xlr-production
-```
-
-
-## Parameters
-For deployment on Production environment, all parameters need to be configured as per users requirement and k8s setup which is under use. However, for deployment on test environment, most of the default values will suffice. The following parameters are required to be configured and rest of the parameters may remain as default 
-- *xlrLicense*: License for Digital.ai Release in base64 format
-- *Persistence.StorageClass*: Storage Class to be defined, Network File System (NFS) for OnPremise or Elastic File System (EFS) for AWS Elastic Kubernetes Service(EKS) 
-- *ingress.hosts*: DNS name for accessing ui of Digital.ai Release
-- *RepositoryKeystore*: RepositoryKeystore for Digital.ai Release in base64 format
-- *KeystorePassphrase*: Passphrase for RepositoryKeystore
-
-The following table lists the configurable parameters of the Digital.ai Release chart and their default values.
-
-Parameter                                        |Description                                                                                                                                                          |Default                                                                                                                                                                                                                                                                                                                                                                        
--------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-K8sSetup.Platform                                |Platform on which to install the chart. Allowed values are PlainK8s and AWSEKS                                                                                                                               |PlainK8s                                                                                                                                                                                                                                                                                                                                                                       
-replicaCount                                     |Number of replicas                                                                                                                                                    |3                                                                                                                                                                                                                                                                                                                                                                              
-ImageRepository                                  |Image name                                                                                                                                                           |xebialabs/xl-release                                                                                                                                                                                                                                                                                                                                                           
-ImageTag                                         |Image tag                                                                                                                                                            |9.7                                                                                                                                                                                                                                                                                                                                                                            
-ImagePullPolicy                                  |Image pull policy, Defaults to 'Always' if image tag is 'latest',set to 'IfNotPresent'                                                                               |Always                                                                                                                                                                                                                                                                                                                                                                         
-ImagePullSecret                                  |Specify docker-registry secret names. Secrets must be manually created in the namespace                                                                              |nil                                                                                                                                                                                                                                                                                                                                                                            
-haproxy-ingress.install                          |Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'                                                                            |true                                                                                                                                                                                                                                                                                                                                                                           
-haproxy-ingress.controller.kind                          |Type of deployment, DaemonSet or Deployment                                                                            |DaemonSet                                                                                                                                                                                                                                                                                                                                                                           
-haproxy-ingress.controller.service.type          |Kubernetes Service type for haproxy. It can be changed to LoadBalancer or NodePort                                                                                   |NodePort                                                                                                                                                                                                                                                                                                                                                                       
-ingress.Enabled                                  |Exposes HTTP and HTTPS routes from outside the cluster to services within the cluster                                                                                |true                                                                                                                                                                                                                                                                                                                                                                           
-ingress.annotations                              |Annotations for ingress controller                                                                                                                                   |ingress.kubernetes.io/ssl-redirect: "false"&nbsp; &nbsp; &nbsp; kubernetes.io/ingress.class: haproxy ingress.kubernetes.io/rewrite-target: / ingress.kubernetes.io/affinity: cookie ingress.kubernetes.io/session-cookie-name: JSESSIONID ingress.kubernetes.io/session-cookie-strategy: prefix ingress.kubernetes.io/config-backend: `|`&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;&nbsp;&nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;  option httpchk GET /ha/health HTTP/1.0 |
-ingress.path                                     |You can route an Ingress to different Services based on the path                                                                                                     |/xl-release/                                                                                                                                                                                                                                                                                                                                                                   
-ingress.hosts                                     |DNS name for accessing ui of Digital.ai Release                                                                                                     |example.com                                                                                                                                                                                                                                                                                                                                                                   
-ingress.tls.secretName                                      |Secret file which holds the tls private key and certificate                      |example-secretsName                                                                                                                                                                                                                                                                                                                                                                          
-ingress.tls.hosts                                      |DNS name for accessing ui of digital.ai Release using tls                      |example.com                                                                                                                                                                                                                                                                                                                                                                          
-AdminPassword                                    |Admin password for digital.ai release                                                                                                                                         |If user does not provide password, random 10 character alphanumeric string will be generated                                                                                                                                                                                                                                                                                                                                        
-xlrLicense                                       |Convert xl-release.lic files content to base64  here                                                                 |nil                                                                                                                                                                                                                                                                                                                                                                            
-RepositoryKeystore                               |Convert keystore.jks files content to base64  here                                                                     |nil                                                                                                                                                                                                                                                                                                                                                                            
-KeystorePassphrase                               |Passphrase for keystore.jks file                                                                                                                                     |nil                                                                                                                                                                                                                                                                                                                                                                            
-postgresql.install                               |postgresql chart with single instance. Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.                                                                     |true                                                                                                                                                                                                                                                                                                                                                                           
-postgresql.postgresqlUsername                    |PostgreSQL user (creates a non-admin user when postgresqlUsername is not postgres)                                                                                   |postgres                                                                                                                                                                                                                                                                                                                                                                       
-postgresql.postgresqlPassword                    |PostgreSQL user password                                                                                                                                             |random 10 character alphanumeric string                                                                                                                                                                                                                                                                                                                                        
-postgresql.postgresqlExtendedConf.listenAddresses|Specifies the TCP/IP address(es) on which the server is to listen for connections from client applications                                                           | *                                                                                                                                                                                                                                                                                                                                                                            
-postgresql.postgresqlExtendedConf.maxConnections |Maximum total connections                                                                                                                                            |500                                                                                                                                                                                                                                                                                                                                                                            
-postgresql.initdbScriptsSecret                   |Secret with initdb scripts that contain sensitive information (Note: can be used with initdbScriptsConfigMap or initdbScripts). The value is evaluated as a template.|postgresql-init-sql-xlr                                                                                                                                                                                                                                                                                                                                                        
-postgresql.service.port                          |PostgreSQL port                                                                                                                                                      |5432                                                                                                                                                                                                                                                                                                                                                                           
-postgresql.persistence.enabled                   |Enable persistence using PVC                                                                                                                                         |true                                                                                                                                                                                                                                                                                                                                                                           
-postgresql.persistence.size                      |PVC Storage Request for PostgreSQL volume                                                                                                                            |50Gi                                                                                                                                                                                                                                                                                                                                                                            
-postgresql.persistence.existingClaim             |Provide an existing PersistentVolumeClaim, the value is evaluated as a template.                                                                                     |nil                                                                                                                                                                                                                                                                                                                                                                            
-postgresql.resources                             |CPU/Memory resource requests/limits                                                                                                                                  |Memory: 256Mi, CPU: 250m                                                                                                                                                                                                                                                                                                                                                       
-postgresql.nodeSelector                          |Node labels for pod assignment                                                                                                                                       |{}                                                                                                                                                                                                                                                                                                                                                                             
-postgresql.affinity                              |Affinity labels for pod assignment                                                                                                                                   |{}                                                                                                                                                                                                                                                                                                                                                                             
-postgresql.tolerations                           |Toleration labels for pod assignment                                                                                                                                 |\[\]                                                                                                                                                                                                                                                                                                                                                                           
-UseExistingDB.Enabled                            |If you want to use an existing database, change 'postgresql.install' to 'false'.                                                                                     |false                                                                                                                                                                                                                                                                                                                                                                          
-UseExistingDB.XLR\_DB\_URL                       |Database URL for xl-release                                                                                                                                           |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_DB\_USER                      |Database User for xl-release                                                                                                                                          |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_DB\_PASS                      |Database Password for xl-release                                                                                                                                      |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_REPORT\_DB\_URL               |Database URL for xl-release report db                                                                                                                                 |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_REPORT\_DB\_USER              |Database User for xl-release report db                                                                                                                                |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingDB.XLR\_REPORT\_DB\_PASS              |Database Password for xl-release report db                                                                                                                            |nil                                                                                                                                                                                                                                                                                                                                                                            
-rabbitmq-ha.install                              |Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.                                                                  |true                                                                                                                                                                                                                                                                                                                                                                           
-rabbitmq-ha.rabbitmqUsername                     |RabbitMQ application username                                                                                                                                        |guest                                                                                                                                                                                                                                                                                                                                                                          
-rabbitmq-ha.rabbitmqPassword                     |RabbitMQ application password                                                                                                                                        |random 24 character long alphanumeric string                                                                                                                                                                                                                                                                                                                                   
-rabbitmq-ha.rabbitmqErlangCookie                     |Erlang cookie                                                                                                                                        |RELEASERABBITMQCLUSTER                                                                                                                                                                                                                                                                                                                                   
-rabbitmq-ha.rabbitmqMemoryHighWatermark                     |Memory high watermark                                                                                                                                        |500MB                                                                                                                                                                                                                                                                                                                                   
-rabbitmq-ha.rabbitmqNodePort                     |Node port                                                                                                                                        |5672                                                                                                                                                                                                                                                                                                                                   
-rabbitmq-ha.extraPlugins                         |Additional plugins to add to the default configmap                                                                                                                   |rabbitmq_shovel, rabbitmq_shovel_management, rabbitmq_federation, rabbitmq_federation_management, rabbitmq_amqp1_0, rabbitmq_management,                                                                                                                                                                                                               
-rabbitmq-ha.replicaCount                         |Number of replica                                                                                                                                                    |3                                                                                                                                                                                                                                                                                                                                                                              
-rabbitmq-ha.rbac.create                          |If true, create & use RBAC resources                                                                                                                                 |true                                                                                                                                                                                                                                                                                                                                                                           
-rabbitmq-ha.service.type                         |Type of service to create                                                                                                                                            |ClusterIP                                                                                                                                                                                                                                                                                                                                                                      
-rabbitmq-ha.persistentVolume.enabled             |If true, persistent volume claims are created                                                                                                                        |true                                                                                                                                                                                                                                                                                                                                                                          
-rabbitmq-ha.persistentVolume.size                |Persistent volume size                                                                                                                                               |20Gi                                                                                                                                                                                                                                                                                                                                                                            
-rabbitmq-ha.persistentVolume.annotations         |Persistent volume annotations                                                                                                                                        |{}                                                                                                                                                                                                                                                                                                                                                                             
-rabbitmq-ha.persistentVolume.resources           |CPU/Memory resource requests/limits                                                                                                                                  |{}                                                                                                                                                                                                                                                                                                                                                                             
-rabbitmq-ha.definitions.policies                 |HA policies to add to definitions.json                                                                                                                               |`{ "name": "ha-all", "pattern": ".*","vhost": "/","definition": {"ha-mode": "all","ha-sync-mode": "automatic","ha-sync-batch-size": 1}}`                                                                                                                                                                                                      
-rabbitmq-ha.definitions.globalParameters         |Pre-configured global parameters                                                                                                                                     |`{"name":"cluster_name","value": "" }`                                                                                                                                                                                                                                                                                                                                
-rabbitmq-ha.prometheus.operator.enabled          |Enabling Prometheus Operator                                                                                                                                         |false                                                                                                                                                                                                                                                                                                                                                                          
-UseExistingMQ.Enabled                            |If you want to use an existing Message Queue, change 'rabbitmq-ha.install' to 'false'                                                                                |false                                                                                                                                                                                                                                                                                                                                                                          
-UseExistingMQ.XLR\_TASK\_QUEUE\_USERNAME         |Username for xl-release task queue                                                                                                                                    |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingMQ.XLR\_TASK\_QUEUE\_PASSWORD         |Password for xl-release task queue                                                                                                                                    |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingMQ.XLR\_TASK\_QUEUE\_NAME             |Name for xl-release task queue                                                                                                                                        |nil                                                                                                                                                                                                                                                                                                                                                                            
-UseExistingMQ.XLR\_TASK\_QUEUE\_URL              |URL for xl-release task queue                                                                                                                                         |nil                                                                                                                                                                                                                                                                                                                                                                            
-resources                                        |CPU/Memory resource requests/limits.User can change the parameter accordingly                                                                                                                                  |nil                                                                                                                                                                                                                                                                                                                                                                            
-HealthProbes                                     |Would you like a HealthProbes to be enabled                                                                                                                          |true                                                                                                                                                                                                                                                                                                                                                                           
-HealthProbesLivenessTimeout                      |Delay before liveness probe is initiated                                                                                                                             |90                                                                                                                                                                                                                                                                                                                                                                             
-HealthProbesReadinessTimeout                     |Delay before readiness probe is initiated                                                                                                                            |90                                                                                                                                                                                                                                                                                                                                                                             
-HealthProbeFailureThreshold                      |Minimum consecutive failures for the probe to be considered failed after having succeeded                                                                            |12                                                                                                                                                                                                                                                                                                                                                                             
-HealthPeriodScans                                |How often to perform the probe                                                                                                                                       |10                                                                                                                                                                                                                                                                                                                                                                             
-nodeSelector                                     |Node labels for pod assignment                                                                                                                                       |{}                                                                                                                                                                                                                                                                                                                                                                             
-tolerations                                      |Toleration labels for pod assignment                                                                                                                                 |\[\]                                                                                                                                                                                                                                                                                                                                                                           
-affinity                                         |Affinity labels for pod assignment                                                                                                                                   |{}                                                                                                                                                                                                                                                                                                                                                                             
-Persistence.Enabled                              |Enable persistence using PVC                                                                                                                                         |true                                                                                                                                                                                                                                                                                                                                                                           
-Persistence.StorageClass                         |PVC Storage Class for volume                                                                                                                                         |nil                                                                                                                                                                                                                                                                                                                                                                            
-Persistence.Annotations                          |Annotations for the PVC                                                                                                                                              |{}                                                                                                                                                                                                                                                                                                                                                                             
-Persistence.AccessMode                           |PVC Access Mode for volume                                                                                                                                           |ReadWriteOnce                                                                                                                                                                                                                                                                                                                                                                  
-Persistence.Size                                 |PVC Storage Request for volume. For production grade setup, size must be changed                                                                                     |5Gi                                                                                                                                                                                                                                                                                                                                                                            
-
-## Upgrading the Digital.ai Release Helm Chart
-To upgrade the version `ImageTag` parameter needs to be updated to the desired version. To see the list of available ImageTag for Digital.ai Release, refer following links [Release_tags](https://hub.docker.com/r/xebialabs/xl-release/tags). For upgrade, Rolling Update strategy is used.
-To upgrade the chart with the release name `xlr-production`, execute below command: 
-```bash
-helm upgrade xlr-production xl-release-kubernetes-helm-chart/
-```
-> **Note**:
-  Currently upgrading custom plugins and database drivers is not supported. In order to upgrade custom plugins and database drivers, users need to build custom docker image of Digital.ai Release containing required files. See the [adding custom plugins](https://docs.xebialabs.com/v.9.7/deploy/how-to/customize-xl-up/#adding-custom-plugins) section in the Digital.ai (formerly Xebialabs) official documentation. 
-### Existing or External Databases
-There is an option to use external PostgreSQL database for your Digital.ai Release. Configure values.yaml file accordingly.
-If you want to use an existing database,  these steps need to be followed:
-- Change `postgresql.install` to false
-- `UseExistingDB.Enabled`: true
-- `UseExistingDB.XLR_DB_URL`: jdbc:postgresql://`<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-database-name>`
-- `UseExistingDB.XLR_DB_USER`: Database User for xl-release
-- `UseExistingDB.XLR_DB_PASS`: Database Password for xl-release
-- `UseExistingDB.XLR_REPORT_DB_URL`: `jdbc:postgresql://<postgres-service-name>.<namsepace>.svc.cluster.local:5432/<xlr-report-database-name>`
-- `UseExistingDB.XLR_REPORT_DB_USER`:  Database User for xl-release report db
-- `UseExistingDB.XLR_REPORT_DB_PASS`:  Database Password for xl-release report db
-
-**Example:**
-```bash
-#Passing a custom PostgreSQL to XL-Release
-UseExistingDB:
-  Enabled: true
-  # If you want to use existing database, change the value to "true".
-  # Uncomment the following lines and provide the values.
-  XLR_DB_URL: jdbc:postgresql://xlr-production-postgresql.default.svc.cluster.local:5432/xlr-db
-  XLR_DB_USER: xlr
-  XLR_DB_PASS: xlr
-  XLR_REPORT_DB_URL: jdbc:postgresql://xlr-production-postgresql.default.svc.cluster.local:5432/xlr-report-db
-  XLR_REPORT_DB_USER: xlr-report
-  XLR_REPORT_DB_PASS: xlr-report
-``` 
-> **Note**: User might have database instance running outside the cluster. Configure parameters accordingly. 
-### Existing or External Messaging Queue
-If you plan to use an existing messaging queue, follow these steps to configure values.yaml
-- Change `rabbitmq-ha.install` to false
-- `UseExistingMQ.Enabled`: true
-- `UseExistingMQ.XLR_TASK_QUEUE_USERNAME`: Username for xl-release task queue
-- `UseExistingMQ.XLR_TASK_QUEUE_PASSWORD`: Password for xl-release task queue
-- `UseExistingMQ.XLR_TASK_QUEUE_NAME`: Queue Name for xl-release
-- `UseExistingMQ.XLR_TASK_QUEUE_URL`: `amqp://<rabbitmq-service-name>.<namsepace>.svc.cluster.local:5672`
-**Example:**
-```bash
-# Passing a custom RabbitMQ to XL-Release
-UseExistingMQ:
-  Enabled: true
-  # If you want to use an existing Message Queue, change 'rabbitmq-ha.install' to 'false'.
-  # Set 'UseExistingMQ.Enabled' to 'true'.Uncomment the following lines and provide the values.
-  XLR_TASK_QUEUE_USERNAME: guest
-  XLR_TASK_QUEUE_PASSWORD: guest
-  XLR_TASK_QUEUE_NAME: xlr-task-queue
-  XLR_TASK_QUEUE_URL: amqp://xlr-production-rabbitmq-ha.default.svc.cluster.local:5672
-```
-> **Note**: User might have rabbitmq instance running outside the cluster. Configure parameters accordingly.
-### Existing Ingress Controller
-There is an option to use external ingress controller for Digital.ai Release.
-If you want to use an existing ingress controller,  change `haproxy.install` to false.
-
-## Useful links
-- [`xebialabs/xl-release:<tagname>`](https://hub.docker.com/r/xebialabs/xl-release/tags) – Docker Hub repository for Digital.ai Release
-- [`stable/rabbitmq-ha`](https://github.com/helm/charts/tree/master/stable/rabbitmq-ha) -  Github repository for RabbitMQ Helm Chart
-- [`bitnami/postgresql`](https://github.com/bitnami/charts/tree/master/bitnami/postgresql) -  Github repository for Postgresql Helm Chart
-- [`haproxy-ingress/haproxy-ingress`](https://github.com/haproxy-ingress/charts) -  Github repository for HAProxy Ingress Controller Helm Chart
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)

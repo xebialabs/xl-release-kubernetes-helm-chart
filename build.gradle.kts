@@ -44,7 +44,7 @@ group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
-val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "22.3.0-${
+val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "23.3.0-${
     LocalDateTime.now().format(DateTimeFormatter.ofPattern("Mdd.Hmm"))
 }"
 project.extra.set("releasedVersion", releasedVersion)
@@ -153,55 +153,14 @@ tasks {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
-    register<Copy>("prepareHelmPackage") {
-        dependsOn("dumpVersion")
-        from(layout.projectDirectory)
-        exclude(
-            layout.buildDirectory.get().asFile.name,
-            "buildSrc/",
-            "docs/",
-            "documentation/",
-            "gradle/",
-            "*gradle*",
-            ".*/",
-            "*.iml",
-            "*.sh"
-        )
-        into(buildXlrOperatorDir)
-    }
-
-    register<Copy>("prepareValuesYaml") {
-        dependsOn("prepareHelmPackage")
-        from(buildXlrOperatorDir)
-        include("values-nginx.yaml")
-        into(buildXlrOperatorDir)
-        rename("values-nginx.yaml", "values.yaml")
-        doLast {
-            exec {
-                workingDir(buildXlrOperatorDir)
-                commandLine("rm", "-f", "values-haproxy.yaml")
-            }
-            exec {
-                workingDir(buildXlrOperatorDir)
-                commandLine("rm", "-f", "values-nginx.yaml")
-            }
-        }
-    }
-
     register<Exec>("prepareHelmDeps") {
-        dependsOn("prepareValuesYaml")
-        workingDir(buildXlrOperatorDir)
+        dependsOn("dumpVersion")
+        workingDir(layout.projectDirectory)
         commandLine("helm", "dependency", "update", ".")
 
         standardOutput = ByteArrayOutputStream()
         errorOutput = ByteArrayOutputStream()
 
-        doLast {
-            exec {
-                workingDir(buildXlrOperatorDir)
-                commandLine("rm", "-f", "Chart.lock")
-            }
-        }
         doLast {
             logger.lifecycle(standardOutput.toString())
             logger.error(errorOutput.toString())
@@ -211,8 +170,8 @@ tasks {
 
     register<Exec>("buildHelmPackage") {
         dependsOn("prepareHelmDeps")
-        workingDir(buildXlrDir)
-        commandLine("helm", "package", "--app-version=$releasedVersion", project.name)
+        workingDir(layout.projectDirectory)
+        commandLine("helm", "package", "--version=$releasedVersion", "--app-version=$releasedVersion", "--destination", buildXlrDir.get(), ".")
 
         standardOutput = ByteArrayOutputStream()
         errorOutput = ByteArrayOutputStream()
@@ -226,7 +185,7 @@ tasks {
             }
             logger.lifecycle(standardOutput.toString())
             logger.error(errorOutput.toString())
-            logger.lifecycle("Helm package finished created ${buildDir}/xlr/xlr.tgz")
+            logger.lifecycle("Helm package finished created ${buildXlrDir.get()}/xlr.tgz")
         }
     }
 

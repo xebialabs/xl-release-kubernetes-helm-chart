@@ -1,31 +1,50 @@
 apiVersion: v2
-appVersion: v23.1
-description: A Helm chart for XL Release
+appVersion: 23.3
+description: A Helm chart for Digital.ai Release
 name: digitalai-release
-version: 23.1
+version: 23.3.0-519.1200
+kubeVersion: ">= 1.20.0 < 1.26.0" # TODO: check span
+sources:
+  - https://github.com/xebialabs/xl-release-kubernetes-helm-chart
+  - https://github.com/xebialabs/xl-release
+home: https://github.com/xebialabs/xl-release-kubernetes-helm-chart
+keywords:
+  - Digital.ai
+  - Release
+  - DAI
+  - DAIR
+  - Xebia
+  - XLR
 
 dependencies:
-- name: haproxy-ingress
-  version: 0.14.2
-  repository: "https://haproxy-ingress.github.io/charts"
-  condition: haproxy-ingress.install
 
-- name: nginx-ingress-controller
-  version: 9.3.32
-  repository: "https://charts.bitnami.com/bitnami"
-  condition: nginx-ingress-controller.install
+  - name: common
+    repository: https://charts.bitnami.com/bitnami
+    tags:
+      - bitnami-common
+    version: 1.17.X
 
-- name: postgresql
-  version: 11.9.13
-  repository: "https://charts.bitnami.com/bitnami"
-  condition: postgresql.install
+  - name: haproxy-ingress
+    version: 0.14.2
+    repository: "https://haproxy-ingress.github.io/charts"
+    condition: haproxy-ingress.install
 
-- name: rabbitmq
-  version: 11.10.2
-  repository: "https://charts.bitnami.com/bitnami"
-  condition: rabbitmq.install
+  - name: nginx-ingress-controller
+    version: 9.3.32
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: nginx-ingress-controller.install
 
-- name: keycloak
-  version: 17.0.1
-  repository: "https://codecentric.github.io/helm-charts"
-  condition: keycloak.install
+  - name: postgresql
+    version: 11.9.13
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: postgresql.install
+
+  - name: rabbitmq
+    version: 11.10.2
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: rabbitmq.install
+
+  - name: keycloak
+    version: 18.3.0
+    repository: "https://codecentric.github.io/helm-charts"
+    condition: keycloak.install

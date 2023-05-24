@@ -1,0 +1,1129 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+##
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+##
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  imagePullSecrets: []
+  storageClass: ""
+
+k8sSetup:
+  platform: PlainK8s
+  validateValues: true
+
+## @section App parameters
+##
+
+# Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
+license: ""
+licenseAcceptEula: false
+
+generateXlConfig: true
+useIpAsHostname: false
+forceRemoveMissingTypes: false
+clusterMode: full
+forceUpgrade: true
+enableEmbeddedQueue: false
+
+http2:
+  enabled: false
+ssl:
+  enabled: false
+  keystorePassword:
+  keystoreKeypassword:
+  keystore:
+
+external:
+  db:
+    enabled: false
+    main:
+      url: ""
+      username: ""
+      password: ""
+      maxPoolSize: ""
+    report:
+      url: ""
+      username: ""
+      password: ""
+      maxPoolSize: ""
+
+  mq:
+    enabled: false
+    url: ""
+    queueName: ""
+    username: ""
+    password: ""
+
+keystore:
+  # Set passphrase for the keystore
+  passphrase: ""
+  # https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
+  # Convert repository-keystore.jceks files content to base64
+  # ( cat repository-keystore.jceks | base64 -w 0 ) and put the output here
+  # if empty during initial run, the default keystore will be generated with provided "passphrase"
+  keystore: ""
+
+## Network Policy configuration
+## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+##
+networkPolicy:
+  ## @param networkPolicy.enabled Enable creation of NetworkPolicy resources
+  ##
+  enabled: false
+  ## @param networkPolicy.allowExternal Don't require client label for connections
+  ## The Policy model to apply. When set to false, only pods with the correct
+  ## client label will have network access to the port Release is listening
+  ## on. When true, Release will accept connections from any source
+  ## (with the correct destination port).
+  ##
+  allowExternal: true
+  ## @param networkPolicy.additionalRules Additional NetworkPolicy Ingress "from" rules to set. Note that all rules are OR-ed.
+  ## e.g:
+  ## additionalRules:
+  ##  - matchLabels:
+  ##    - role: frontend
+  ##  - matchExpressions:
+  ##    - key: role
+  ##      operator: In
+  ##      values:
+  ##        - frontend
+  ##
+  additionalRules: []
+
+metrics:
+  enabled: false
+
+oidc:
+  accessToken:
+    audience:
+    enable: false
+    issuer:
+    jwsAlg:
+    keyRetrievalUri:
+    secretKey:
+  accessTokenUri:
+  clientAuthJwt:
+    enable: false
+    jwsAlg:
+    keyStore:
+      enable: false
+      path:
+      password:
+      type:
+    key:
+      alias:
+      enable: false
+      password:
+    tokenKeyId:
+  clientAuthMethod:
+  clientId:
+  clientSecret:
+  emailClaim:
+  enabled: false
+  external: false
+  externalIdClaim:
+  fullNameClaim:
+  idTokenJWSAlg:
+  issuer:
+  keyRetrievalUri:
+  logoutUri:
+  postLogoutRedirectUri:
+  proxyHost:
+  proxyPort:
+  redirectUri:
+  rolesClaim:
+  scopes: [ "openid" ]
+  userAuthorizationUri:
+  userNameClaim:
+
+## @section Common parameters
+##
+
+## @param nameOverride String to partially override release.fullname template (will maintain the release name)
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override release.fullname template
+##
+fullnameOverride: ""
+## @param namespaceOverride String to fully override common.names.namespace
+##
+namespaceOverride: ""
+## @param kubeVersion Force target Kubernetes version (using Helm capabilities if not set)
+##
+kubeVersion: ""
+## @param clusterDomain Kubernetes Cluster Domain
+##
+clusterDomain: cluster.local
+## @param extraDeploy Array of extra objects to deploy with the release
+##
+extraDeploy: [ ]
+## @param commonAnnotations Annotations to add to all deployed objects
+##
+commonAnnotations: { }
+## @param commonLabels Labels to add to all deployed objects
+##
+commonLabels: { }
+## Enable diagnostic mode in the deployment
+##
+diagnosticMode:
+  ## @param diagnosticMode.enabled Enable diagnostic mode (all probes will be disabled and the command will be overridden)
+  ##
+  enabled: false
+  ## @param diagnosticMode.command Command to override all containers in the deployment
+  ##
+  command:
+    - /opt/xebialabs/tini
+  ## @param diagnosticMode.args Args to override all containers in the deployment
+  ##
+  args:
+    - --
+    - sleep
+    - infinity
+
+## @param hostAliases Deployment pod host aliases
+## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
+##
+hostAliases: []
+## @param dnsPolicy DNS Policy for pod
+## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+## E.g.
+## dnsPolicy: ClusterFirst
+dnsPolicy: ""
+## @param dnsConfig DNS Configuration pod
+## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/
+## E.g.
+## dnsConfig:
+##   options:
+##   - name: ndots
+##     value: "4"
+dnsConfig: {}
+
+## Release Authentication parameters
+##
+auth:
+  adminPassword: ""
+
+## @param command Override default container command (useful when using custom images)
+##
+command:
+  - /opt/xebialabs/tini
+## @param args Override default container args (useful when using custom images)
+##
+args:
+  - --
+  - /opt/xebialabs/xl-release-server/bin/run-in-container.sh
+## @param lifecycleHooks Overwrite livecycle for the Release container(s) to automate configuration before or after startup
+##
+lifecycleHooks: {}
+## @param terminationGracePeriodSeconds Default duration in seconds k8s waits for container to exit before sending kill signal.
+## Any time in excess of 10 seconds will be spent waiting for any synchronization necessary for cluster not to lose data.
+##
+terminationGracePeriodSeconds: 200
+## @param extraEnvVars Extra environment variables to add to Release pods
+## E.g:
+## extraEnvVars:
+##   - name: FOO
+##     value: BAR
+##
+extraEnvVars: [ ]
+## @param extraEnvVarsCM Name of existing ConfigMap containing extra environment variables
+##
+extraEnvVarsCM: ""
+## @param extraEnvVarsSecret Name of existing Secret containing extra environment variables (in case of sensitive data)
+##
+extraEnvVarsSecret: ""
+
+## Container Ports
+containerPorts:
+  releaseHttp: 5516
+  releaseHttps: 5543
+
+## @param extraContainerPorts Extra ports to be included in container spec, primarily informational
+## E.g:
+## extraContainerPorts:
+## - name: new_port_name
+##   containerPort: 1234
+##
+extraContainerPorts: []
+
+## @param configuration [string] Release Configuration file content: required cluster configuration
+## Do not override unless you know what you are doing.
+## To add more configuration, use `extraConfiguration` of `advancedConfiguration` instead
+##
+configuration:
+  xl-release.conf.template: |-
+    xl {
+      cluster {
+        # mode: "default", "hot-standby", "full"
+        mode = ${XL_CLUSTER_MODE}
+        name = "xl-release_cluster"
+        akka {
+          loglevel = "INFO"
+          actor.debug.receive = off
+          remote {
+              log-received-messages = off
+              log-sent-messages = off
+          }
+        }
+      }
+    
+      server {
+          http2 {
+              enabled = ${XLR_HTTP2_ENABLED}
+          }
+      }
+  
+      license {
+        kind = ${XL_LICENSE_KIND}
+        product = "xl-release"
+      }
+  
+      database {
+        db-driver-classname="${XL_DB_DRIVER}"
+        db-password="${XL_DB_PASSWORD}"
+        db-url="${XL_DB_URL}"
+        db-username=${XL_DB_USERNAME}
+        max-pool-size=${XL_DB_MAX_POOL_SIZE}
+      }
+  
+      # TODO Release does not support (H2) running in one schema.
+      reporting {
+        db-driver-classname="${XL_DB_DRIVER}"
+        db-password="${XL_REPORT_DB_PASSWORD}"
+        db-url="${XL_REPORT_DB_URL}"
+        db-username=${XL_REPORT_DB_USERNAME}
+        max-pool-size=${XL_REPORT_DB_MAX_POOL_SIZE}
+      }
+  
+      # Task queue
+      queue {
+        embedded=${ENABLE_EMBEDDED_QUEUE}
+        password="${XLR_TASK_QUEUE_PASSWORD}"
+        queueName="${XLR_TASK_QUEUE_NAME}"
+        url="${XLR_TASK_QUEUE_URL}"
+        username="${XLR_TASK_QUEUE_USERNAME}"
+      }
+  
+      metrics {
+        enabled = ${XL_METRICS_ENABLED}
+      }
+    
+      {{- if or .Values.keycloak.install .Values.oidc.enabled }}
+      security {
+        auth {
+          providers {
+            oidc {
+              {{- if .Values.oidc.external }}
+              clientId=""
+              clientId=${?OIDC_CLIENT_ID}
+              clientSecret=""
+              clientSecret=${?OIDC_CLIENT_SECRET}
+              {{- if .Values.oidc.clientAuthMethod }}
+              clientAuthMethod={{ .Values.oidc.clientAuthMethod | quote }}
+              {{- end }}
+              {{- if .Values.oidc.clientAuthJwt.enable }}
+              clientAuthJwt {
+                  jwsAlg={{ default "" .Values.oidc.clientAuthJwt.jwsAlg | quote }}
+                  tokenKeyId={{ default "" .Values.oidc.clientAuthJwt.tokenKeyId | quote }}
+                  {{- if .Values.oidc.clientAuthJwt.keyStore.enable }}
+                  keyStore {
+                      path={{ default "" .Values.oidc.clientAuthJwt.keyStore.path | quote }}
+                      password=""
+                      password=${?OIDC_CLIENT_AUTH_JWT_KEYSTORE_PASSWORD}
+                      type={{ default "" .Values.oidc.clientAuthJwt.keyStore.type | quote }}
+                  }
+                  {{- end }}
+                  {{- if .Values.oidc.clientAuthJwt.key.enable }}
+                  key {
+                      alias={{ default "" .Values.oidc.clientAuthJwt.key.alias | quote }}
+                      password=""
+                      password=${?OIDC_CLIENT_AUTH_JWT_KEY_PASSWORD}
+                  }
+                  {{- end }}
+              }
+              {{- end }}
+              issuer={{ .Values.oidc.issuer | quote }}
+              keyRetrievalUri={{ default "" .Values.oidc.keyRetrievalUri | quote }}
+              accessTokenUri={{ default "" .Values.oidc.accessTokenUri | quote }}
+              userAuthorizationUri={{ default "" .Values.oidc.userAuthorizationUri | quote }}
+              logoutUri={{ default "" .Values.oidc.logoutUri | quote }}
+              redirectUri={{ .Values.oidc.redirectUri | quote }}
+              postLogoutRedirectUri={{ .Values.oidc.postLogoutRedirectUri | quote }}
+              userNameClaim={{ default "" .Values.oidc.userNameClaim | quote }}
+              fullNameClaim={{ default "" .Values.oidc.fullNameClaim | quote }}
+              emailClaim={{ default "" .Values.oidc.emailClaim | quote }}
+              {{- if .Values.oidc.externalIdClaim }}
+              externalIdClaim={{ .Values.oidc.externalIdClaim | quote }}
+              {{- end }}
+              rolesClaim={{ default "" .Values.oidc.rolesClaim | quote }}
+              {{- if .Values.oidc.scopes }}
+              scopes={{ .Values.oidc.scopes }}
+              {{- else }}
+              scopes=["openid"]
+              {{- end }}
+              {{- if .Values.oidc.idTokenJWSAlg }}
+              idTokenJWSAlg={{ .Values.oidc.idTokenJWSAlg | quote }}
+              {{- end }}
+              {{- if .Values.oidc.accessToken.enable }}
+              access-token {
+                  issuer={{ default "" .Values.oidc.accessToken.issuer | quote }}
+                  audience={{ default "" .Values.oidc.accessToken.audience | quote }}
+                  keyRetrievalUri={{ default "" .Values.oidc.accessToken.keyRetrievalUri | quote }}
+                  jwsAlg={{ default "" .Values.oidc.accessToken.jwsAlg | quote }}
+                  secretKey=""
+                  secretKey=${?OIDC_ACCESS_TOKEN_SECRET_KEY}
+                  }
+              {{- end }}
+              {{- if .Values.oidc.proxyHost }}
+              proxyHost={{ .Values.oidc.proxyHost | quote }}
+              {{- end }}
+              {{- if .Values.oidc.proxyPort }}
+              proxyPort={{ .Values.oidc.proxyPort | quote }}
+              {{- end }}
+              {{- else }}
+              clientId="release"
+              clientSecret="ab2088f6-2251-4233-9b22-e24db6a67483"
+              {{- range .Values.keycloak.ingress.rules }}
+              issuer="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform"
+              keyRetrievalUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/certs"
+              accessTokenUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/token"
+              userAuthorizationUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/auth"
+              logoutUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/logout"
+              {{- end }}
+              redirectUri="{{ include "release.serverUrl" . }}/oidc-login"
+              postLogoutRedirectUri="{{ include "release.serverUrl" . }}/oidc-login"
+              userNameClaim="preferred_username"
+              fullNameClaim="name"
+              emailClaim="email"
+              rolesClaim="groups"
+              scopes =["openid"]
+              {{- end }}
+            }
+          }
+        }
+      }
+      {{- end }}
+    }
+
+## @param extraConfiguration [string] Configuration file content: extra configuration to be appended to Release configuration
+## Use this instead of `configuration` to add more configuration
+##
+# TODO usage of extra conf
+extraConfiguration: |-
+  #{}
+
+## @param extraVolumeMounts Optionally specify extra list of additional volumeMounts
+## Examples:
+## extraVolumeMounts:
+##   - name: extras
+##     mountPath: /usr/share/extras
+##     readOnly: true
+##
+extraVolumeMounts: []
+## @param extraVolumes Optionally specify extra list of additional volumes .
+## Example:
+## extraVolumes:
+##   - name: extras
+##     emptyDir: {}
+##
+extraVolumes: []
+## @param extraSecrets Optionally specify extra secrets to be created by the chart.
+## This can be useful when combined with load_definitions to automatically create the secret containing the definitions to be loaded.
+## Example:
+## extraSecrets:
+##   load-definition:
+##     load_definition.json: |
+##       {
+##         ...
+##       }
+##
+extraSecrets: {}
+## @param extraSecretsPrependReleaseName Set this flag to true if extraSecrets should be created with <release-name> prepended.
+##
+extraSecretsPrependReleaseName: false
+
+## @section Release Image parameters
+## Release image version
+## ref: https://hub.docker.com/r/xebialabs/xl-release/tags/
+## @param image.registry Release image registry
+## @param image.repository Release image repository
+## @param image.tag Release image tag (immutable tags are recommended)
+## @param image.pullPolicy Release image pull policy
+## @param image.pullSecrets Specify docker-registry secret names as an array
+## @param image.debug Set to true if you would like to see extra information on logs
+##
+image:
+  registry: docker.io
+  repository: xebialabsunsupported/xl-release
+  tag: "{{ .Chart.AppVersion }}"
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets (secrets must be manually created in the namespace)
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## Example:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+
+  ## Configure the ingress resource that allows you to access the
+  ## Release installation. Set up the URL
+  ## ref: https://kubernetes.io/docs/user-guide/ingress/
+  ##
+ingress:
+  ## @param ingress.enabled Enable ingress resource for Management console
+  ##
+  enabled: false
+
+  ## @param ingress.path Path for the default host. You may need to set this to '/*' in order to use this with ALB ingress controllers.
+  ##
+  path: /
+
+  ## @param ingress.pathType Ingress path type
+  ##
+  pathType: ImplementationSpecific
+  ## @param ingress.hostname Default host for the ingress resource
+  ##
+  hostname: ""
+  ## @param ingress.annotations Additional annotations for the Ingress resource. To enable certificate autogeneration, place here your cert-manager annotations.
+  ## For a full list of possible ingress annotations, please see
+  ## ref: https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/nginx-configuration/annotations.md
+  ## Use this parameter to set the required annotations for cert-manager, see
+  ## ref: https://cert-manager.io/docs/usage/ingress/#supported-annotations
+  ##
+  ## e.g:
+  ## annotations:
+  ##   kubernetes.io/ingress.class: nginx
+  ##   cert-manager.io/cluster-issuer: cluster-issuer-name
+  ##
+  annotations:
+    # ingress.kubernetes.io/tls-acme: "true"
+
+    ## nginx
+    #kubernetes.io/ingress.class: "nginx-dair"
+    #nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    #nginx.ingress.kubernetes.io/rewrite-target: /
+    #nginx.ingress.kubernetes.io/affinity: cookie
+    #nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    #nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    #nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    #nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    #
+    ## haproxy
+    #kubernetes.io/ingress.class: "haproxy-dair"
+    #ingress.kubernetes.io/rewrite-target: /
+    #ingress.kubernetes.io/affinity: cookie
+    #ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    #ingress.kubernetes.io/session-cookie-strategy: prefix
+    #ingress.kubernetes.io/config-backend: |
+    #  option httpchk GET /ha/health HTTP/1.0
+
+  ## @param ingress.tls Enable TLS configuration for the hostname defined at `ingress.hostname` parameter
+  ## TLS certificates will be retrieved from a TLS secret with name: {{- printf "%s-tls" .Values.ingress.hostname }}
+  ## You can:
+  ##   - Use the `ingress.secrets` parameter to create this TLS secret
+  ##   - Relay on cert-manager to create it by setting the corresponding annotations
+  ##   - Relay on Helm to create self-signed certificates by setting `ingress.selfSigned=true`
+  ##
+  tls: false
+  ## @param ingress.selfSigned Set this to true in order to create a TLS secret for this ingress record
+  ## using self-signed certificates generated by Helm
+  ##
+  selfSigned: false
+  ## @param ingress.extraHosts The list of additional hostnames to be covered with this ingress record.
+  ## Most likely the hostname above will be enough, but in the event more hosts are needed, this is an array
+  ## e.g:
+  ## extraHosts:
+  ##   - name: release.local
+  ##     path: /
+  ##
+  extraHosts: []
+  ## @param ingress.extraPaths An array with additional arbitrary paths that may need to be added to the ingress under the main host
+  ## e.g:
+  ## extraPaths:
+  ## - path: /*
+  ##   backend:
+  ##     serviceName: ssl-redirect
+  ##     servicePort: use-annotation
+  ##
+  extraPaths: []
+  ## @param ingress.extraRules The list of additional rules to be added to this ingress record. Evaluated as a template
+  ## Useful when looking for additional customization, such as using different backend
+  ##
+  extraRules: []
+  ## @param ingress.extraTls The tls configuration for additional hostnames to be covered with this ingress record.
+  ## see: https://kubernetes.io/docs/concepts/services-networking/ingress/#tls
+  ## e.g:
+  ## extraTls:
+  ##   - hosts:
+  ##       - release.local
+  ##     secretName: release.local-tls
+  ##
+  extraTls: []
+  ## @param ingress.secrets Custom TLS certificates as secrets
+  ## NOTE: 'key' and 'certificate' are expected in PEM format
+  ## NOTE: 'name' should line up with a 'secretName' set further up
+  ## If it is not set and you're using cert-manager, this is unneeded, as it will create a secret for you with valid certificates
+  ## If it is not set and you're NOT using cert-manager either, self-signed certificates will be created valid for 365 days
+  ## It is also possible to create and manage the certificates outside of this helm chart
+  ## Please see README.md for more information
+  ## e.g:
+  ## secrets:
+  ##   - name: release.local-tls
+  ##     key: |-
+  ##       -----BEGIN RSA PRIVATE KEY-----
+  ##       ...
+  ##       -----END RSA PRIVATE KEY-----
+  ##     certificate: |-
+  ##       -----BEGIN CERTIFICATE-----
+  ##       ...
+  ##       -----END CERTIFICATE-----
+  ##
+  secrets: []
+  ## @param ingress.ingressClassName IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+  ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+  ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  ##
+  ingressClassName: ""
+
+route:
+  ## @param route.enabled Enable route resource
+  ##
+  enabled: false
+  ## @param route.path Path for the default host.
+  ##
+  path: /
+  ## @param route.hostname Default host for the route resource
+  ##
+  hostname: ""
+  ## @param route.annotations Additional annotations for the route resource.
+  annotations:
+    haproxy.router.openshift.io/cookie_name: JSESSIONID
+    haproxy.router.openshift.io/disable_cookies: "false"
+    haproxy.router.openshift.io/rewrite-target: /
+  tls:
+    enabled: false
+    key: ""
+    certificate: ""
+    caCertificate: ""
+    insecureEdgeTerminationPolicy: ""
+    termination: edge
+
+
+## @section RBAC parameters
+##
+
+## Release pods ServiceAccount
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+##
+serviceAccount:
+  ## @param serviceAccount.create Enable creation of ServiceAccount for Release pods
+  ##
+  create: true
+  ## @param serviceAccount.name Name of the created serviceAccount
+  ## If not set and create is true, a name is generated using the release.fullname template
+  ##
+  name: ""
+  ## @param serviceAccount.automountServiceAccountToken Auto-mount the service account token in the pod
+  ##
+  automountServiceAccountToken: true
+  ## @param serviceAccount.annotations Annotations for service account. Evaluated as a template. Only used if `create` is `true`.
+  ##
+  annotations: { }
+## Role Based Access
+## ref: https://kubernetes.io/docs/admin/authorization/rbac/
+##
+rbac:
+  ## @param rbac.create Whether RBAC rules should be created
+  ## binding Release ServiceAccount to a role
+  ## that allows Release pods querying the K8s API
+  ##
+  create: true
+
+## @section Persistence parameters
+##
+
+persistence:
+  ## @param persistence.enabled Enable Release data persistence using PVC
+  ##
+  enabled: true
+  ## @param persistence.single Enable Release data to use single PVC
+  ##
+  single: true
+  ## @param persistence.storageClass PVC Storage Class for Release data volume
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: ""
+  ## @param persistence.selector Selector to match an existing Persistent Volume
+  ## selector:
+  ##   matchLabels:
+  ##     app: my-app
+  ##
+  selector: { }
+  ## @param persistence.accessModes PVC Access Modes for Release data volume
+  ##
+  accessModes:
+    - ReadWriteMany
+  ## @param persistence.existingClaim Provide an existing PersistentVolumeClaims
+  ## The value is evaluated as a template
+  ## So, for example, the name can depend on .Release or .Chart
+  ##
+  existingClaim: ""
+  ## @param persistence.size PVC Storage Request for Release data volume
+  ##
+  size: 8Gi
+  ## @param persistence.annotations Persistence annotations. Evaluated as a template
+  ## Example:
+  ## annotations:
+  ##   example.io/disk-volume-type: SSD
+  ##
+  annotations:
+    helm.sh/resource-policy: "keep"
+
+## @section Exposure parameters
+##
+
+## Kubernetes service type
+##
+service:
+  ## @param service.type Kubernetes Service type
+  ##
+  type: ClusterIP
+
+  ## @param service.portEnabled Release port. Cannot be disabled when `auth.tls.enabled` is `false`. Listener can be disabled with `listeners.tcp = none`.
+  ##
+  portEnabled: true
+  ## Service ports
+  ##
+  ports:
+    releaseHttp: 80
+    releaseHttps: 443
+  ## Service ports name
+  ##
+  portNames:
+    releaseHttp: "release-http"
+    releaseHttps: "release-https"
+
+  ## Node ports to expose
+  ##
+  nodePorts:
+    releaseHttp: ""
+    releaseHttps: ""
+  ## @param service.extraPorts Extra ports to expose in the service
+  ## E.g.:
+  ## extraPorts:
+  ## - name: new_svc_name
+  ##   port: 1234
+  ##   targetPort: 1234
+  ##
+  extraPorts: [ ]
+  ## @param service.loadBalancerSourceRanges Address(es) that are allowed when service is `LoadBalancer`
+  ## https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ## e.g:
+  ## loadBalancerSourceRanges:
+  ## - 10.10.10.0/24
+  ##
+  loadBalancerSourceRanges: [ ]
+  ## @param service.externalIPs Set the ExternalIPs
+  ##
+  externalIPs: [ ]
+  ## @param service.externalTrafficPolicy Enable client source IP preservation
+  ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  ##
+  externalTrafficPolicy: Cluster
+  ## @param service.loadBalancerIP Set the LoadBalancerIP
+  ##
+  loadBalancerIP: ""
+  ## @param service.clusterIP Kubernetes service Cluster IP
+  ## e.g.:
+  ## clusterIP: None
+  ##
+  clusterIP: ""
+  ## @param service.labels Service labels. Evaluated as a template
+  ##
+  labels: { }
+  ## @param service.annotations Service annotations. Evaluated as a template
+  ## Example:
+  ## annotations:
+  ##   service.beta.kubernetes.io/aws-load-balancer-internal: 0.0.0.0/0
+  ##
+  annotations: { }
+  ## @param service.annotationsHeadless Headless Service annotations. Evaluated as a template
+  ## Example:
+  ## annotations:
+  ##   external-dns.alpha.kubernetes.io/internal-hostname: release.example.com
+  ##
+  annotationsHeadless: { }
+  ## @param service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
+  ## If "ClientIP", consecutive client requests will be directed to the same Pod
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+  ##
+  sessionAffinity: None
+  ## @param service.sessionAffinityConfig Additional settings for the sessionAffinity
+  ## sessionAffinityConfig:
+  ##   clientIP:
+  ##     timeoutSeconds: 300
+  ##
+  sessionAffinityConfig: { }
+
+## @section Statefulset parameters
+##
+
+## @param replicaCount Number of Release replicas to deploy
+##
+replicaCount: 3
+## @param schedulerName Use an alternate scheduler, e.g. "stork".
+## ref: https://kubernetes.io/docs/tasks/administer-cluster/configure-multiple-schedulers/
+##
+schedulerName: ""
+## Release should be initialized one by one when building cluster.
+## Therefore, the default value of podManagementPolicy is 'OrderedReady'
+## @param podManagementPolicy Pod management policy
+##
+podManagementPolicy: OrderedReady
+## @param podLabels Release Pod labels. Evaluated as a template
+## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+podLabels: {}
+## @param podAnnotations Release Pod annotations. Evaluated as a template
+## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
+podAnnotations: {}
+## @param updateStrategy.type Update strategy type for Release statefulset
+## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
+##
+updateStrategy:
+  ## StrategyType
+  ## Can be set to RollingUpdate or OnDelete
+  ##
+  type: RollingUpdate
+## @param statefulsetLabels Release statefulset labels. Evaluated as a template
+## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+##
+statefulsetLabels: {}
+## @param priorityClassName Name of the priority class to be used by Release pods, priority class needs to be created beforehand
+## Ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
+##
+priorityClassName: ""
+## @param podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAffinityPreset: ""
+## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAntiAffinityPreset: soft
+## Node affinity preset
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+##
+nodeAffinityPreset:
+  ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  type: ""
+  ## @param nodeAffinityPreset.key Node label key to match Ignored if `affinity` is set.
+  ## E.g.
+  ## key: "kubernetes.io/e2e-az-name"
+  ##
+  key: ""
+  ## @param nodeAffinityPreset.values Node label values to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## values:
+  ##   - e2e-az1
+  ##   - e2e-az2
+  ##
+  values: []
+
+## @param affinity Affinity for pod assignment. Evaluated as a template
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+## Note: podAffinityPreset, podAntiAffinityPreset, and  nodeAffinityPreset will be ignored when it's set
+##
+affinity: { }
+## @param nodeSelector Node labels for pod assignment. Evaluated as a template
+## ref: https://kubernetes.io/docs/user-guide/node-selection/
+##
+nodeSelector: { }
+## @param tolerations Tolerations for pod assignment. Evaluated as a template
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+##
+tolerations: [ ]
+## @param topologySpreadConstraints Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template
+## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/#spread-constraints-for-pods
+##
+topologySpreadConstraints: [ ]
+
+## Release pods' Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param podSecurityContext.enabled Enable Release pods' Security Context
+## @param podSecurityContext.fsGroup Set Release pod's Security Context fsGroup
+##
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+
+## @param containerSecurityContext.enabled Enabled Release containers' Security Context
+## @param containerSecurityContext.runAsUser Set Release containers' Security Context runAsUser
+## @param containerSecurityContext.runAsNonRoot Set Release container's Security Context runAsNonRoot
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## Example:
+##   containerSecurityContext:
+##     capabilities:
+##       drop: ["NET_RAW"]
+##     readOnlyRootFilesystem: true
+##
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsNonRoot: true
+
+## Release containers' resource requests and limits
+## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+## We usually recommend not to specify default resources and to leave this as a conscious
+## choice for the user. This also increases chances charts run on environments with little
+## resources, such as Minikube. If you do want to specify resources, uncomment the following
+## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+## @param resources.limits The resources limits for Release containers
+## @param resources.requests The requested resources for Release containers
+##
+resources:
+  ## Example:
+  ## limits:
+  ##    cpu: 1000m
+  ##    memory: 2Gi
+  ##
+  limits: {}
+  ## Examples:
+  ## requests:
+  ##    cpu: 1000m
+  ##    memory: 2Gi
+  ##
+  requests: {}
+
+health:
+  enabled: true
+  periodScans: 10
+  probeFailureThreshold: 12
+  probes: true
+  probesLivenessTimeout: 60
+  probesReadinessTimeout: 60
+
+## @param initContainers Add init containers to the Release pod
+## Example:
+## initContainers:
+##   - name: your-image-name
+##     image: your-image
+##     imagePullPolicy: Always
+##     ports:
+##       - name: portname
+##         containerPort: 1234
+##
+initContainers: []
+## @param sidecars Add sidecar containers to the Release pod
+## Example:
+## sidecars:
+##   - name: your-image-name
+##     image: your-image
+##     imagePullPolicy: Always
+##     ports:
+##       - name: portname
+##         containerPort: 1234
+##
+sidecars: []
+
+## Pod Disruption Budget configuration
+## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+##
+pdb:
+  ## @param pdb.create Enable/disable a Pod Disruption Budget creation
+  ##
+  create: false
+  ## @param pdb.minAvailable Minimum number/percentage of pods that should remain scheduled
+  ##
+  minAvailable: 1
+  ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
+  ##
+  maxUnavailable: ""
+
+busyBox:
+  image:
+    registry: docker.io
+    repository: library/busybox
+    tag: stable
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    ##
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets (secrets must be manually created in the namespace)
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## Example:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    ##
+    pullSecrets: []
+
+## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
+## If you have any other ingress controller installed, you can set the 'install' to 'false'.
+haproxy-ingress:
+  install: false
+  controller:
+    kind: Deployment
+    ingressClass: haproxy-dair
+    service:
+      type: LoadBalancer
+
+## Ref: https://github.com/codecentric/helm-charts/blob/master/charts/keycloak/README.md
+## Install keycloak chart. If need to use it, set 'install' to 'true'.
+keycloak:
+  install: false
+  extraEnv: |
+    - name: PROXY_ADDRESS_FORWARDING
+      value: "true"
+    - name: KEYCLOAK_USER
+      value: admin
+    - name: KEYCLOAK_PASSWORD
+      value: admin
+    - name: JGROUPS_DISCOVERY_PROTOCOL
+      value: dns.DNS_PING
+    - name: JGROUPS_DISCOVERY_PROPERTIES
+      value: 'dns_query={{ include "keycloak.serviceDnsName" . }}'
+    - name: CACHE_OWNERS_COUNT
+      value: "2"
+    - name: CACHE_OWNERS_AUTH_SESSIONS_COUNT
+      value: "2"
+    - name: JAVA_OPTS
+      value: >-
+        -XX:+UseContainerSupport
+        -XX:MaxRAMPercentage=50.0
+        -Djava.net.preferIPv4Stack=true
+        -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS
+        -Djava.awt.headless=true
+    - name: DB_VENDOR
+      value: postgres
+    - name: DB_ADDR
+      value: {{ include "postgresql.subchart" . }}
+    - name: DB_PORT
+      value: "5432"
+    - name: DB_DATABASE
+      value: keycloak
+    - name: DB_USER
+      value: keycloak
+    - name: DB_PASSWORD
+      value: keycloak
+    - name: KEYCLOAK_IMPORT
+      value: /realm/digitalai-platform-realm.json
+  extraVolumes: |
+    - name: realm-config
+      configMap:
+        name: {{ include "common.names.fullname" . }}-release-keycloak
+  extraVolumeMounts: |
+    - name: realm-config
+      mountPath: "/realm/"
+      readOnly: true
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: "nginx-dair"
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    rules:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  postgresql:
+    enabled: false
+  service:
+    type: LoadBalancer
+
+## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
+## If you have any other ingress controller installed, you can set the 'install' to 'false'.
+## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
+nginx-ingress-controller:
+  install: false
+  extraArgs:
+    ingress-class: "nginx-dair"
+  ingressClassResource:
+    controllerClass: "k8s.io/ingress-nginx-dair"
+    name: "nginx-dair"
+  replicaCount: 1
+  resources:
+    limits: {}
+    #   cpu: 100m
+    #   memory: 128Mi
+    requests: {}
+    #   cpu: 100m
+    #   memory: 128Mi
+  service:
+    type: LoadBalancer
+
+## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
+## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
+postgresql:
+  install: true
+  primary:
+    initdb:
+      scriptsSecret: '{{ include "postgresql.primary.fullname" . }}-release'
+    extendedConfiguration: |
+      max_connections = 150
+    persistence:
+      enabled: true
+      accessMode: ReadWriteOnce
+      storageClass: ""
+      size: 8Gi
+      existingClaim: ""
+  auth:
+    enablePostgresUser: true
+    postgresPassword: postgres
+  service:
+    port: 5432
+    type: ClusterIP
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+  volumePermissions:
+    enabled: true
+
+## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
+## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
+rabbitmq:
+  install: true
+  forceBoot: true
+  replicaCount: 3
+  auth:
+    username: guest
+    password: guest
+    erlangCookie: RELEASERABBITMQCLUSTER
+  extraPlugins: 'rabbitmq_amqp1_0'
+  loadDefinition:
+    enabled: true
+    file: /app/release_load_definition.json
+    existingSecret: '{{ include "common.names.fullname" . }}-release'
+  extraConfiguration: |
+    raft.wal_max_size_bytes = 1048576
+  persistence:
+    enabled: true
+    accessMode: ReadWriteOnce
+    storageClass: ""
+    size: 8Gi
+  service:
+    type: ClusterIP
+  volumePermissions:
+    enabled: true
