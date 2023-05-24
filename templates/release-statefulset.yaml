@@ -303,8 +303,11 @@ spec:
           resources: {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
+            {{- range $k, $v := .Values.configuration }}
             - name: configuration
-              mountPath: /opt/xebialabs/xl-release-server/default-conf
+              mountPath: /opt/xebialabs/xl-release-server/default-conf/{{ $k }}
+              subPath: {{ $k }}
+            {{- end }}
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/conf
               subPath: conf
@@ -332,9 +335,16 @@ spec:
         {{- include "common.tplvalues.render" (dict "value" .Values.sidecars "context" $) | nindent 8 }}
         {{- end }}
       volumes:
+        {{- if .Values.configuration }}
         - name: configuration
           configMap:
             name: {{ printf "%s-config" (include "common.names.fullname" .) }}
+            items:
+              {{- range $k, $v := .Values.configuration }}
+              - key: {{ $k }}
+                path: {{ $k }}
+              {{- end }}
+        {{- end }}
         {{- if .Values.ssl.enabled }}
         - name: http-ssl-keystore
           secret:

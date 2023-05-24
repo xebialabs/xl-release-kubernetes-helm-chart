@@ -12,6 +12,6 @@ metadata:
   {{- end }}
 data:
   {{- range $k, $v := .Values.configuration }}
-  {{ $k }}:|-
+  {{ $k }}: |-
     {{- include "common.tplvalues.render" (dict "value" $v "context" $) | nindent 4 }}
   {{- end }}

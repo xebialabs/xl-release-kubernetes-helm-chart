@@ -82,7 +82,11 @@ Remove Nginx regex from path.
         {{- end -}}
     {{- else -}}
         {{- if .Values.route.enabled }}
-            {{- printf "%s/" .Values.route.path }}
+            {{- if hasSuffix "/" .Values.route.path }}
+                {{- printf "%s" .Values.route.path }}
+            {{- else }}
+                {{- printf "%s/" .Values.route.path }}
+            {{- end }}
         {{- else -}}
             {{- print "" }}
         {{- end -}}
@@ -122,7 +126,6 @@ Get the server URL
             {{- else }}
                 {{- printf "%s://%s" $protocol $hostname }}
             {{- end }}
-            {{- printf "%s://%s" $protocol $hostname }}
         {{- else -}}
             {{- print "" }}
         {{- end }}

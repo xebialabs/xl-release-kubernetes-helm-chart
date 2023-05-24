@@ -27,7 +27,7 @@ tests:
           of: StatefulSet
       - equal:
           path: metadata.name
-          value: test-release-dai-release
+          value: test-release-digitalai-release
       - equal:
           path: spec.replicas
           value: 1
