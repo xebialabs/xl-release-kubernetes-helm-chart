@@ -1,3 +1,4 @@
+## the file will be removed with S-92288 (and all its secrets)
 {{- if .Values.keycloak.install }}
 apiVersion: v1
 kind: ConfigMap
