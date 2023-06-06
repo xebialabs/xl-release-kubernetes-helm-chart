@@ -2,11 +2,11 @@
 sidebar_position: 5
 ---
 
+#  Manual integration with the Identity Service
+
 :::caution
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
 :::
-
-#  Manual integration with the Identity Service
 
 ## Prerequisites
 - There is an account in the platform to connect to the Release instance (https://demoaccount.staging.digital.ai)
