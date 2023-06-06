@@ -2,7 +2,11 @@
 # From 10.2 version helm chart is not used directly. Use operator based installation instead.
 
 # Helm Charts for Digital.ai Release on Kubernetes 
- This repository contains Helm Charts for Digital.ai (formerly Xebialabs) Release product. The Helm Chart automates and simplifies deploying Digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
+
+Full documentation can be found by this link:
+- [https://xebialabs.github.io/xl-release-kubernetes-helm-chart](https://xebialabs.github.io/xl-release-kubernetes-helm-chart/)
+
+This repository contains Helm Charts for Digital.ai (formerly Xebialabs) Release product. The Helm Chart automates and simplifies deploying Digital.ai Release clusters on Kubernetes and other Kubernetes-enabled Platforms by providing the essential features you need to keep your clusters up and running. 
 
 ## Prerequisites Details
 * Kubernetes v1.17+
