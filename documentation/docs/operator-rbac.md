@@ -2,11 +2,11 @@
 sidebar_position: 11
 ---
 
+# RBAC rules for the Release installation
+
 :::caution
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
 :::
-
-# RBAC rules for the Release installation
 
 In Kubernetes, an operator is a piece of software that manages a specific application or service on behalf of its users. 
 Operators typically use Kubernetes API calls to create, update, and delete resources that are associated with the application or service they manage. 

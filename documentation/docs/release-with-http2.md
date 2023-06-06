@@ -2,11 +2,12 @@
 sidebar_position: 10
 ---
 
+## Install Release with http2 backend enabled
+
 :::caution
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
 :::
 
-## Install Release with http2 backend enabled
 This article describes the settings to be configured before you install Release with http2 backend enabled on a Kubernetes cluster.
 
 When Release is started with http2, it starts on https/ssl endpoint. And the xl-release backend communicates with ingress on the configured http2 backend endpoint.

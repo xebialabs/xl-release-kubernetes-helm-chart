@@ -2,11 +2,11 @@
 sidebar_position: 4
 ---
 
+# Assigning Pods to Nodes
+
 :::caution
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
 :::
-
-# Assigning Pods to Nodes
 
 ## Prerequisites
 - The kubectl command-line tool
