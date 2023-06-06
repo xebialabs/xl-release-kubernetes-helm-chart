@@ -14,7 +14,7 @@ When Release is started with http2, it starts on https/ssl endpoint. And the xl-
 ## Prerequisites
 
 * [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
-* [XL CLI 22.3.5 or later](/xl-platform/how-to/install-the-xl-cli.html)
+* [XL CLI 22.3.5 or later](https://docs.digital.ai/bundle/devops-deploy-version-v.22.3/page/deploy/how-to/install-the-xl-cli.html)
 * [yq 4.18.2 or later](https://github.com/mikefarah/yq)
 * [openssl] (https://www.openssl.org/source/)
 * keytool (Comes with Java JDK. Required only when generating keystore)
