@@ -1,5 +1,5 @@
 
-replicaCount: 3
+replicaCount: 2
 
 rabbitmq:
-  replicaCount: 3
+  replicaCount: 1

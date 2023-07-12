@@ -3,7 +3,7 @@ appVersion: 23.3
 description: A Helm chart for Digital.ai Release
 name: digitalai-release
 version: 23.3.0-519.1200
-kubeVersion: ">= 1.20.0 < 1.26.0" # TODO: check span
+kubeVersion: ">= 1.20.0-0 < 1.26.0-0" # TODO: check span
 sources:
   - https://github.com/xebialabs/xl-release-kubernetes-helm-chart
   - https://github.com/xebialabs/xl-release

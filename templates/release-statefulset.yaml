@@ -10,8 +10,11 @@ metadata:
     {{- if .Values.commonLabels }}
     {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
     {{- end }}
-  {{- if .Values.commonAnnotations }}
+  {{- if or .Values.commonAnnotations .Values.statefulsetAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+    {{- if .Values.statefulsetLabels }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.statefulsetAnnotations "context" $) | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   serviceName: {{ printf "%s-headless" (include "common.names.fullname" .) }}
@@ -305,8 +308,13 @@ spec:
           volumeMounts:
             {{- range $k, $v := .Values.configuration }}
             - name: configuration
-              mountPath: /opt/xebialabs/xl-release-server/default-conf/{{ $k }}
-              subPath: {{ $k }}
+              mountPath: /opt/xebialabs/xl-release-server/{{ $v.path }}
+              subPath: {{ $v.path }}
+            {{- end }}
+            {{- range $k, $v := .Values.extraConfiguration }}
+            - name: configuration-extra
+              mountPath: /opt/xebialabs/xl-release-server/{{ $v.path }}
+              subPath: {{ $v.path }}
             {{- end }}
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/conf
@@ -342,7 +350,23 @@ spec:
             items:
               {{- range $k, $v := .Values.configuration }}
               - key: {{ $k }}
-                path: {{ $k }}
+                path: {{ $v.path }}
+                {{- if $v.mode}}
+                mode: {{ $v.mode }}
+                {{- end }}
+              {{- end }}
+        {{- end }}
+        {{- if .Values.extraConfiguration }}
+        - name: configuration-extra
+          configMap:
+            name: {{ printf "%s-config" (include "common.names.fullname" .) }}-extra
+            items:
+              {{- range $k, $v := .Values.extraConfiguration }}
+              - key: {{ $k }}
+                path: {{ $v.path }}
+                {{- if $v.mode}}
+                mode: {{ $v.mode }}
+                {{- end }}
               {{- end }}
         {{- end }}
         {{- if .Values.ssl.enabled }}

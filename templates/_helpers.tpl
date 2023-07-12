@@ -60,7 +60,9 @@ Get the password secret.
     {{- if .Values.auth.adminPassword -}}
         {{ .Values.auth.adminPassword }}
     {{- else -}}
-        {{ randAlphaNum 10 }}
+        {{- $secretObj := (lookup "v1" "Secret" .Release.Namespace (include "common.names.fullname" .)) | default dict }}
+        {{- $secretData := (get $secretObj "data") | default dict }}
+        {{- (get $secretData "releasePassword") | b64dec | default (randAlphaNum 10) }}
     {{- end -}}
 {{- end -}}
 

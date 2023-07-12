@@ -1,23 +1,30 @@
 
-{{- include "release.validateValues" . -}}
+{{- include "release.validateValues" . }}
 
+{{- if (include "release.serverUrl" .) }}
 ## To get the application URL, run:
 {{ include "release.serverUrl" . }}
+{{- end }}
 
-## To connect over port forward on port 5516 use:
-kubectl port-forward service/{{ include "common.names.fullname" . }} 5516:{{ .Values.service.portNames.releaseHttp }}
+{{- if .Values.http2.enabled }}
+## To connect over HTTP2 port forward on port {{ .Values.containerPorts.releaseHttps }} use:
+kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.containerPorts.releaseHttps }}:{{ .Values.service.portNames.releaseHttps }}
+{{- else }}
+## To connect over HTTP port forward on port {{ .Values.containerPorts.releaseHttp }} use:
+kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.containerPorts.releaseHttp }}:{{ .Values.service.portNames.releaseHttp }}
+{{- end }}
 
-## To get the admin password for xl-release, run:
+## To get the admin password for Digitalai Release, run:
 kubectl get secret --namespace {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.releasePassword}" | base64 --decode; echo
 
-{{- if or .Values.postgresql.install .Values.external.db.enabled -}}
+{{- if or .Values.postgresql.install .Values.external.db.enabled }}
 ## To get the password for main database, run:
 kubectl get secret --namespace  {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.mainDatabasePassword}" | base64 --decode; echo
 ## To get the password for report database, run:
 kubectl get secret --namespace  {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.reportDatabasePassword}" | base64 --decode; echo
-{{- end -}}
+{{- end }}
 
-{{- if or .Values.rabbitmq.install .Values.external.mq.enabled -}}
+{{- if or .Values.rabbitmq.install .Values.external.mq.enabled }}
 ## To get the password for rabbitMQ, run:
 kubectl get secret --namespace  {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.rabbitmqPassword}" | base64 --decode; echo
-{{- end -}}
+{{- end }}
