@@ -53,7 +53,7 @@ defaultAddCapabilities: null
 fsGroup:
   type: RunAsAny
 groups: []
-priority: 0
+priority: 100
 readOnlyRootFilesystem: false
 requiredDropCapabilities:
   - MKNOD
