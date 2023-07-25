@@ -107,7 +107,7 @@ tasks {
 
     register<Copy>("prepareHelmPackage") {        
         group = "helm"
-        dependsOn("dumpVersion")
+        dependsOn("dumpVersion", ":integration-tests:jar", ":integration-tests:inspectClassesForKotlinIC")
         from(layout.projectDirectory)
         exclude(
             layout.buildDirectory.get().asFile.name,
