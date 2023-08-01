@@ -27,16 +27,16 @@ buildscript {
 }
 
 plugins {
-    kotlin("jvm") version "1.4.20"
+    kotlin("jvm") version "1.8.10"
 
-    id("com.github.node-gradle.node") version "3.1.0"
+    id("com.github.node-gradle.node") version "4.0.0"
     id("idea")
-    id("nebula.release") version "15.3.1"
+    id("nebula.release") version (properties["nebulaReleasePluginVersion"] as String)
     id("maven-publish")
 }
 
-apply(plugin = "integration.server")
 apply(plugin = "ai.digital.gradle-commit")
+apply(plugin = "integration.server")
 apply(plugin = "com.xebialabs.dependency")
 
 apply(from = "$rootDir/integration-tests/base-test-configuration.gradle")
@@ -44,12 +44,14 @@ group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
-val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "22.3.0-${
+val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "23.3.0-${
     LocalDateTime.now().format(DateTimeFormatter.ofPattern("Mdd.Hmm"))
 }"
 project.extra.set("releasedVersion", releasedVersion)
 
 allprojects {
+    apply(plugin = "kotlin")
+
     repositories {
         mavenLocal()
         mavenCentral()
@@ -89,61 +91,8 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
-val providers = listOf("aws-eks", "azure-aks", "gcp-gke", "onprem", "openshift")
-
-tasks.withType<AbstractPublishToMaven> {
-    dependsOn("buildHelmPackage")
-}
 
 tasks {
-
-    val buildXlrDir = layout.buildDirectory.dir("xlr")
-    val buildXlrOperatorDir = layout.buildDirectory.dir("xlr/${project.name}")
-
-    register("dumpVersion") {
-        doLast {
-            file(buildDir).mkdirs()
-            file("$buildDir/version.dump").writeText("version=${releasedVersion}")
-        }
-    }
-
-    named<YarnTask>("yarn_install") {
-        args.set(listOf("--mutex", "network"))
-        workingDir.set(file("${rootDir}/documentation"))
-    }
-
-    register<YarnTask>("yarnRunStart") {
-        dependsOn(named("yarn_install"))
-        args.set(listOf("run", "start"))
-        workingDir.set(file("${rootDir}/documentation"))
-    }
-
-    register<YarnTask>("yarnRunBuild") {
-        dependsOn(named("yarn_install"))
-        args.set(listOf("run", "build"))
-        workingDir.set(file("${rootDir}/documentation"))
-    }
-
-    register<Delete>("docCleanUp") {
-        delete(file("${rootDir}/docs"))
-        delete(file("${rootDir}/documentation/build"))
-        delete(file("${rootDir}/documentation/.docusaurus"))
-        delete(file("${rootDir}/documentation/node_modules"))
-    }
-
-    register<Copy>("docBuild") {
-        dependsOn(named("yarnRunBuild"), named("docCleanUp"))
-        from(file("${rootDir}/documentation/build"))
-        into(file("${rootDir}/docs"))
-    }
-
-    register<GenerateDocumentation>("updateDocs") {
-        dependsOn(named("docBuild"))
-    }
-
-    register<NebulaRelease>("nebulaRelease") {
-        dependsOn(named("updateDocs"))
-    }
 
     compileKotlin {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
@@ -153,8 +102,12 @@ tasks {
         kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
-    register<Copy>("prepareHelmPackage") {
-        dependsOn("dumpVersion")
+    val buildXlrDir = layout.buildDirectory.dir("xlr")
+    val buildXlrOperatorDir = layout.buildDirectory.dir("xlr/${project.name}")
+
+    register<Copy>("prepareHelmPackage") {        
+        group = "helm"
+        dependsOn("dumpVersion", ":integration-tests:jar", ":integration-tests:inspectClassesForKotlinIC")
         from(layout.projectDirectory)
         exclude(
             layout.buildDirectory.get().asFile.name,
@@ -171,6 +124,7 @@ tasks {
     }
 
     register<Copy>("prepareValuesYaml") {
+        group = "helm"
         dependsOn("prepareHelmPackage")
         from(buildXlrOperatorDir)
         include("values-nginx.yaml")
@@ -189,6 +143,7 @@ tasks {
     }
 
     register<Exec>("prepareHelmDeps") {
+        group = "helm"
         dependsOn("prepareValuesYaml")
         workingDir(buildXlrOperatorDir)
         commandLine("helm", "dependency", "update", ".")
@@ -210,6 +165,7 @@ tasks {
     }
 
     register<Exec>("buildHelmPackage") {
+        group = "helm"
         dependsOn("prepareHelmDeps")
         workingDir(buildXlrDir)
         commandLine("helm", "package", "--app-version=$releasedVersion", project.name)
@@ -231,6 +187,7 @@ tasks {
     }
 
     register<Exec>("prepareOperatorImage") {
+        group = "operator"
         dependsOn("buildHelmPackage")
         workingDir(buildXlrDir)
         commandLine("operator-sdk", "init", "--domain=digital.ai", "--plugins=helm")
@@ -246,6 +203,7 @@ tasks {
     }
 
     register<Exec>("buildOperatorImage") {
+        group = "operator"
         dependsOn("prepareOperatorImage")
         workingDir(buildXlrDir)
         commandLine("operator-sdk", "create", "api", "--group=xlr", "--version=v1alpha1", "--helm-chart=xlr.tgz")
@@ -261,6 +219,7 @@ tasks {
     }
 
     register<Exec>("publishToDockerHub") {
+        group = "operator"
         dependsOn("buildOperatorImage")
         workingDir(buildXlrDir)
         val imageUrl = "docker.io/$dockerHubRepository/release-operator:${releasedVersion}"
@@ -279,6 +238,80 @@ tasks {
     register("checkDependencyVersions") {
         // a placeholder to unify with release in jenkins-job
     }
+
+    register("uploadArchives") {
+        group = "upload"
+        dependsOn("dumpVersion", "publish")
+    }
+    register("uploadArchivesMavenRepository") {
+        group = "upload"
+        dependsOn("dumpVersion","publishAllPublicationsToMavenRepository")
+    }
+    register("uploadArchivesToMavenLocal") {
+        group = "upload"
+        dependsOn("dumpVersion", "publishToMavenLocal")
+    }
+
+    register("dumpVersion") {
+        group = "release"
+        doLast {
+            file(buildDir).mkdirs()
+            file("$buildDir/version.dump").writeText("version=${releasedVersion}")
+        }
+    }
+
+    register<NebulaRelease>("nebulaRelease") {    
+        group = "release"
+        dependsOn(named("updateDocs"))
+    }
+
+    named<YarnTask>("yarn_install") {        
+        group = "doc"
+        args.set(listOf("--mutex", "network"))
+        workingDir.set(file("${rootDir}/documentation"))
+    }
+
+    register<YarnTask>("yarnRunStart") {
+        group = "doc"
+        dependsOn(named("yarn_install"))
+        args.set(listOf("run", "start"))
+        workingDir.set(file("${rootDir}/documentation"))
+    }
+
+    register<YarnTask>("yarnRunBuild") {
+        group = "doc"
+        dependsOn(named("yarn_install"))
+        args.set(listOf("run", "build"))
+        workingDir.set(file("${rootDir}/documentation"))
+    }
+
+    register<Delete>("docCleanUp") {
+        group = "doc"
+        delete(file("${rootDir}/docs"))
+        delete(file("${rootDir}/documentation/build"))
+        delete(file("${rootDir}/documentation/.docusaurus"))
+        delete(file("${rootDir}/documentation/node_modules"))
+    }
+
+    register<Copy>("docBuild") {
+        group = "doc"
+        dependsOn(named("yarnRunBuild"), named("docCleanUp"))
+        from(file("${rootDir}/documentation/build"))
+        into(file("${rootDir}/docs"))
+    }
+
+    register<GenerateDocumentation>("updateDocs") {
+        group = "doc"
+        dependsOn(named("docBuild"))
+    }
+}
+
+tasks.withType<AbstractPublishToMaven> {
+    dependsOn("buildHelmPackage")
+}
+
+tasks.named("build") {
+    dependsOn("buildOperatorImage")
 }
 
 publishing {
