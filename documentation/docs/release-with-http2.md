@@ -2,11 +2,12 @@
 sidebar_position: 10
 ---
 
+## Install Release with http2 backend enabled
+
 :::caution
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
 :::
 
-## Install Release with http2 backend enabled
 This article describes the settings to be configured before you install Release with http2 backend enabled on a Kubernetes cluster.
 
 When Release is started with http2, it starts on https/ssl endpoint. And the xl-release backend communicates with ingress on the configured http2 backend endpoint.
@@ -14,7 +15,7 @@ When Release is started with http2, it starts on https/ssl endpoint. And the xl-
 ## Prerequisites
 
 * [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl)
-* [XL CLI 22.3.5 or later](/xl-platform/how-to/install-the-xl-cli.html)
+* [XL CLI 22.3.5 or later](https://docs.digital.ai/bundle/devops-deploy-version-v.22.3/page/deploy/how-to/install-the-xl-cli.html)
 * [yq 4.18.2 or later](https://github.com/mikefarah/yq)
 * [openssl] (https://www.openssl.org/source/)
 * keytool (Comes with Java JDK. Required only when generating keystore)
