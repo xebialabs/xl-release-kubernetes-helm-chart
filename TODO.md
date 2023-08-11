@@ -23,7 +23,6 @@
 - update of config should change the configuration
 - add template for other conf files
 - check tls and installation of tls secrets
-- check keycloak
 - use of headless service and plain service
 - using haproxy
 - changing ingress class
