@@ -327,7 +327,7 @@ configuration:
           enabled = ${XL_METRICS_ENABLED}
         }
       
-        {{- if or .Values.keycloak.install .Values.oidc.enabled }}
+        {{- if .Values.oidc.enabled }}
         security {
           auth {
             providers {
@@ -399,23 +399,6 @@ configuration:
                 {{- if .Values.oidc.proxyPort }}
                 proxyPort={{ .Values.oidc.proxyPort | quote }}
                 {{- end }}
-                {{- else }}
-                clientId="release"
-                clientSecret="ab2088f6-2251-4233-9b22-e24db6a67483"
-                {{- range .Values.keycloak.ingress.rules }}
-                issuer="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform"
-                keyRetrievalUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/certs"
-                accessTokenUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/token"
-                userAuthorizationUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/auth"
-                logoutUri="http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ .host }}/auth/realms/digitalai-platform/protocol/openid-connect/logout"
-                {{- end }}
-                redirectUri="{{ include "release.serverUrl" . }}/oidc-login"
-                postLogoutRedirectUri="{{ include "release.serverUrl" . }}/oidc-login"
-                userNameClaim="preferred_username"
-                fullNameClaim="name"
-                emailClaim="email"
-                rolesClaim="groups"
-                scopes =["openid"]
                 {{- end }}
               }
             }
@@ -995,70 +978,6 @@ haproxy-ingress:
     ingressClass: haproxy-dair
     service:
       type: LoadBalancer
-
-## Ref: https://github.com/codecentric/helm-charts/blob/master/charts/keycloak/README.md
-## Install keycloak chart. If need to use it, set 'install' to 'true'.
-keycloak:
-  install: false
-  extraEnv: |
-    - name: PROXY_ADDRESS_FORWARDING
-      value: "true"
-    - name: KEYCLOAK_USER
-      value: admin
-    - name: KEYCLOAK_PASSWORD
-      value: admin
-    - name: JGROUPS_DISCOVERY_PROTOCOL
-      value: dns.DNS_PING
-    - name: JGROUPS_DISCOVERY_PROPERTIES
-      value: 'dns_query={{ include "keycloak.serviceDnsName" . }}'
-    - name: CACHE_OWNERS_COUNT
-      value: "2"
-    - name: CACHE_OWNERS_AUTH_SESSIONS_COUNT
-      value: "2"
-    - name: JAVA_OPTS
-      value: >-
-        -XX:+UseContainerSupport
-        -XX:MaxRAMPercentage=50.0
-        -Djava.net.preferIPv4Stack=true
-        -Djboss.modules.system.pkgs=$JBOSS_MODULES_SYSTEM_PKGS
-        -Djava.awt.headless=true
-    - name: DB_VENDOR
-      value: postgres
-    - name: DB_ADDR
-      value: {{ include "postgresql.subchart" . }}
-    - name: DB_PORT
-      value: "5432"
-    - name: DB_DATABASE
-      value: keycloak
-    - name: DB_USER
-      value: keycloak
-    - name: DB_PASSWORD
-      value: keycloak
-    - name: KEYCLOAK_IMPORT
-      value: /realm/digitalai-platform-realm.json
-  extraVolumes: |
-    - name: realm-config
-      configMap:
-        name: {{ include "common.names.fullname" . }}-release-keycloak
-  extraVolumeMounts: |
-    - name: realm-config
-      mountPath: "/realm/"
-      readOnly: true
-  ingress:
-    enabled: true
-    annotations:
-      kubernetes.io/ingress.class: "nginx-dair"
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    rules:
-      - host: ""
-        paths:
-          - path: /
-            pathType: Prefix
-    tls: []
-  postgresql:
-    enabled: false
-  service:
-    type: LoadBalancer
 
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.

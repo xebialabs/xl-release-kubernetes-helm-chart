@@ -43,8 +43,3 @@ dependencies:
     version: 11.10.2
     repository: "https://charts.bitnami.com/bitnami"
     condition: rabbitmq.install
-
-  - name: keycloak
-    version: 18.3.0
-    repository: "https://codecentric.github.io/helm-charts"
-    condition: keycloak.install
