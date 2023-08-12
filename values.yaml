@@ -73,6 +73,10 @@ keystore:
   # if empty during initial run, the default keystore will be generated with provided "passphrase"
   keystore: ""
 
+truststore:
+  password: ""
+  truststore: ""
+
 ## Network Policy configuration
 ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
 ##
@@ -213,6 +217,8 @@ dnsConfig: {}
 ##
 auth:
   adminPassword: ""
+
+jvmArgs: ""
 
 ## @param command Override default container command (useful when using custom images)
 ##
