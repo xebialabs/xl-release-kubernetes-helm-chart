@@ -74,6 +74,8 @@ keystore:
   keystore: ""
 
 truststore:
+   # possible value jks or jceks or pkcs12
+  type: "pkcs12"
   password: ""
   truststore: ""
 
