@@ -217,7 +217,17 @@ spec:
             {{- end }}
             {{- if .Values.keystore.passphrase }}
             - name: REPOSITORY_KEYSTORE_PASSPHRASE
-              {{- include "render.value-secret" (dict  "value" (.Values.keystore.passphrase) "defaultName" (include "common.names.fullname" .) "defaultKey" "keystorePassphrase" "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (.Values.keystore.passphrase) "defaultName" (include "common.names.fullname" .) "defaultKey" "repositoryKeystorePassphrase" "context" $ ) | nindent 14 }}
+            {{- end }}
+            {{- if .Values.truststore.truststore }}
+            - name: TRUSTSTORE
+              value: "/opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}"
+            - name: TRUSTSTORE_TYPE
+              value: {{ .Values.truststore.type | quote }}
+            {{- if .Values.truststore.password }}
+            - name: TRUSTSTORE_PASSWORD
+              {{- include "render.value-secret" (dict  "value" (.Values.truststore.password) "defaultName" (include "common.names.fullname" .) "defaultKey" "truststorePassword" "context" $ ) | nindent 14 }}
+            {{- end }}
             {{- end }}
             {{- if .Values.oidc.external }}
             - name: OIDC_CLIENT_ID
@@ -251,6 +261,8 @@ spec:
             - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.ssl.keystoreKeypassword "defaultName" (include "common.names.fullname" .) "defaultKey" "sslKeystoreKeypassword" "context" $ ) | nindent 14 }}
             {{- end }}
+            - name: XL_RELEASE_SERVER_OPTS
+              value: "{{- include "common.tplvalues.render" (dict "value" .Values.jvmArgs "context" .) }} {{- if .Values.truststore.truststore }}-Djavax.net.ssl.trustStore=$(TRUSTSTORE) -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD) -Djavax.net.ssl.trustStoreType=$(TRUSTSTORE_TYPE){{- end }}"
             {{- if .Values.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraEnvVars "context" $) | nindent 12 }}
             {{- end }}
@@ -316,6 +328,12 @@ spec:
               mountPath: /opt/xebialabs/xl-release-server/{{ $v.path }}
               subPath: {{ $v.path }}
             {{- end }}
+            {{- if .Values.truststore.truststore }}
+            - mountPath: /opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}
+              name: release-truststore
+              subPath: {{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}
+              readOnly: true
+            {{- end }}
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/conf
               subPath: conf
@@ -335,6 +353,7 @@ spec:
             - name: http-ssl-keystore
               mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
               subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+              readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
@@ -368,6 +387,11 @@ spec:
                 mode: {{ $v.mode }}
                 {{- end }}
               {{- end }}
+        {{- end }}
+        {{- if .Values.truststore.truststore }}
+        - name: release-truststore
+          secret:
+            secretName: "{{- include "render.secret-name" (dict "value" .Values.truststore.truststore "defaultName" (include "common.names.fullname" .) "context" $ ) }}"
         {{- end }}
         {{- if .Values.ssl.enabled }}
         - name: http-ssl-keystore
