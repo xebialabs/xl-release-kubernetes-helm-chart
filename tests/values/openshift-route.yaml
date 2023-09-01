@@ -1,0 +1,21 @@
+global:
+  # storageClass: aws-efs
+  storageClass: gp2
+k8sSetup:
+  platform: Openshift
+serviceAccount:
+  create: true
+postgresql:
+  serviceAccount:
+    create: true
+  primary:
+    persistence:
+      # storageClass: aws-efs
+      storageClass: gp2
+rabbitmq:
+  persistence:
+    # storageClass: aws-efs
+    storageClass: gp2
+route:
+  enabled: true
+  hostname: router-default.apps.apollo-operator.raqx.p1.openshiftapps.com

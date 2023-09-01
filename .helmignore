@@ -19,11 +19,19 @@
 .project
 .idea/
 *.tmproj
-
+*.iml
+# Gradle
 buildSrc/
-build/
-.gradle/
-gradle/
-integration-tests
+*gradle*
+
+# Specific
 documentation/
+integration-tests/
 docs/
+old-chart/
+build/
+tests/
+tests-values/
+scripts/
+values-*.yaml
+.env

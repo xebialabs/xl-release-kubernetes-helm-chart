@@ -1,0 +1,5 @@
+
+replicaCount: 2
+
+rabbitmq:
+  replicaCount: 1

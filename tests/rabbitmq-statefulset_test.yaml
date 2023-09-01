@@ -1,0 +1,32 @@
+suite: Test Rabbitmq Statefulset
+templates:
+  - charts/rabbitmq/templates/statefulset.yaml
+release:
+  name: test-release
+  namespace: test-namespace
+  revision: 1
+  upgrade: true
+tests:
+  - it: basic should work
+    values:
+      - ./values/basic.yaml
+    asserts:
+      - isKind:
+          of: StatefulSet
+      - equal:
+          path: metadata.name
+          value: test-release-rabbitmq
+      - equal:
+          path: spec.replicas
+          value: 1
+      - equal:
+          path: spec.template.spec.containers[0].image
+          value: docker.io/bitnami/rabbitmq:3.11.10-debian-11-r0
+  - it: rabbitmq replicas
+    values:
+      - ./values/basic.yaml
+      - ./values/replicated.yaml
+    asserts:
+      - equal:
+          path: spec.replicas
+          value: 3
