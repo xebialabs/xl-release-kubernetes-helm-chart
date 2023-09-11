@@ -413,7 +413,7 @@ spec:
         {{- else if .Values.persistence.single }}
         - name: data
           persistentVolumeClaim:
-            claimName: data-{{ include "common.names.fullname" . }}
+            claimName: {{ include "common.names.fullname" . }}
         {{- else }}
   volumeClaimTemplates:
     - metadata:
