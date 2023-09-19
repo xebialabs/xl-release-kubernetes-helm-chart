@@ -1,3 +1,4 @@
 image:
     repository: xldevdocker/xl-release
     pullPolicy: Always
+    tag: 23.3.0-SNAPSHOT

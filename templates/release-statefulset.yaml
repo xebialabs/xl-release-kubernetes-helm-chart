@@ -261,6 +261,8 @@ spec:
             - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.ssl.keystoreKeypassword "defaultName" (include "common.names.fullname" .) "defaultKey" "sslKeystoreKeypassword" "context" $ ) | nindent 14 }}
             {{- end }}
+            - name: APP_CONTEXT_ROOT
+              value: {{ .Values.appContextRoot }}
             - name: XL_RELEASE_SERVER_OPTS
               value: "{{- include "common.tplvalues.render" (dict "value" .Values.jvmArgs "context" .) }} {{- if .Values.truststore.truststore }}-Djavax.net.ssl.trustStore=$(TRUSTSTORE) -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD) -Djavax.net.ssl.trustStoreType=$(TRUSTSTORE_TYPE){{- end }}"
             {{- if .Values.extraEnvVars }}
@@ -294,7 +296,7 @@ spec:
               port: {{ .Values.service.portNames.releaseHttps }}
             {{- else }}
             httpGet:
-              path: /
+              path: {{ .Values.appContextRoot }}
               port: {{ .Values.service.portNames.releaseHttp }}
             {{- end }}
             initialDelaySeconds: {{ .Values.health.probesLivenessTimeout }}
@@ -306,7 +308,7 @@ spec:
               port: http2
             {{- else }}
             httpGet:
-              path: /
+              path: {{ .Values.appContextRoot }}
               port: {{ .Values.service.portNames.releaseHttp }}
             {{- end }}
             initialDelaySeconds: {{ .Values.health.probesReadinessTimeout }}
@@ -413,7 +415,7 @@ spec:
         {{- else if .Values.persistence.single }}
         - name: data
           persistentVolumeClaim:
-            claimName: data-{{ include "common.names.fullname" . }}
+            claimName: {{ include "common.names.fullname" . }}
         {{- else }}
   volumeClaimTemplates:
     - metadata:

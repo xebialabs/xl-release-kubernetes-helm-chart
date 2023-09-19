@@ -5,7 +5,6 @@
 ## To get the application URL, run:
 {{ include "release.serverUrl" . }}
 {{- end }}
-
 {{- if .Values.http2.enabled }}
 ## To connect over HTTP2 port forward on port {{ .Values.containerPorts.releaseHttps }} use:
 kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.containerPorts.releaseHttps }}:{{ .Values.service.portNames.releaseHttps }}
@@ -13,7 +12,6 @@ kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.
 ## To connect over HTTP port forward on port {{ .Values.containerPorts.releaseHttp }} use:
 kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.containerPorts.releaseHttp }}:{{ .Values.service.portNames.releaseHttp }}
 {{- end }}
-
 ## To get the admin password for Digitalai Release, run:
 kubectl get secret --namespace {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.releasePassword}" | base64 --decode; echo
 
