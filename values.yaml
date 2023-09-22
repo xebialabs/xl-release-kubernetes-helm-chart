@@ -35,6 +35,13 @@ clusterMode: full
 forceUpgrade: true
 enableEmbeddedQueue: false
 
+appContextRoot: /
+
+## Release Authentication parameters
+##
+auth:
+  adminPassword: ""
+  
 http2:
   enabled: false
 ssl:
@@ -214,11 +221,6 @@ dnsPolicy: ""
 ##   - name: ndots
 ##     value: "4"
 dnsConfig: {}
-
-## Release Authentication parameters
-##
-auth:
-  adminPassword: ""
 
 jvmArgs: ""
 
@@ -606,6 +608,7 @@ route:
     haproxy.router.openshift.io/cookie_name: JSESSIONID
     haproxy.router.openshift.io/disable_cookies: "false"
     haproxy.router.openshift.io/rewrite-target: /
+    haproxy.router.openshift.io/timeout: 120s
   tls:
     enabled: false
     key: ""

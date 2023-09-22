@@ -1,0 +1,17 @@
+## Requires:
+## helm install psql-test1 bitnami/postgresql --set 'primary.persistence.storageClass=my-efs' --set 'global.postgresql.auth.postgresPassword=admin"123' --set global.postgresql.auth.username=test --set 'global.postgresql.auth.password=test123' --set global.postgresql.auth.database=main --set primary.extendedConfiguration="max_connections = 300"
+## helm install psql-test2 bitnami/postgresql --set 'primary.persistence.storageClass=my-efs' --set 'global.postgresql.auth.postgresPassword=admin"123' --set global.postgresql.auth.username=test --set 'global.postgresql.auth.password=test123' --set global.postgresql.auth.database=main --set primary.extendedConfiguration="max_connections = 300"
+##
+external:
+  db:
+    enabled: true
+    main:
+      url: jdbc:postgresql://psql-test1-postgresql.default.svc.cluster.local:5432/main
+      username: postgres
+      password: admin"123
+    report:
+      url: jdbc:postgresql://psql-test2-postgresql.default.svc.cluster.local:5432/main
+      username: postgres
+      password: admin"123
+postgresql:
+  install: false
