@@ -1043,7 +1043,7 @@ rabbitmq:
   auth:
     username: guest
     password: guest
-    erlangCookie: RELEASERABBITMQCLUSTER
+    existingErlangSecret: '{{ include "common.names.fullname" . }}-release'
   extraPlugins: 'rabbitmq_amqp1_0'
   loadDefinition:
     enabled: true
