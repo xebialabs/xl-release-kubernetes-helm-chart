@@ -46,8 +46,8 @@ apply(from = "$rootDir/integration-tests/base-test-configuration.gradle")
 group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
-val helmVersion = "3.12.3"
-val operatorSdkVersion = "1.25.4"
+val helmVersion = properties["helmVersion"]
+val operatorSdkVersion = properties["operatorSdkVersion"]
 val os = detectOs()
 val arch = detectHostArch()
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
@@ -170,7 +170,7 @@ tasks {
         fileMode = 0b111101101
     }
 
-    register<Copy>("prepareHelmPackage") {        
+    register<Copy>("prepareHelmPackage") {
         group = "helm"
         dependsOn("dumpVersion", "unzipHelm", ":integration-tests:jar", ":integration-tests:inspectClassesForKotlinIC")
         from(layout.projectDirectory)
@@ -329,12 +329,12 @@ tasks {
         }
     }
 
-    register<NebulaRelease>("nebulaRelease") {    
+    register<NebulaRelease>("nebulaRelease") {
         group = "release"
         dependsOn(named("updateDocs"))
     }
 
-    named<YarnTask>("yarn_install") {        
+    named<YarnTask>("yarn_install") {
         group = "doc"
         args.set(listOf("--mutex", "network"))
         workingDir.set(file("${rootDir}/documentation"))
