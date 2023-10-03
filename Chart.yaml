@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: 23.3.0-rc.1
+appVersion: 23.3.0-rc.2
 description: A Helm chart for Digital.ai Release
 name: digitalai-release
 version: 23.3.0-rc.2
