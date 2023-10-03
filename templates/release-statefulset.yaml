@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "common.names.fullname" . }}
+  name: {{ include "release.name" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
     {{- if .Values.statefulsetLabels }}
@@ -413,7 +413,7 @@ spec:
         {{- else if .Values.persistence.single }}
         - name: data
           persistentVolumeClaim:
-            claimName: {{ include "common.names.fullname" . }}
+            claimName: {{ include "release.name" . }}
         {{- else }}
   volumeClaimTemplates:
     - metadata:

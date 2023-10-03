@@ -8,6 +8,15 @@
 {{ include "common.names.fullname" (merge .Subcharts.rabbitmq (dict "nameOverride" "rabbitmq")) }}
 {{- end -}}
 
+{{- define "release.name" -}}
+{{- $name := ( include "common.names.fullname" . ) -}}
+{{- if eq .Values.k8sSetup.platform "Openshift" -}}
+{{- printf "%s-ocp" $name -}}
+{{- else -}}
+{{- $name -}}
+{{- end -}}
+{{- end -}}
+
 {{/*
 Return the proper image name
 {{ include "common.images.image" ( dict "imageRoot" .Values.path.to.the.image "global" $) }}

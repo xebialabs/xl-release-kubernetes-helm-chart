@@ -1039,7 +1039,8 @@ postgresql:
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
 rabbitmq:
   install: true
-  forceBoot: true
+  clustering:
+    forceBoot: true
   replicaCount: 3
   auth:
     username: guest
