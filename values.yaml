@@ -84,7 +84,7 @@ truststore:
    # possible value jks or jceks or pkcs12
   type: "pkcs12"
   password: ""
-  truststore: ""
+  truststore: {}
 
 ## Network Policy configuration
 ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
@@ -272,8 +272,9 @@ extraContainerPorts: []
 ## To add more configuration, use `extraConfiguration` of `advancedConfiguration` instead
 ##
 configuration:
-  default-conf_xl-release.conf.template:
+  default-conf_xl-release-conf-template:
     path: "default-conf/xl-release.conf.template"
+    mode: 0660
     content: |
       xl {
         cluster {
@@ -336,7 +337,6 @@ configuration:
           auth {
             providers {
               oidc {
-                {{- if .Values.oidc.external }}
                 clientId=""
                 clientId=${?OIDC_CLIENT_ID}
                 clientSecret=""
@@ -402,7 +402,6 @@ configuration:
                 {{- end }}
                 {{- if .Values.oidc.proxyPort }}
                 proxyPort={{ .Values.oidc.proxyPort | quote }}
-                {{- end }}
                 {{- end }}
               }
             }
@@ -1027,6 +1026,8 @@ postgresql:
   service:
     port: 5432
     type: ClusterIP
+  serviceAccount:
+    create: true
   resources:
     requests:
       memory: 256Mi
@@ -1038,7 +1039,8 @@ postgresql:
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
 rabbitmq:
   install: true
-  forceBoot: true
+  clustering:
+    forceBoot: true
   replicaCount: 3
   auth:
     username: guest
