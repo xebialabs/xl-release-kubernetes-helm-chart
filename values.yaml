@@ -17,63 +17,108 @@ global:
   imagePullSecrets: []
   storageClass: ""
 
+## @section Env parameters
+##
+
+## @param k8sSetup.platform The platform on which you install the chart. Possible values: AWSEKS/AzureAKS/GoogleGKE/PlainK8s
+## @param k8sSetup.validateValues Enable validation of the values
+##
 k8sSetup:
   platform: PlainK8s
   validateValues: true
 
-## @section App parameters
+## @section Release server parameters
 ##
 
-# Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
+## @param license Sets your XL License by passing a base64 string license, which will then be added to the license file.
+## Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
+##
 license: ""
+## @param licenseAcceptEula Accept EULA, in case of missing license, it will generate temporary license.
+##
 licenseAcceptEula: false
-
+## @param generateXlConfig Generate configuration from environment parameters passed, and volumes mounted with custom changes. If set to false, a default config will be used and all environment variables and volumes added will be ignored.
+##
 generateXlConfig: true
+## @param useIpAsHostname Set IP address of the container as the hostname for the instance.
+## If set to true then IP will be used instead of the container ID. This is useful
+## when deploying Release as active-active cluster using docker compose as Akka cannot resolve aliases within the docker network.
+##
 useIpAsHostname: false
+## @param forceRemoveMissingTypes Force removal of the missing types.
+##
 forceRemoveMissingTypes: false
+## @param clusterMode This is to specify if the HA setup is needed and to specify the HA mode. Possible values: "default", "hot-standby", "full"
+##
 clusterMode: full
+## @param forceUpgrade It can be used to perform an upgrade in non-interactive mode by passing flag -force-upgrades while starting a service.
+##
 forceUpgrade: true
+## @param enableEmbeddedQueue Flag to expose external messaging queue. If set to true, a default embedded-queue will be used and all environment variables will be ignored.
+##
 enableEmbeddedQueue: false
-
+## @param appContextRoot Release context root.
+##
 appContextRoot: /
 
 ## Release Authentication parameters
 ##
 auth:
+  ## @param auth.adminPassword Admin password for Release. If user does not provide password, random 10 character alphanumeric string will be generated.
   adminPassword: ""
-  
+
 http2:
+  ## @param http2.enabled Enable HTTP2 communication on Release
   enabled: false
 ssl:
+  ## @param ssl.enabled Enable SSL to be used on Release
   enabled: false
+  ## @param ssl.keystorePassword Keystore password with SSL key.
   keystorePassword:
+  ## @param ssl.keystoreKeypassword Keystore key password with SSL key.
   keystoreKeypassword:
+  ## @param ssl.keystore Keystore content in base64 format.
   keystore:
 
 external:
   db:
+    ## @param external.db.enabled Enable external database
     enabled: false
     main:
+      ## @param external.db.main.url Main database URL for Release
       url: ""
+      ## @param external.db.main.username Main database username for Release
       username: ""
+      ## @param external.db.main.password Main database password for Release
       password: ""
+      ## @param external.db.main.maxPoolSize Main database max pool size for Release
       maxPoolSize: ""
     report:
+      ## @param external.db.report.url Report database URL for Release
       url: ""
+      ## @param external.db.report.username Report database username for Release
       username: ""
+      ## @param external.db.report.password Report database password for Release
       password: ""
+      ## @param external.db.report.maxPoolSize Report database max pool size for Release
       maxPoolSize: ""
 
   mq:
+    ## @param external.mq.enabled Enable external message queue
     enabled: false
+    ## @param external.mq.url External message queue broker URL for Release
     url: ""
+    ## @param external.mq.queueName External message queue name for Release
     queueName: ""
+    ## @param external.mq.username External message queue broker username for Release
     username: ""
+    ## @param external.mq.password External message queue broker password for Release
     password: ""
 
 keystore:
-  # Set passphrase for the keystore
+  ## @param keystore.passphrase Set passphrase for the keystore
   passphrase: ""
+  ## @param keystore.keystore Use repository-keystore.jceks files content ecoded with base64
   # https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
   # Convert repository-keystore.jceks files content to base64
   # ( cat repository-keystore.jceks | base64 -w 0 ) and put the output here
@@ -81,9 +126,11 @@ keystore:
   keystore: ""
 
 truststore:
-   # possible value jks or jceks or pkcs12
+  ## @param truststore.type Type of truststore, possible value jks or jceks or pkcs12
   type: "pkcs12"
+  ## @param truststore.password Truststore password
   password: ""
+  ## @param truststore.truststore Truststore file base64 encoded
   truststore: ""
 
 ## Network Policy configuration
@@ -113,50 +160,104 @@ networkPolicy:
   ##
   additionalRules: []
 
+## @section Metrics Parameters
+##
+
+## Metrics
+##
 metrics:
+  ## @param metrics.enabled Enable exposing Release metrics to be gathered.
+  ## Flag to expose internal and system metrics over Java Management Extensions (JMX).
+  ## This is to enable the use of monitoring systems that can read JMX data, with XL Products.
+  ##
   enabled: false
+
+## @section OIDC parameters
+##
 
 oidc:
   accessToken:
+    ## @param oidc.accessToken.audience Expected audience 'aud' claim value
     audience:
+    ## @param oidc.accessToken.enable Enable access token
     enable: false
+    ## @param oidc.accessToken.issuer Expected issuer 'iss' claim value
     issuer:
+    ## @param oidc.accessToken.jwsAlg Expected JSON Web Algorithm
     jwsAlg:
+    ## @param oidc.accessToken.keyRetrievalUri The jwks_uri to retrieve keys for the token
     keyRetrievalUri:
+    ## @param oidc.accessToken.secretKey The secret key if MAC based algorithms is used for the token
     secretKey:
+  ## @param oidc.accessTokenUri The redirect URI to use for returning the access token
   accessTokenUri:
   clientAuthJwt:
+    ## @param oidc.clientAuthJwt.enable Enable Client Authentication Using private_key_jwt
     enable: false
+    ## @param oidc.clientAuthJwt.jwsAlg Expected JSON Web Algorithm
     jwsAlg:
     keyStore:
+      ## @param oidc.clientAuthJwt.keyStore.enable Enable keystore
       enable: false
+      ## @param oidc.clientAuthJwt.keyStore.path The key store file path
       path:
+      ## @param oidc.clientAuthJwt.keyStore.password The key store password
       password:
+      ## @param oidc.clientAuthJwt.keyStore.type The type of keystore
       type:
     key:
+      ## @param oidc.clientAuthJwt.key.alias Private key alias inside the key store
       alias:
+      ## @param oidc.clientAuthJwt.key.enable Enable private key
       enable: false
+      ## @param oidc.clientAuthJwt.key.password Private key password
       password:
+    ## @param oidc.clientAuthJwt.tokenKeyId Token key identifier 'kid' header - set it if your OpenID Connect provider requires it
     tokenKeyId:
+  ## @param oidc.clientAuthMethod Client authentication method
   clientAuthMethod:
+  ## @param oidc.clientId Client ID
   clientId:
+  ## @param oidc.clientSecret Client secret
   clientSecret:
+  ## @param oidc.emailClaim Email claim
   emailClaim:
+  ## @param oidc.enabled Enable the OIDC configuration
   enabled: false
+  ## @param oidc.external Enable the OIDC configuration
   external: false
+  ## @param oidc.externalIdClaim A unique external ID such as the user's employee ID or GitHub ID. This is an optional claim.
   externalIdClaim:
+  ## @param oidc.fullNameClaim FullName claim
   fullNameClaim:
+  ## @param oidc.idTokenJWSAlg The ID token signature verification algorithm
   idTokenJWSAlg:
+  ## @param oidc.issuer OpenID Provider Issuer here
   issuer:
+  ## @param oidc.keyRetrievalUri The jwks_uri to retrieve keys
   keyRetrievalUri:
+  ## @param oidc.logoutUri The logout endpoint to revoke token via the browser
   logoutUri:
+  ## @param oidc.postLogoutRedirectUri If you need to redirect to the login page after logout, you can use your redirectUri as the postLogoutRedirectUri
   postLogoutRedirectUri:
+  ## @param oidc.proxyHost Proxy host
   proxyHost:
+  ## @param oidc.proxyPort Proxy port
   proxyPort:
+  ## @param oidc.redirectUri The redirectUri endpoint must always point to the /oidc-login Release endpoint.
+  ## The redirectUri is an endpoint where authentication responses can be sent and received by Release.
+  ## It must exactly match one of the redirect_uris you registered in OKTA and Azure AD portal and it must be URL encoded.
+  ## For Keycloak you can register a pattern for redirect_uri from the Keycloak Admin Panel
+  ## (For example, you can provide a mask such as: http://example.com/mask** that matches http://example.com/mask/ or http://example.com/mask).
   redirectUri:
+  ## @param oidc.rolesClaim Roles claim
   rolesClaim:
+  ## @param oidc.scopes Fields described here must be present in the scope.
   scopes: [ "openid" ]
+  ## @param oidc.userAuthorizationUri The authorize endpoint to request tokens or authorization codes via the browser
   userAuthorizationUri:
+  ## @param oidc.userNameClaim A unique username for both internal and external users.
+  ## You cannot sign in with a user if a local account with the same username exists.
   userNameClaim:
 
 ## @section Common parameters
@@ -177,15 +278,16 @@ kubeVersion: ""
 ## @param clusterDomain Kubernetes Cluster Domain
 ##
 clusterDomain: cluster.local
-## @param extraDeploy Array of extra objects to deploy with the release
+## @param extraDeploy Array of extra objects to deploy with the Release
 ##
 extraDeploy: [ ]
 ## @param commonAnnotations Annotations to add to all deployed objects
 ##
 commonAnnotations: { }
-## @param commonLabels Labels to add to all deployed objects
+## @extra commonLabels Labels to add to all deployed objects
 ##
 commonLabels:
+  ## @param commonLabels.app.kubernetes.io/version Labels Release server version
   app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
 ## Enable diagnostic mode in the deployment
 ##
@@ -222,6 +324,8 @@ dnsPolicy: ""
 ##     value: "4"
 dnsConfig: {}
 
+## @param jvmArgs Release JVM arguments
+##
 jvmArgs: ""
 
 ## @param command Override default container command (useful when using custom images)
@@ -255,6 +359,9 @@ extraEnvVarsCM: ""
 extraEnvVarsSecret: ""
 
 ## Container Ports
+## @param containerPorts.releaseHttp Release HTTP port value exposed on the container
+## @param containerPorts.releaseHttps Release HTTPS port value exposed on the container
+##
 containerPorts:
   releaseHttp: 5516
   releaseHttps: 5543
@@ -454,7 +561,6 @@ extraSecretsPrependReleaseName: false
 ## @param image.tag Release image tag (immutable tags are recommended)
 ## @param image.pullPolicy Release image pull policy
 ## @param image.pullSecrets Specify docker-registry secret names as an array
-## @param image.debug Set to true if you would like to see extra information on logs
 ##
 image:
   registry: docker.io
@@ -473,10 +579,10 @@ image:
   ##
   pullSecrets: []
 
-  ## Configure the ingress resource that allows you to access the
-  ## Release installation. Set up the URL
-  ## ref: https://kubernetes.io/docs/user-guide/ingress/
-  ##
+## Configure the ingress resource that allows you to access the
+## Release installation. Set up the URL
+## ref: https://kubernetes.io/docs/user-guide/ingress/
+##
 ingress:
   ## @param ingress.enabled Enable ingress resource for Management console
   ##
@@ -503,27 +609,29 @@ ingress:
   ##   kubernetes.io/ingress.class: nginx
   ##   cert-manager.io/cluster-issuer: cluster-issuer-name
   ##
+  ## - generic
+  ## ingress.kubernetes.io/tls-acme: "true"
+  ##
+  ## - nginx
+  ## kubernetes.io/ingress.class: "nginx-dair"
+  ## nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  ## nginx.ingress.kubernetes.io/rewrite-target: /
+  ## nginx.ingress.kubernetes.io/affinity: cookie
+  ## nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+  ## nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+  ## nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+  ## nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+  ##
+  ## - haproxy
+  ## kubernetes.io/ingress.class: "haproxy-dair"
+  ## ingress.kubernetes.io/rewrite-target: /
+  ## ingress.kubernetes.io/affinity: cookie
+  ## ingress.kubernetes.io/session-cookie-name: JSESSIONID
+  ## ingress.kubernetes.io/session-cookie-strategy: prefix
+  ## ingress.kubernetes.io/config-backend: |
+  ## option httpchk GET /ha/health HTTP/1.0
+  ##
   annotations:
-    # ingress.kubernetes.io/tls-acme: "true"
-
-    ## nginx
-    #kubernetes.io/ingress.class: "nginx-dair"
-    #nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    #nginx.ingress.kubernetes.io/rewrite-target: /
-    #nginx.ingress.kubernetes.io/affinity: cookie
-    #nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
-    #nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
-    #nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-    #nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
-    #
-    ## haproxy
-    #kubernetes.io/ingress.class: "haproxy-dair"
-    #ingress.kubernetes.io/rewrite-target: /
-    #ingress.kubernetes.io/affinity: cookie
-    #ingress.kubernetes.io/session-cookie-name: JSESSIONID
-    #ingress.kubernetes.io/session-cookie-strategy: prefix
-    #ingress.kubernetes.io/config-backend: |
-    #  option httpchk GET /ha/health HTTP/1.0
 
   ## @param ingress.tls Enable TLS configuration for the hostname defined at `ingress.hostname` parameter
   ## TLS certificates will be retrieved from a TLS secret with name: {{- printf "%s-tls" .Values.ingress.hostname }}
@@ -593,6 +701,9 @@ ingress:
   ##
   ingressClassName: ""
 
+## @section OpenShift Route parameters
+##
+
 route:
   ## @param route.enabled Enable route resource
   ##
@@ -603,18 +714,29 @@ route:
   ## @param route.hostname Default host for the route resource
   ##
   hostname: ""
-  ## @param route.annotations Additional annotations for the route resource.
+  ## @extra route.annotations Additional annotations for the route resource.
+  ## @skip route.annotations
   annotations:
     haproxy.router.openshift.io/cookie_name: JSESSIONID
     haproxy.router.openshift.io/disable_cookies: "false"
     haproxy.router.openshift.io/rewrite-target: /
     haproxy.router.openshift.io/timeout: 120s
+  ## @extra route.tls Tls configuration
   tls:
+    ## @param route.tls.enabled Enable the route TLS configuration
     enabled: false
+    ## @param route.tls.key key in PEM-encoded format
     key: ""
+    ## @param route.tls.certificate certificate in PEM-encoded format
     certificate: ""
+    ## @param route.tls.caCertificate CA certificate in a PEM-encoded format
     caCertificate: ""
+    ## @param route.tls.insecureEdgeTerminationPolicy Redirect HTTP to HTTPS. The only valid values are None, Redirect, or empty for disabled.
     insecureEdgeTerminationPolicy: ""
+    ## @param route.tls.termination The accepted values are edge, passthrough and reencrypt.
+    ## All other values are silently ignored.
+    ## When the annotation value is unset, edge is the default route.
+    ## The TLS certificate details must be defined in the template file to implement the default edge route.
     termination: edge
 
 
@@ -684,7 +806,8 @@ persistence:
   ## @param persistence.size PVC Storage Request for Release data volume
   ##
   size: 8Gi
-  ## @param persistence.annotations Persistence annotations. Evaluated as a template
+  ## @extra persistence.annotations Persistence annotations. Evaluated as a template
+  ## @param persistence.annotations.helm.sh/resource-policy Persistence annotation for keeping created PVCs
   ## Example:
   ## annotations:
   ##   example.io/disk-volume-type: SSD
@@ -706,17 +829,23 @@ service:
   ##
   portEnabled: true
   ## Service ports
+  ## @param service.ports.releaseHttp Release HTTP port value exposed on the service
+  ## @param service.ports.releaseHttps Release HTTPS port value exposed on the service
   ##
   ports:
     releaseHttp: 80
     releaseHttps: 443
   ## Service ports name
+  ## @param service.portNames.releaseHttp Release HTTP port name
+  ## @param service.portNames.releaseHttps Release HTTPS port name
   ##
   portNames:
     releaseHttp: "release-http"
     releaseHttps: "release-https"
 
   ## Node ports to expose
+  ## @param service.nodePorts.releaseHttp Release HTTP port value exposed on the node (in case of NodePort service)
+  ## @param service.nodePorts.releaseHttps Release HTTPS port value exposed on the node (in case of NodePort service)
   ##
   nodePorts:
     releaseHttp: ""
@@ -813,6 +942,9 @@ updateStrategy:
 ## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
 ##
 statefulsetLabels: {}
+## @param statefulsetAnnotations Release statefulset annotations. Evaluated as a template
+## Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+##
 statefulsetAnnotations: {}
 ## @param priorityClassName Name of the priority class to be used by Release pods, priority class needs to be created beforehand
 ## Ref: https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/
@@ -911,11 +1043,18 @@ resources:
   ##
   requests: {}
 
+## Configure containers' extra options for liveness and readiness probe
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+## @param health.enabled Enable probes
+## @param health.periodScans Period seconds for probe
+## @param health.probeFailureThreshold Failure threshold for probe
+## @param health.probesLivenessTimeout Initial delay seconds for livenessProbe
+## @param health.probesReadinessTimeout Initial delay seconds for readinessProbe
+##
 health:
   enabled: true
   periodScans: 10
   probeFailureThreshold: 12
-  probes: true
   probesLivenessTimeout: 60
   probesReadinessTimeout: 60
 
@@ -956,6 +1095,12 @@ pdb:
   ##
   maxUnavailable: ""
 
+## @param busyBox.image.registry busyBox container image registry
+## @param busyBox.image.repository busyBox container image repository
+## @param busyBox.image.tag busyBox container image tag
+## @param busyBox.image.pullPolicy busyBox container image pull policy
+## @param busyBox.image.pullSecrets Specify docker-registry secret names as an array
+##
 busyBox:
   image:
     registry: docker.io
@@ -977,86 +1122,223 @@ busyBox:
 ## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 haproxy-ingress:
+  ## @param haproxy-ingress.install Enable Haproxy Ingress helm subchart installation
   install: false
   controller:
-    kind: Deployment
+    ## @param haproxy-ingress.controller.ingressClass Name of the ingress class to route through this controller
+    ##
     ingressClass: haproxy-dair
     service:
+      ## @param haproxy-ingress.controller.service.type Kubernetes Service type for Controller
+      ##
       type: LoadBalancer
 
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
 nginx-ingress-controller:
+  ## @param nginx-ingress-controller.install Enable NGINX Ingress Controller helm subchart installation
   install: false
+  ## @extra nginx-ingress-controller.extraArgs Additional command line arguments to pass to nginx-ingress-controller
+  ## E.g. to specify the default SSL certificate you can use
+  ## extraArgs:
+  ##   default-ssl-certificate: "<namespace>/<secret_name>"
+  ##   ingress-class: nginx
+  ##
   extraArgs:
+    ## @param nginx-ingress-controller.extraArgs.ingress-class Name of the IngressClass resource
     ingress-class: "nginx-dair"
+  ## Configuring this doesn't affect `kubernetes.io/ingress.class` annotation. See `extraArgs` below how to configure processing of custom annotation.
+  ## @param nginx-ingress-controller.ingressClassResource.name Name of the IngressClass resource
+  ## @param nginx-ingress-controller.ingressClassResource.controllerClass IngressClass identifier for the controller
+  ##
   ingressClassResource:
     controllerClass: "k8s.io/ingress-nginx-dair"
     name: "nginx-dair"
+  ## @param nginx-ingress-controller.replicaCount Desired number of Controller pods
+  ##
   replicaCount: 1
-  resources:
-    limits: {}
-    #   cpu: 100m
-    #   memory: 128Mi
-    requests: {}
-    #   cpu: 100m
-    #   memory: 128Mi
+  ## @section Traffic exposure parameters
+
+  ## Service parameters
+  ##
   service:
+    ## @param nginx-ingress-controller.service.type Kubernetes Service type for Controller
+    ##
     type: LoadBalancer
 
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
+  ## @param postgresql.install Enable PostgreSQL helm subchart installation
   install: true
+  ## @section PostgreSQL Primary parameters
+  ##
   primary:
+    ## Initdb configuration
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#specifying-initdb-arguments
+    ##
     initdb:
+      ## @param postgresql.primary.initdb.scriptsSecret Secret with scripts to be run at first boot (in case it contains sensitive information)
+      ## NOTE: This can work along `primary.initdb.scripts` or `primary.initdb.scriptsConfigMap`
+      ##
       scriptsSecret: '{{ include "postgresql.primary.fullname" . }}-release'
+    ## @param postgresql.primary.extendedConfiguration Extended PostgreSQL Primary configuration (appended to main or default configuration)
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#allow-settings-to-be-loaded-from-files-other-than-the-default-postgresqlconf
+    ##
     extendedConfiguration: |
       max_connections = 150
+    ## PostgreSQL Primary persistence configuration
+    ##
     persistence:
+      ## @param postgresql.primary.persistence.enabled Enable PostgreSQL Primary data persistence using PVC
+      ##
       enabled: true
-      accessMode: ReadWriteOnce
+      ## @param postgresql.primary.persistence.accessModes PVC Access Mode for PostgreSQL volume
+      ##
+      accessModes:
+        - ReadWriteOnce
+      ## @param postgresql.primary.persistence.storageClass PVC Storage Class for PostgreSQL Primary data volume
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+      ##   GKE, AWS & OpenStack)
+      ##
       storageClass: ""
+      ## @param postgresql.primary.persistence.size PVC Storage Request for PostgreSQL volume
+      ##
       size: 8Gi
+      ## @param postgresql.primary.persistence.existingClaim Name of an existing PVC to use
+      ##
       existingClaim: ""
+    ## PostgreSQL Primary service configuration
+    ##
+    service:
+      ## @param postgresql.primary.service.type Kubernetes Service type
+      ##
+      type: ClusterIP
+  ## Authentication parameters
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#setting-the-root-password-on-first-run
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#creating-a-database-on-first-run
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#creating-a-database-user-on-first-run
+  ##
   auth:
+    ## @param postgresql.auth.enablePostgresUser Assign a password to the "postgres" admin user. Otherwise, remote access will be blocked for this user
+    ##
     enablePostgresUser: true
+    ## @param postgresql.auth.username Name for a custom user to create
+    ##
     username: postgres
+    ## @param postgresql.auth.postgresPassword Password for the "postgres" admin user. Ignored if `auth.existingSecret` is provided
+    ##
     postgresPassword: postgres
-  service:
-    port: 5432
-    type: ClusterIP
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 250m
+  ## @section Volume Permissions parameters
+  ##
+
+  ## Init containers parameters:
+  ## volumePermissions: Change the owner and group of the persistent volume(s) mountpoint(s) to 'runAsUser:fsGroup' on each node
+  ##
   volumePermissions:
+    ## @param postgresql.volumePermissions.enabled Enable init container that changes the owner and group of the persistent volume
+    ##
     enabled: true
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
 rabbitmq:
+  ## @param rabbitmq.install Enable Rabbitmq helm subchart installation
   install: true
-  forceBoot: true
+  ## Clustering settings
+  ##
+  clustering:
+    ## @param rabbitmq.clustering.forceBoot Force boot of an unexpectedly shut down cluster (in an unexpected order).
+    ## forceBoot executes 'rabbitmqctl force_boot' to force boot cluster shut down unexpectedly in an unknown order
+    ## ref: https://www.rabbitmq.com/rabbitmqctl.8.html#force_boot
+    ##
+    forceBoot: true
+  ## @param rabbitmq.replicaCount Number of RabbitMQ replicas to deploy
+  ##
   replicaCount: 3
+  ## RabbitMQ Authentication parameters
+  ##
   auth:
+    ## @param rabbitmq.auth.username RabbitMQ application username
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    ##
     username: guest
+    ## @param rabbitmq.auth.password RabbitMQ application password
+    ## ref: https://github.com/bitnami/containers/tree/main/bitnami/rabbitmq#environment-variables
+    ##
     password: guest
+    ## @param rabbitmq.auth.existingErlangSecret Existing secret with RabbitMQ Erlang cookie (must contain a value for `rabbitmq-erlang-cookie` key)
+    ## e.g:
+    ## existingErlangSecret: name-of-existing-secret
+    ##
     existingErlangSecret: '{{ include "common.names.fullname" . }}-release'
+  ## @param rabbitmq.extraPlugins Extra plugins to enable (single string containing a space-separated list)
+  ## Use this instead of `plugins` to add new plugins
+  ##
   extraPlugins: 'rabbitmq_amqp1_0'
+  ## Loading a RabbitMQ definitions file to configure RabbitMQ
+  ##
   loadDefinition:
+    ## @param rabbitmq.loadDefinition.enabled Enable loading a RabbitMQ definitions file to configure RabbitMQ
+    ##
     enabled: true
+    ## @param rabbitmq.loadDefinition.file Name of the definitions file
+    ##
     file: /app/release_load_definition.json
+    ## @param rabbitmq.loadDefinition.existingSecret Existing secret with the load definitions file
+    ## Can be templated if needed, e.g:
+    ## existingSecret: "{{ .Release.Name }}-load-definition"
+    ##
     existingSecret: '{{ include "common.names.fullname" . }}-release'
+  ## @param rabbitmq.extraConfiguration [string] Configuration file content: extra configuration to be appended to RabbitMQ configuration
+  ## Use this instead of `configuration` to add more configuration
+  ## Do not use simultaneously with `extraConfigurationExistingSecret`
+  ##
   extraConfiguration: |
     raft.wal_max_size_bytes = 1048576
+  ## @section Persistence parameters
+  ##
   persistence:
+    ## @param rabbitmq.persistence.enabled Enable RabbitMQ data persistence using PVC
+    ##
     enabled: true
-    accessMode: ReadWriteOnce
+    ## @param rabbitmq.persistence.accessModes PVC Access Modes for RabbitMQ data volume
+    ##
+    accessModes:
+      - ReadWriteOnce
+    ## @param rabbitmq.persistence.storageClass PVC Storage Class for RabbitMQ data volume
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ##
     storageClass: ""
+    ## @param rabbitmq.persistence.size PVC Storage Request for RabbitMQ data volume
+    ## If you change this value, you might have to adjust `rabbitmq.diskFreeLimit` as well
+    ##
     size: 8Gi
+  ## @section Exposure parameters
+  ##
+
+  ## Kubernetes service type
+  ##
   service:
+    ## @param rabbitmq.service.type Kubernetes Service type
+    ##
     type: ClusterIP
+  ## @section Init Container Parameters
+  ##
+
+  ## Init Container parameters
+  ## Change the owner and group of the persistent volume(s) mountpoint(s) to 'runAsUser:fsGroup' on each component
+  ## values from the securityContext section of the component
+  ##
   volumePermissions:
+    ## @param rabbitmq.volumePermissions.enabled Enable init container that changes the owner and group of the persistent volume(s) mountpoint to `runAsUser:fsGroup`
+    ##
     enabled: true
