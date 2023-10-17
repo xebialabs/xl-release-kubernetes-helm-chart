@@ -131,7 +131,7 @@ truststore:
   ## @param truststore.password Truststore password
   password: ""
   ## @param truststore.truststore Truststore file base64 encoded
-  truststore: ""
+  truststore: {}
 
 ## Network Policy configuration
 ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
@@ -379,8 +379,9 @@ extraContainerPorts: []
 ## To add more configuration, use `extraConfiguration` of `advancedConfiguration` instead
 ##
 configuration:
-  default-conf_xl-release.conf.template:
+  default-conf_xl-release-conf-template:
     path: "default-conf/xl-release.conf.template"
+    mode: 0660
     content: |
       xl {
         cluster {
@@ -443,7 +444,6 @@ configuration:
           auth {
             providers {
               oidc {
-                {{- if .Values.oidc.external }}
                 clientId=""
                 clientId=${?OIDC_CLIENT_ID}
                 clientSecret=""
@@ -509,7 +509,6 @@ configuration:
                 {{- end }}
                 {{- if .Values.oidc.proxyPort }}
                 proxyPort={{ .Values.oidc.proxyPort | quote }}
-                {{- end }}
                 {{- end }}
               }
             }
@@ -1233,6 +1232,32 @@ postgresql:
     ## @param postgresql.auth.postgresPassword Password for the "postgres" admin user. Ignored if `auth.existingSecret` is provided
     ##
     postgresPassword: postgres
+  ## PostgreSQL Primary service configuration
+  ##
+  service:
+    ## @param postgresql.primary.service.ports.postgresql PostgreSQL service port
+    ##
+    ports:
+      postgresql: 5432
+    ## @param postgresql.primary.service.type Kubernetes Service type
+    ##
+    type: ClusterIP
+  ## Service account for PostgreSQL to use.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  ##
+  serviceAccount:
+    ## @param postgresql.serviceAccount.create Enable creation of ServiceAccount for PostgreSQL pod
+    ##
+    create: true
+  ## PostgreSQL Primary resource requests and limits
+  ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  ## @param postgresql.primary.resources.requests.memory The requested memory for the PostgreSQL Primary containers
+  ## @param postgresql.primary.resources.requests.cpu The requested cpu for the PostgreSQL Primary containers
+  ##
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
   ## @section Volume Permissions parameters
   ##
 
