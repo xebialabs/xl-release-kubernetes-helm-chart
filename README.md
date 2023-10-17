@@ -116,7 +116,7 @@ kubectl delete namespace digitalai
 | `keystore.keystore`              | Use repository-keystore.jceks files content ecoded with base64                                                                                                                                                      | `""`     |
 | `truststore.type`                | Type of truststore, possible value jks or jceks or pkcs12                                                                                                                                                           | `pkcs12` |
 | `truststore.password`            | Truststore password                                                                                                                                                                                                 | `""`     |
-| `truststore.truststore`          | Truststore file base64 encoded                                                                                                                                                                                      | `""`     |
+| `truststore.truststore`          | Truststore file base64 encoded                                                                                                                                                                                      | `{}`     |
 | `networkPolicy.enabled`          | Enable creation of NetworkPolicy resources                                                                                                                                                                          | `false`  |
 | `networkPolicy.allowExternal`    | Don't require client label for connections                                                                                                                                                                          | `true`   |
 | `networkPolicy.additionalRules`  | Additional NetworkPolicy Ingress "from" rules to set. Note that all rules are OR-ed.                                                                                                                                | `[]`     |
@@ -366,10 +366,14 @@ kubectl delete namespace digitalai
 | `postgresql.primary.persistence.storageClass`  | PVC Storage Class for PostgreSQL Primary data volume                                                   | `""`                                                    |
 | `postgresql.primary.persistence.size`          | PVC Storage Request for PostgreSQL volume                                                              | `8Gi`                                                   |
 | `postgresql.primary.persistence.existingClaim` | Name of an existing PVC to use                                                                         | `""`                                                    |
+| `postgresql.primary.resources.requests.memory` | The requested memory for the PostgreSQL Primary containers                                             | `256Mi`                                                 |
+| `postgresql.primary.resources.requests.cpu`    | The requested cpu for the PostgreSQL Primary containers                                                | `250m`                                                  |
+| `postgresql.primary.service.ports.postgresql`  | PostgreSQL service port                                                                                | `5432`                                                  |
 | `postgresql.primary.service.type`              | Kubernetes Service type                                                                                | `ClusterIP`                                             |
 | `postgresql.auth.enablePostgresUser`           | Assign a password to the "postgres" admin user. Otherwise, remote access will be blocked for this user | `true`                                                  |
 | `postgresql.auth.username`                     | Name for a custom user to create                                                                       | `postgres`                                              |
 | `postgresql.auth.postgresPassword`             | Password for the "postgres" admin user. Ignored if `auth.existingSecret` is provided                   | `postgres`                                              |
+| `postgresql.serviceAccount.create`             | Enable creation of ServiceAccount for PostgreSQL pod                                                   | `true`                                                  |
 
 ### Volume Permissions parameters
 

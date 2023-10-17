@@ -1211,9 +1211,22 @@ postgresql:
       ## @param postgresql.primary.persistence.existingClaim Name of an existing PVC to use
       ##
       existingClaim: ""
+    ## PostgreSQL Primary resource requests and limits
+    ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    ## @param postgresql.primary.resources.requests.memory The requested memory for the PostgreSQL Primary containers
+    ## @param postgresql.primary.resources.requests.cpu The requested cpu for the PostgreSQL Primary containers
+    ##
+    resources:
+      requests:
+        memory: 256Mi
+        cpu: 250m
     ## PostgreSQL Primary service configuration
     ##
     service:
+      ## @param postgresql.primary.service.ports.postgresql PostgreSQL service port
+      ##
+      ports:
+        postgresql: 5432
       ## @param postgresql.primary.service.type Kubernetes Service type
       ##
       type: ClusterIP
@@ -1232,16 +1245,6 @@ postgresql:
     ## @param postgresql.auth.postgresPassword Password for the "postgres" admin user. Ignored if `auth.existingSecret` is provided
     ##
     postgresPassword: postgres
-  ## PostgreSQL Primary service configuration
-  ##
-  service:
-    ## @param postgresql.primary.service.ports.postgresql PostgreSQL service port
-    ##
-    ports:
-      postgresql: 5432
-    ## @param postgresql.primary.service.type Kubernetes Service type
-    ##
-    type: ClusterIP
   ## Service account for PostgreSQL to use.
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   ##
@@ -1249,15 +1252,6 @@ postgresql:
     ## @param postgresql.serviceAccount.create Enable creation of ServiceAccount for PostgreSQL pod
     ##
     create: true
-  ## PostgreSQL Primary resource requests and limits
-  ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-  ## @param postgresql.primary.resources.requests.memory The requested memory for the PostgreSQL Primary containers
-  ## @param postgresql.primary.resources.requests.cpu The requested cpu for the PostgreSQL Primary containers
-  ##
-  resources:
-    requests:
-      memory: 256Mi
-      cpu: 250m
   ## @section Volume Permissions parameters
   ##
 
