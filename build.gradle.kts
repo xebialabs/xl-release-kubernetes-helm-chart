@@ -271,9 +271,24 @@ tasks {
         }
     }
 
+    register<Exec>("buildReadme") {
+        group = "readme"
+        workingDir(layout.projectDirectory)
+        commandLine("readme-generator-for-helm", "--readme", "README.md", "--values", "values.yaml")
+
+        standardOutput = ByteArrayOutputStream()
+        errorOutput = ByteArrayOutputStream()
+
+        doLast {
+            logger.lifecycle(standardOutput.toString())
+            logger.error(errorOutput.toString())
+            logger.lifecycle("Update README.md finished")
+        }
+    }
+
     register<Exec>("buildOperatorImage") {
         group = "operator"
-        dependsOn("prepareOperatorImage")
+        dependsOn("prepareOperatorImage", "buildReadme")
         workingDir(buildXlrDir)
         commandLine(operatorSdkCli, "create", "api", "--group=xlr", "--version=v1alpha1", "--helm-chart=xlr.tgz")
 
