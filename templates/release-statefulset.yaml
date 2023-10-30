@@ -82,6 +82,12 @@ spec:
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
       {{- if or .Values.initContainers (and (not .Values.external.db.enabled) .Values.postgresql.install) (and (not .Values.external.mq.enabled) .Values.rabbitmq.install) }}
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.global.imagePullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
       initContainers:
         {{- if not .Values.diagnosticMode.enabled }}
         {{- if and (not .Values.external.db.enabled) .Values.postgresql.install }}
