@@ -8,6 +8,10 @@ sidebar_position: 3
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
 :::
 
+:::caution
+From 23.3 version this document is outdated. Use official Digital.ai documentation.
+:::
+
 ## Requirements
 
 - Running Release installation on k8s cluster
