@@ -2,7 +2,7 @@
 sidebar_position: 10
 ---
 
-## Install Release with http2 backend enabled
+# Install Release with http2 backend enabled
 
 :::caution
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
