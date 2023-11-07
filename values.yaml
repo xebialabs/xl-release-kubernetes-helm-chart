@@ -14,8 +14,13 @@ global:
   ## imagePullSecrets:
   ##   - myRegistryKeySecretName
   ##
-  imagePullSecrets: []
+  imagePullSecrets: [ "regcred" ]
   storageClass: ""
+  postgresql:
+    service:
+      ports:
+        postgresql: "5432"
+
 
 ## @section Env parameters
 ##
