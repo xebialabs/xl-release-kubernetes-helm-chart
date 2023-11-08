@@ -81,10 +81,8 @@ spec:
       dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.dnsConfig "context" .) | nindent 8 }}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      {{- include "release.imagePullSecrets" . | nindent 6 }}
       {{- if or .Values.initContainers (and (not .Values.external.db.enabled) .Values.postgresql.install) (and (not .Values.external.mq.enabled) .Values.rabbitmq.install) }}
-      {{- if or .Values.global.imagePullSecrets .Values.image.pullSecrets }}
-      {{ include "common.images.renderPullSecrets" ( dict "images" (list .Values.image) "context" .) | nindent 6 }}
-      {{- end }}
       initContainers:
         {{- if not .Values.diagnosticMode.enabled }}
         {{- if and (not .Values.external.db.enabled) .Values.postgresql.install }}
