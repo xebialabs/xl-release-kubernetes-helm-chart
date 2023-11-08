@@ -48,7 +48,7 @@ Return the proper Release image name
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "release.imagePullSecrets" -}}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image .Values.busyBox.image) "context" .) }}
+{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image .Values.busyBox.image) "context" $) }}
 {{- end -}}
 
 {{/*
@@ -158,7 +158,7 @@ Get the main db URL
         {{- .Values.external.db.main.url -}}
     {{- else -}}
         {{- if .Values.postgresql.install -}}
-            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ .Values.postgresql.service.port }}/xlr-db
+            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ .Values.postgresql.primary.service.ports.postgresql }}/xlr-db
         {{- end -}}
     {{- end -}}
 {{- end -}}
@@ -197,7 +197,7 @@ Get the report db URL
         {{ .Values.external.db.report.url }}
     {{- else -}}
         {{- if .Values.postgresql.install -}}
-            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ .Values.postgresql.service.port }}/xlr-report-db
+            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ .Values.postgresql.primary.service.ports.postgresql }}/xlr-report-db
         {{- end -}}
     {{- end -}}
 {{- end -}}
@@ -286,8 +286,6 @@ Compile all warnings into a single message, and call fail.
 {{- define "release.validateValues" -}}
 {{- $messages := list -}}
 {{- $messages = append $messages (include "release.validateValues.ingress.tls" .) -}}
-{{- $messages = append $messages (include "release.validateValues.keystore.passphrase" .) -}}
-{{- $messages = append $messages (include "release.validateValues.license" .) -}}
 {{- if .Values.AdminPassword -}}
 {{- $messages = append $messages (include "validate.existing.secret" (dict "value" .Values.AdminPassword "context" $) ) -}}
 {{- end -}}
