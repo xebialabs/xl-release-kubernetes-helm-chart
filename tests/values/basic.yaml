@@ -1,5 +1,8 @@
 # Mandatory
 
+auth:
+  adminPassword: "test123"
+
 keystore:
   passphrase: test123
 licenseAcceptEula: true
