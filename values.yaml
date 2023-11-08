@@ -16,6 +16,12 @@ global:
   ##
   imagePullSecrets: []
   storageClass: ""
+  postgresql:
+    ## @param global.postgresql.service.ports.postgresql PostgreSQL service port (overrides `service.ports.postgresql`)
+    ##
+    service:
+      ports:
+        postgresql: ""
 
 ## @section Env parameters
 ##
