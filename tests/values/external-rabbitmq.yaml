@@ -1,0 +1,14 @@
+## Requires:
+## helm install rabbitmq-test1 oci://registry-1.docker.io/bitnamicharts/rabbitmq --set 'auth.username=user' --set 'auth.password=password' --set 'extraPlugins=rabbitmq_amqp1_0'
+##
+## helm delete rabbitmq-test1
+##
+external:
+  mq:
+    enabled: true
+    url: "amqp://rabbitmq-test1.default.svc.cluster.local:5672"
+    queueName: ""
+    username: "user"
+    password: password
+rabbitmq:
+  install: false

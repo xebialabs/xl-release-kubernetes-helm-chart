@@ -103,7 +103,7 @@ spec:
             - name: POSTGRESQL_SVC
               value: {{ include "postgresql.subchart" . }}
             - name: POSTGRESQL_PORT
-              value: {{ .Values.postgresql.service.port | quote }}
+              value: {{ (include "release.postgresql.service.port" .) | quote }}
         {{- end }}
         {{- if and (not .Values.external.mq.enabled) .Values.rabbitmq.install }}
         - name: wait-for-rabbitmq
@@ -163,7 +163,7 @@ spec:
               value: {{ .Values.containerPorts.releaseHttp | quote }}
             {{- end }}
             - name: ADMIN_PASSWORD
-              {{- include "render.value-secret" (dict  "value" (include "release.secretPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "releasePassword" "default" true "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (include "release.secretPassword" .) "source" .Values.auth.adminPassword "sourceEnabled" true "defaultName" (include "common.names.fullname" .) "defaultKey" "releasePassword" "default" true "context" $ ) | nindent 14 }}
             - name: XL_CLUSTER_MODE
               value: {{ .Values.clusterMode }}
             - name: FORCE_UPGRADE
@@ -176,17 +176,17 @@ spec:
             - name: XL_DB_URL
               value: {{ include "release.mainDbUrl" . }}
             - name: XL_DB_USERNAME
-              {{- include "render.value-secret" (dict  "value" (include "release.mainUsername" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "mainDatabaseUsername" "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (include "release.mainUsername" .) "source" .Values.external.db.main.username "sourceEnabled" .Values.external.db.enabled "defaultName" (include "common.names.fullname" .) "defaultKey" "mainDatabaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_DB_PASSWORD
-              {{- include "render.value-secret" (dict  "value" (include "release.mainPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "mainDatabasePassword" "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (include "release.mainPassword" .) "source" .Values.external.db.main.password "sourceEnabled" .Values.external.db.enabled "defaultName" (include "common.names.fullname" .) "defaultKey" "mainDatabasePassword" "context" $ ) | nindent 14 }}
             - name: XL_DB_MAX_POOL_SIZE
               value: {{ default 10 .Values.external.db.main.maxPoolSize | quote }}
             - name: XL_REPORT_DB_URL
               value: {{ include "release.reportDbUrl" . }}
             - name: XL_REPORT_DB_USERNAME
-              {{- include "render.value-secret" (dict  "value" (include "release.reportUsername" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "reportDatabaseUsername" "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (include "release.reportUsername" .) "source" .Values.external.db.report.username "sourceEnabled" .Values.external.db.enabled "defaultName" (include "common.names.fullname" .) "defaultKey" "reportDatabaseUsername" "context" $ ) | nindent 14 }}
             - name: XL_REPORT_DB_PASSWORD
-              {{- include "render.value-secret" (dict  "value" (include "release.reportPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "reportDatabasePassword" "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (include "release.reportPassword" .) "source" .Values.external.db.report.password "sourceEnabled" .Values.external.db.enabled "defaultName" (include "common.names.fullname" .) "defaultKey" "reportDatabasePassword" "context" $ ) | nindent 14 }}
             - name: XL_REPORT_DB_MAX_POOL_SIZE
               value: {{ default 10 .Values.external.db.report.maxPoolSize | quote }}
              {{- end }}
@@ -208,9 +208,9 @@ spec:
             - name: XLR_TASK_QUEUE_NAME
               value: {{ include "release.mqQueueName" . }}
             - name: XLR_TASK_QUEUE_USERNAME
-              {{- include "render.value-secret" (dict  "value" (include "release.mqUsername" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "rabbitmqUsername" "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (include "release.mqUsername" .) "source" .Values.external.mq.username "sourceEnabled" .Values.external.mq.enabled "defaultName" (include "common.names.fullname" .) "defaultKey" "rabbitmqUsername" "context" $ ) | nindent 14 }}
             - name: XLR_TASK_QUEUE_PASSWORD
-              {{- include "render.value-secret" (dict  "value" (include "release.mqPassword" .) "defaultName" (include "common.names.fullname" .) "defaultKey" "rabbitmqPassword" "context" $ ) | nindent 14 }}
+              {{- include "render.value-secret" (dict  "value" (include "release.mqPassword" .) "source" .Values.external.mq.password "sourceEnabled" .Values.external.mq.enabled "defaultName" (include "common.names.fullname" .) "defaultKey" "rabbitmqPassword" "context" $ ) | nindent 14 }}
              {{- end }}
             {{- if .Values.keystore.keystore }}
             - name: REPOSITORY_KEYSTORE
