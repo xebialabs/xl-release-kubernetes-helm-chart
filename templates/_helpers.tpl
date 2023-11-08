@@ -4,6 +4,10 @@
 {{ include "postgresql.primary.fullname" (merge .Subcharts.postgresql (dict "nameOverride" "postgresql")) }}
 {{- end -}}
 
+{{- define "release.postgresql.service.port" -}}
+{{ include "postgresql.service.port" (dict "Values" (dict "global" .Values.global "primary" .Values.postgresql.primary)) }}
+{{- end -}}
+
 {{- define "rabbitmq.subchart" -}}
 {{ include "common.names.fullname" (merge .Subcharts.rabbitmq (dict "nameOverride" "rabbitmq")) }}
 {{- end -}}
@@ -151,7 +155,7 @@ Get the main db URL
         {{- .Values.external.db.main.url -}}
     {{- else -}}
         {{- if .Values.postgresql.install -}}
-            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ include "postgresql.service.port" . }}/xlr-db
+            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ include "release.postgresql.service.port" . }}/xlr-db
         {{- end -}}
     {{- end -}}
 {{- end -}}
@@ -190,7 +194,7 @@ Get the report db URL
         {{ .Values.external.db.report.url }}
     {{- else -}}
         {{- if .Values.postgresql.install -}}
-            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ include "postgresql.service.port" . }}/xlr-report-db
+            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ include "release.postgresql.service.port" . }}/xlr-report-db
         {{- end -}}
     {{- end -}}
 {{- end -}}

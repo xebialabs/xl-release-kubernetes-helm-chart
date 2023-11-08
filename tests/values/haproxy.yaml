@@ -1,0 +1,22 @@
+
+ingress:
+  enabled: true
+  hostname: "a1db7abf4679544aaab772ef28f87184-1739314795.us-east-1.elb.amazonaws.com"
+  path: /
+
+  annotations:
+    # ingress.kubernetes.io/tls-acme: "true"
+
+    ## haproxy
+    kubernetes.io/ingress.class: "haproxy-dai-xlr"
+    ingress.kubernetes.io/rewrite-target: /
+    ingress.kubernetes.io/affinity: cookie
+    ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    ingress.kubernetes.io/session-cookie-strategy: prefix
+    ingress.kubernetes.io/config-backend: |
+     option httpchk GET /ha/health HTTP/1.0
+
+haproxy-ingress:
+  install: true
+  controller:
+    ingressClass: haproxy-dai-xlr

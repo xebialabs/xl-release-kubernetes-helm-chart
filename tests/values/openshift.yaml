@@ -1,0 +1,14 @@
+global:
+  storageClass: gp2
+    # storageClass: aws-efs
+k8sSetup:
+  platform: Openshift
+postgresql:
+  primary:
+    persistence:
+      storageClass: gp2
+    # storageClass: aws-efs
+rabbitmq:
+  persistence:
+    storageClass: gp2
+    # storageClass: aws-efs
