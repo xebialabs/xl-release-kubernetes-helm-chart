@@ -325,7 +325,7 @@ Validate values of Release - license and licenseAcceptEula
 {{- define "release.validateValues.license" -}}
 {{- if not .Values.licenseAcceptEula }}
 {{- if not .Values.license }}
-release: keystore.license
+release: license or licenseAcceptEula
     The `license` is empty. It is mandatory to set if `licenseAcceptEula` is disabled.
 {{- end -}}
 {{- end -}}
