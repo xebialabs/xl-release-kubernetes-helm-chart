@@ -48,7 +48,9 @@ Return the proper Release image name
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "release.imagePullSecrets" -}}
+{{- if or .Values.global.imagePullSecrets .Values.image.pullSecrets .Values.busyBox.image.pullSecrets }}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image .Values.busyBox.image) "context" $) }}
+{{- end -}}
 {{- end -}}
 
 {{/*
