@@ -151,7 +151,7 @@ Get the main db URL
         {{- .Values.external.db.main.url -}}
     {{- else -}}
         {{- if .Values.postgresql.install -}}
-            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ .Values.postgresql.primary.service.ports.postgresql }}/xlr-db
+            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ include "postgresql.service.port" . }}/xlr-db
         {{- end -}}
     {{- end -}}
 {{- end -}}
@@ -190,7 +190,7 @@ Get the report db URL
         {{ .Values.external.db.report.url }}
     {{- else -}}
         {{- if .Values.postgresql.install -}}
-            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ .Values.postgresql.primary.service.ports.postgresql }}/xlr-report-db
+            jdbc:postgresql://{{ include "postgresql.subchart" . }}:{{ include "postgresql.service.port" . }}/xlr-report-db
         {{- end -}}
     {{- end -}}
 {{- end -}}

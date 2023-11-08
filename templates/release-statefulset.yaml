@@ -103,7 +103,7 @@ spec:
             - name: POSTGRESQL_SVC
               value: {{ include "postgresql.subchart" . }}
             - name: POSTGRESQL_PORT
-              value: {{ .Values.postgresql.primary.service.ports.postgresql | quote }}
+              value: {{ (include "postgresql.service.port" .) | quote }}
         {{- end }}
         {{- if and (not .Values.external.mq.enabled) .Values.rabbitmq.install }}
         - name: wait-for-rabbitmq
