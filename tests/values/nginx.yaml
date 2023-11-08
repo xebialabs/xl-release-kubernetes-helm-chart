@@ -1,0 +1,26 @@
+
+ingress:
+  enabled: true
+  hostname: "af4ff752ff7544008b91bd63dc4f9f5c-1812070945.us-east-1.elb.amazonaws.com"
+  path: /
+
+  annotations:
+    # ingress.kubernetes.io/tls-acme: "true"
+
+    ## nginx
+    kubernetes.io/ingress.class: "nginx-dai-xlr"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/affinity: cookie
+    nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+
+nginx-ingress-controller:
+  install: true
+  extraArgs:
+    ingress-class: nginx-dai-xlr
+  ingressClassResource:
+    controllerClass: k8s.io/ingress-nginx-dai-xlr
+    name: nginx-dai-xlr
