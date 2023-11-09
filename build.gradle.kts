@@ -288,7 +288,7 @@ tasks {
 
     register<Exec>("buildOperatorImage") {
         group = "operator"
-        dependsOn("prepareOperatorImage", "buildReadme")
+        dependsOn("prepareOperatorImage")
         workingDir(buildXlrDir)
         commandLine(operatorSdkCli, "create", "api", "--group=xlr", "--version=v1alpha1", "--helm-chart=xlr.tgz")
 
