@@ -168,6 +168,12 @@ spec:
               value: {{ .Values.forceUpgrade | quote }}
             - name: ENABLE_EMBEDDED_QUEUE
               value: {{ .Values.enableEmbeddedQueue | quote }}
+            - name: LOGBACK_GLOBAL_LOGGING_LEVEL
+              value: {{ .Values.logbackGlobalLoggingLevel | quote }}
+            - name: LOGBACK_SCAN_ENABLED
+              value: {{ .Values.logbackScanEnabled | quote }}
+            - name: LOGBACK_SCAN_PERIOD
+              value: {{ .Values.logbackScanPeriod | quote }}
             - name: SERVER_URL
               value: {{ include "release.serverUrl" . }}
              {{- if or .Values.external.db.enabled .Values.postgresql.install }}
