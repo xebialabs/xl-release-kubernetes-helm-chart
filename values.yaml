@@ -1008,6 +1008,8 @@ nginx-ingress-controller:
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
   install: true
+  image:
+    tag: 15.4.0-debian-11-r54
   primary:
     initdb:
       scriptsSecret: '{{ include "postgresql.primary.fullname" . }}-release'
@@ -1034,11 +1036,15 @@ postgresql:
       cpu: 250m
   volumePermissions:
     enabled: true
+    image:
+      tag: 11-debian-11-r90
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
 rabbitmq:
   install: true
+  image: 
+    tag: 3.12.7-debian-11-r0
   clustering:
     forceBoot: true
   replicaCount: 3
@@ -1062,3 +1068,6 @@ rabbitmq:
     type: ClusterIP
   volumePermissions:
     enabled: true
+    image:
+      tag: 11-debian-11-r90
+
