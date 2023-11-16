@@ -8,10 +8,6 @@ sidebar_position: 2
 This is internal documentation. This document can be used only if it was recommended by the Support Team.
 :::
 
-In order to create and publish a new operator you can use `build_operator.sh` for that.
-It requires to have at least 1 parameter, to specify which version you would like to release.
-Make sure, that you provide the [SemVer](https://semver.org/) compatible version.
-
 :::tip
 
 You have to login to your docker account before executing the script!
@@ -20,24 +16,6 @@ You have to login to your docker account before executing the script!
 
 :::
 
-
-## Build and publish with script
-
-Requirements:
-- operator-sdk
-- helm
-- make
-- docker
-- 
-Use script `build_operator.sh` to build and publish operator image
-```
-./build_operator.sh $RELEASE_EXPLICIT $DOCKER_HUB_REPOSITORY $BRANCH_NAME
-```
-
-Where env variables are:
-- `RELEASE_EXPLICIT` - version of them releasing image, use `22.0.0-114.1255` pattern
-- `DOCKER_HUB_REPOSITORY` - DockerHub repository name, default is `xebialabsunsupported`
-- `BRANCH_NAME` - branch from where release will be done, default is `master` 
 
 ## Build and publish with gradle
 

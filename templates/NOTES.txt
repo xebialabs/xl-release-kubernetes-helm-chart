@@ -13,7 +13,11 @@ kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.
 kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.containerPorts.releaseHttp }}:{{ .Values.service.portNames.releaseHttp }}
 {{- end }}
 ## To get the admin password for Digitalai Release, run:
+{{- if kindIs "map" .Values.auth.adminPassword }}
+kubectl get secret --namespace {{ .Release.Namespace }} {{ .Values.auth.adminPassword.valueFrom.secretKeyRef.name }} -o jsonpath="{ .data.{{ .Values.auth.adminPassword.valueFrom.secretKeyRef.key }} }" | base64 --decode; echo
+{{- else }}
 kubectl get secret --namespace {{ .Release.Namespace }} {{ include "common.names.fullname" . }} -o jsonpath="{.data.releasePassword}" | base64 --decode; echo
+{{- end }}
 
 {{- if or .Values.postgresql.install .Values.external.db.enabled }}
 ## To get the password for main database, run:

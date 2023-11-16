@@ -1,1 +1,1 @@
-./gradlew clean publishToDockerHub -x updateDocs -x test --stacktrace --info
+./gradlew clean publishToDockerHub -x updateDocs -x buildReadme -x test --stacktrace --info

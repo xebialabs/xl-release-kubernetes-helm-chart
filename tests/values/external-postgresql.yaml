@@ -2,6 +2,12 @@
 ## helm install psql-test1 bitnami/postgresql --set 'primary.persistence.storageClass=my-efs' --set 'global.postgresql.auth.postgresPassword=admin"123' --set global.postgresql.auth.username=test --set 'global.postgresql.auth.password=test123' --set global.postgresql.auth.database=main --set primary.extendedConfiguration="max_connections = 300"
 ## helm install psql-test2 bitnami/postgresql --set 'primary.persistence.storageClass=my-efs' --set 'global.postgresql.auth.postgresPassword=admin"123' --set global.postgresql.auth.username=test --set 'global.postgresql.auth.password=test123' --set global.postgresql.auth.database=main --set primary.extendedConfiguration="max_connections = 300"
 ##
+## helm install psql-test1 bitnami/postgresql --set 'global.postgresql.auth.postgresPassword=admin"123' --set global.postgresql.auth.username=test --set 'global.postgresql.auth.password=test123' --set global.postgresql.auth.database=main --set primary.extendedConfiguration="max_connections = 300"
+## helm install psql-test2 bitnami/postgresql --set 'global.postgresql.auth.postgresPassword=admin"123' --set global.postgresql.auth.username=test --set 'global.postgresql.auth.password=test123' --set global.postgresql.auth.database=main --set primary.extendedConfiguration="max_connections = 300"
+##
+## helm delete psql-test1
+## helm delete psql-test2
+##
 external:
   db:
     enabled: true
