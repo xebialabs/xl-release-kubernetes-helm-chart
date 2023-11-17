@@ -48,7 +48,7 @@ licenseAcceptEula: false
 generateXlConfig: true
 ## @param useIpAsHostname Set IP address of the container as the hostname for the instance.
 ## If set to true then IP will be used instead of the container ID. This is useful
-## when deploying Release as active-active cluster using docker compose as Akka cannot resolve aliases within the docker network.
+## when deploying Release as active-active cluster using docker compose as Pekko cannot resolve aliases within the docker network.
 ##
 useIpAsHostname: false
 ## @param forceRemoveMissingTypes Force removal of the missing types.
@@ -394,7 +394,7 @@ configuration:
           # mode: "default", "hot-standby", "full"
           mode = ${XL_CLUSTER_MODE}
           name = "xl-release_cluster"
-          akka {
+          pekko {
             loglevel = "INFO"
             actor.debug.receive = off
             remote {
