@@ -66,15 +66,14 @@ enableEmbeddedQueue: false
 ## @param appContextRoot Release context root.
 ##
 appContextRoot: /
-## @param logbackGlobalLoggingLevel Global logging level. Possible values: "trace", "debug", "info", "warn", "error"
+## @param logback.globalLoggingLevel Global logging level. Possible values: "trace", "debug", "info", "warn", "error"
+## @param logback.scanEnabled Enables scanning of logback.xml.
+## @param logback.scanPeriod Interval for checking logback.xml configuration.
 ##
-logbackGlobalLoggingLevel: "info"
-## @param logbackScanEnabled Enables scanning of logback.xml.
-##
-logbackScanEnabled: true
-## @param logbackScanPeriod Interval for checking logback.xml configuration.
-##
-logbackScanPeriod: "30 seconds"
+logback:
+  globalLoggingLevel: "info"
+  scanEnabled: true
+  scanPeriod: "30 seconds"
 
 ## Release Authentication parameters
 ##
