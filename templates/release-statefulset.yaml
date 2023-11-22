@@ -147,6 +147,12 @@ spec:
           lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.lifecycleHooks "context" $) | nindent 12 }}
           {{- end }}
           env:
+            {{- if .Values.logback.fileLogging }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            {{- end }}
             - name: ACCEPT_EULA
               {{- if .Values.licenseAcceptEula }}
               value: "y"
@@ -365,6 +371,14 @@ spec:
             {{- if .Values.extraVolumeMounts }}
             {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
             {{- end }}
+            {{- if .Values.logback.fileLogging }}
+            - name: logback
+              mountPath: /opt/xebialabs/xl-release-server/conf/logback.xml
+              subPath: logback.xml
+            - name: data
+              mountPath: /opt/xebialabs/xl-release-server/log
+              subPath: log
+            {{- end }}
         {{- if .Values.sidecars }}
         {{- include "common.tplvalues.render" (dict "value" .Values.sidecars "context" $) | nindent 8 }}
         {{- end }}
@@ -407,6 +421,11 @@ spec:
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $)  | nindent 8 }}
+        {{- end }}
+        {{- if .Values.logback.fileLogging }}
+        - name: logback
+          configMap:
+            name: logback
         {{- end }}
         {{- if not .Values.persistence.enabled }}
         - name: data
