@@ -69,13 +69,11 @@ appContextRoot: /
 ## @param logback.globalLoggingLevel Global logging level. Possible values: "trace", "debug", "info", "warn", "error"
 ## @param logback.scanEnabled Enables scanning of logback.xml.
 ## @param logback.scanPeriod Interval for checking logback.xml configuration.
-## @param logback.fileLogging Enables file logging to log/pod_name.log
 ##
 logback:
   globalLoggingLevel: "info"
   scanEnabled: true
   scanPeriod: "30 seconds"
-  fileLogging: false
 
 ## Release Authentication parameters
 ##
