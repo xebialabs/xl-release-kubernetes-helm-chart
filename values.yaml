@@ -63,6 +63,12 @@ forceUpgrade: true
 ## @param enableEmbeddedQueue Flag to expose external messaging queue. If set to true, a default embedded-queue will be used and all environment variables will be ignored.
 ##
 enableEmbeddedQueue: false
+## @param appProtocol Release protocol (the protocol http or https that will be used by enduser to access Release). It is not used if ingress or route are enabled.
+##
+appProtocol: http
+## @param appHostname Release hostname (the hostname that will be used by enduser to access Release). It is not used if ingress or route are enabled.
+##
+appHostname: ""
 ## @param appContextRoot Release context root.
 ##
 appContextRoot: /

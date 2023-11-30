@@ -151,7 +151,11 @@ Get the server URL
                 {{- printf "%s://%s" $protocol $hostname }}
             {{- end }}
         {{- else -}}
-            {{- print "" }}
+            {{- if .Values.appHostname }}
+                {{- printf "%s://%s" .Values.appProtocol .Values.appHostname }}
+            {{- else -}}
+                {{- print "" }}
+            {{- end }}
         {{- end }}
     {{- end }}
 {{- end -}}
