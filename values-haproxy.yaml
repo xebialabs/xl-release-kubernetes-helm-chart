@@ -26,6 +26,21 @@ ImagePullPolicy: "Always"
 ## Secrets must be manually created in the namespace.
 # ImagePullSecret: xlRelease
 
+## @param appProtocol Release protocol (the protocol http or https that will be used by enduser to access Release). It is not used if ingress or route are enabled.
+##
+appProtocol: http
+## @param appHostname Release hostname (the hostname that will be used by enduser to access Release). It is not used if ingress or route are enabled.
+##
+appHostname: ""
+
+http2:
+  enabled: false
+ssl:
+  enabled: false
+  keystorePassword:
+  keystoreKeypassword:
+  keystore:
+
 release:
   terminationGracePeriodSeconds: 200
   configurationManagement:
