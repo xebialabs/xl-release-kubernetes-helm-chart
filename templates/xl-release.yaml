@@ -148,6 +148,11 @@ spec:
             - name: SERVER_URL
               value: "http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}{{ $.Values.route.path }}"
             {{- end }}
+            {{- else }}
+            {{- if .Values.appHostname }}
+            - name: SERVER_URL
+              value: {{ printf "%s://%s" .Values.appProtocol .Values.appHostname }}
+            {{- end }}
             {{- end }}
             {{- if .Values.UseExistingDB.Enabled }}
             - name: XL_DB_URL
