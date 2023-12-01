@@ -33,14 +33,6 @@ appProtocol: http
 ##
 appHostname: ""
 
-http2:
-  enabled: false
-ssl:
-  enabled: false
-  keystorePassword:
-  keystoreKeypassword:
-  keystore:
-
 release:
   terminationGracePeriodSeconds: 200
   configurationManagement:
