@@ -1,4 +1,4 @@
 image:
-    repository: xldevdocker/xl-release
+    repository: xebialabsunsupported/xl-release
     pullPolicy: Always
-    tag: 23.3.0-SNAPSHOT
+    tag: 24.1.0-1207.113

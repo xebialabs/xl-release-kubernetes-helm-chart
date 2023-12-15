@@ -1,0 +1,131 @@
+{{- if and .Values.hooks.getLicense.enabled .Values.licenseAcceptEula (not .Values.license) }}
+{{- $name := include "common.tplvalues.render" ( dict "value" .Values.hooks.getLicense.name "context" $ ) -}}
+{{- $licenseExists := include "secrets.exists" ( dict "secret" $name "context" $ ) -}}
+{{- if eq $licenseExists "false" }}
+---
+kind: Role
+apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+---
+kind: RoleBinding
+apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+subjects:
+  - kind: ServiceAccount
+    name: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+data:
+  {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+  {{ $k }}: |-
+    {{- include "common.tplvalues.render" (dict "value" $v.content "context" $) | nindent 4 }}
+  {{- end }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    metadata:
+      name: {{ $name }}
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
+        {{- end }}
+    spec:
+      restartPolicy: Never
+      {{- include "release.getLicense.imagePullSecrets" . | nindent 6 }}
+      initContainers:
+        - name: eula-get-license-job
+          image: {{ template "release.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.getCommand "context" $) | nindent 12 }}
+          volumeMounts:
+            - name: shared-data
+              mountPath: /opt/xebialabs/xl-release-server/conf
+            {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+            - name: configuration
+              mountPath: /opt/xebialabs/xl-release-server/{{ $v.path }}
+              subPath: {{ $v.path }}
+            {{- end }}
+      containers:
+        - name: eula-install-license-job
+          image: {{ template "release.getLicense.image" . }}
+          imagePullPolicy: {{ .Values.hooks.getLicense.image.pullPolicy | quote }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.installCommand "context" $) | nindent 12 }}
+          volumeMounts:
+            - name: shared-data
+              mountPath: /opt/xebialabs/xl-release-server/conf
+            {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+            - name: configuration
+              mountPath: /opt/xebialabs/xl-release-server/{{ $v.path }}
+              subPath: {{ $v.path }}
+            {{- end }}
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+        {{- if .Values.hooks.getLicense.configuration }}
+        - name: configuration
+          configMap:
+            name: {{ $name }}
+            items:
+              {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+              - key: {{ $k }}
+                path: {{ $v.path }}
+                {{- if $v.mode}}
+                mode: {{ $v.mode }}
+                {{- end }}
+              {{- end }}
+        {{- end }}
+{{- end }}
+{{- end }}
