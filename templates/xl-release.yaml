@@ -166,6 +166,11 @@ spec:
             - name: SERVER_URL
               value: "http{{ if $.Values.route.tls }}s{{ end }}://{{ . }}{{ $.Values.route.path }}"
             {{- end }}
+            {{- else }}
+            {{- if .Values.appHostname }}
+            - name: SERVER_URL
+              value: {{ printf "%s://%s" .Values.appProtocol .Values.appHostname }}
+            {{- end }}
             {{- end }}
             {{- if .Values.http2.enabled }}
             - name: APP_PORT
