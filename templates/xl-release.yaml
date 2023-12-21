@@ -144,7 +144,7 @@ spec:
             - name: XL_CLUSTER_MODE
               value: full
             {{- $ingressclass := index .Values "ingress" "annotations" "kubernetes.io/ingress.class" }}
-            {{- if and .Values.ingress.Enabled }}
+            {{- if .Values.ingress.Enabled }}
             {{- if and (contains $ingressclass "nginx") (ne .Values.ingress.path "/") }}
             {{- range .Values.ingress.hosts }}
             - name: SERVER_URL
@@ -155,6 +155,11 @@ spec:
             - name: SERVER_URL
               value: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ . }}{{ $.Values.ingress.path }}
             {{- end }}
+            {{- end }}
+            {{- else }}
+            {{- if .Values.appHostname }}
+            - name: SERVER_URL
+              value: {{ printf "%s://%s" .Values.appProtocol .Values.appHostname }}
             {{- end }}
             {{- end }}
             {{- if .Values.UseExistingDB.Enabled }}
