@@ -4,7 +4,8 @@ auth:
   adminPassword: "test123"
 
 keystore:
-  passphrase: test123
+  passphrase: "test-keystore"
+
 licenseAcceptEula: true
 
 # Optional

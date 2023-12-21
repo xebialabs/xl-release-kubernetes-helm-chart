@@ -49,11 +49,27 @@ Return the proper Release image name
 {{- end -}}
 
 {{/*
+Return the proper Licence get image name
+*/}}
+{{- define "release.getLicense.image" -}}
+{{ include "release.images.image" (dict "imageRoot" .Values.hooks.getLicense.image "global" .Values.global "context" .) }}
+{{- end -}}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "release.imagePullSecrets" -}}
 {{- if or .Values.global.imagePullSecrets .Values.image.pullSecrets .Values.busyBox.image.pullSecrets }}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image .Values.busyBox.image) "context" $) }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the proper Docker Image Registry Secret Names
+*/}}
+{{- define "release.getLicense.imagePullSecrets" -}}
+{{- if or .Values.global.imagePullSecrets .Values.hooks.getLicense.image.pullSecrets }}
+{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.getLicense.image) "context" $) }}
 {{- end -}}
 {{- end -}}
 
@@ -458,7 +474,7 @@ false
     {{- if kindIs "map" .value -}}
       {{- if .value.valueFrom.secretKeyRef.name }}
         {{- $exists := include "secrets.exists" (dict "secret" .value.valueFrom.secretKeyRef.name "context" .context) -}}
-        {{- if not $exists -}}
+        {{- if eq $exists "false" -}}
             secret: {{ .value.valueFrom.secretKeyRef.name }}:
                 The secret `{{ .value.valueFrom.secretKeyRef.name }}` does not exist in namespace `{{ .context.Release.Namespace }}`.
         {{- end -}}

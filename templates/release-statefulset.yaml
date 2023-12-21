@@ -12,7 +12,7 @@ metadata:
     {{- end }}
   {{- if or .Values.commonAnnotations .Values.statefulsetAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-    {{- if .Values.statefulsetLabels }}
+    {{- if .Values.statefulsetAnnotations }}
     {{- include "common.tplvalues.render" (dict "value" .Values.statefulsetAnnotations "context" $) | nindent 4 }}
     {{- end }}
   {{- end }}
@@ -201,6 +201,14 @@ spec:
             {{- if .Values.license }}
             - name: XL_LICENSE
               {{- include "render.value-secret" (dict  "value" (.Values.license) "defaultName" (include "common.names.fullname" .) "defaultKey" "releaseLicense" "context" $ ) | nindent 14 }}
+            {{- else }}
+            {{- if and .Values.hooks.getLicense.enabled .Values.licenseAcceptEula }}
+            - name: XL_LICENSE
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "common.tplvalues.render" ( dict "value" .Values.hooks.getLicense.name "context" $ ) }}"
+                  key: xl-release-license.lic
+            {{- end }}
             {{- end }}
             - name: XL_METRICS_ENABLED
               value: {{ .Values.metrics.enabled | quote }}
@@ -345,18 +353,6 @@ spec:
               subPath: {{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}
               readOnly: true
             {{- end }}
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/conf
-              subPath: conf
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/ext
-              subPath: ext
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/hotfix
-              subPath: hotfix
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/hotfix/lib
-              subPath: lib
             - name: data
               mountPath: /opt/xebialabs/xl-release-server/reports
               subPath: reports

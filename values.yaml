@@ -81,6 +81,60 @@ logback:
   scanEnabled: true
   scanPeriod: "30 seconds"
 
+hooks:
+  ## @param busyBox.image.registry busyBox container image registry
+  ## @param busyBox.image.repository busyBox container image repository
+  ## @param busyBox.image.tag busyBox container image tag
+  ## @param busyBox.image.pullPolicy busyBox container image pull policy
+  ## @param busyBox.image.pullSecrets Specify docker-registry secret names as an array
+  ##
+  getLicense:
+    enabled: true
+    name: '{{ include "release.name" . }}-license'
+    getCommand: 
+      - /opt/xebialabs/xl-release-server/bin/get-license.sh
+    installCommand: 
+      - /opt/xebialabs/xl-release-server/bin/install-license.sh
+    image:
+      registry: docker.io
+      repository: bitnami/kubectl
+      tag: latest
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets (secrets must be manually created in the namespace)
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## Example:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+      ## @param configuration [string] Release Configuration file content: required cluster configuration
+      ## Do not override unless you know what you are doing.
+      ## To add more configuration, use `extraConfiguration` of `advancedConfiguration` instead
+      ##
+    configuration:
+      bin_get-license:
+        path: "bin/get-license.sh"
+        mode: 0755
+        content: |
+          #!/bin/bash
+
+          echo "Requesting unregistered license"
+          SERVER_PATH_PART=https://download.xebialabs.com
+          echo -e $(curl -X POST "${SERVER_PATH_PART}/api/unregistered/xl-release" | jq --raw-output .license) > ${APP_HOME}/conf/xl-release-license.lic
+
+      bin_install-license:
+        path: "bin/install-license.sh"
+        mode: 0755
+        content: |
+          #!/bin/bash
+
+          file_path="/opt/xebialabs/xl-release-server/conf/xl-release-license.lic"
+          kubectl create secret generic {{ include "common.tplvalues.render" ( dict "value" $.Values.hooks.getLicense.name "context" $ ) }} --from-file=$file_path
+    
 ## Release Authentication parameters
 ##
 auth:
