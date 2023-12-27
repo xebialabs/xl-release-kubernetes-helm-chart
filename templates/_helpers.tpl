@@ -49,10 +49,17 @@ Return the proper Release image name
 {{- end -}}
 
 {{/*
-Return the proper Licence get image name
+Return the proper get image name
 */}}
 {{- define "release.getLicense.image" -}}
 {{ include "release.images.image" (dict "imageRoot" .Values.hooks.getLicense.image "global" .Values.global "context" .) }}
+{{- end -}}
+
+{{/*
+Return the proper get image name
+*/}}
+{{- define "release.genSelfSigned.image" -}}
+{{ include "release.images.image" (dict "imageRoot" .Values.hooks.genSelfSigned.image "global" .Values.global "context" .) }}
 {{- end -}}
 
 {{/*
@@ -70,6 +77,15 @@ Return the proper Docker Image Registry Secret Names
 {{- define "release.getLicense.imagePullSecrets" -}}
 {{- if or .Values.global.imagePullSecrets .Values.hooks.getLicense.image.pullSecrets }}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.getLicense.image) "context" $) }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the proper Docker Image Registry Secret Names
+*/}}
+{{- define "release.genSelfSigned.imagePullSecrets" -}}
+{{- if or .Values.global.imagePullSecrets .Values.hooks.genSelfSigned.image.pullSecrets }}
+{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.genSelfSigned.image) "context" $) }}
 {{- end -}}
 {{- end -}}
 
@@ -98,7 +114,7 @@ Get the password secret.
     {{- if .Values.auth.adminPassword -}}
         {{ .Values.auth.adminPassword }}
     {{- else -}}
-        {{- $secretObj := (lookup "v1" "Secret" .Release.Namespace (include "common.names.fullname" .)) | default dict }}
+        {{- $secretObj := (lookup "v1" "Secret" ( include "common.names.namespace" . ) (include "common.names.fullname" .)) | default dict }}
         {{- $secretData := (get $secretObj "data") | default dict }}
         {{- (get $secretData "releasePassword") | b64dec | default (randAlphaNum 10) }}
     {{- end -}}
@@ -166,10 +182,41 @@ Get the server URL
             {{- else }}
                 {{- printf "%s://%s" $protocol $hostname }}
             {{- end }}
-        {{- else -}}
-            {{- print "" }}
+        {{- else -}}        
+            {{- if .Values.ssl.enabled }}
+                {{- $protocol = "https" }}
+            {{- end }}
+            {{- $hostname := (include "release.serviceHostname" .) }}
+            {{- $path := include "release.path.fullname" $ }}
+            {{- if $path }}
+                {{- printf "%s://%s%s" $protocol $hostname $path }}
+            {{- else }}
+                {{- printf "%s://%s" $protocol $hostname }}
+            {{- end }}
         {{- end }}
     {{- end }}
+{{- end -}}
+
+{{/*
+Use the service name with namespace. In case of ssl enabled the SNI check will fail without ".".
+*/}}
+{{- define "release.hostname" -}}
+    {{- if .Values.ingress.enabled }}
+        {{- .Values.ingress.hostname }}
+    {{- else -}}
+        {{- if .Values.route.enabled }}
+            {{- .Values.route.hostname }}
+        {{- else -}}        
+            {{- include "release.serviceHostname" . }}
+        {{- end }}
+    {{- end }}
+{{- end -}}
+
+{{/*
+Use the service name with namespace. In case of ssl enabled the SNI check will fail without ".".
+*/}}
+{{- define "release.serviceHostname" -}}
+{{- printf "%s.%s" (include "common.names.fullname" .) ( include "common.names.namespace" . ) }}
 {{- end -}}
 
 {{/*
@@ -363,7 +410,7 @@ release: license or licenseAcceptEula
 {{- define "render.secret-name" -}}
   {{- if .value -}}
     {{- if kindIs "map" .value -}}
-{{ .value.valueFrom.secretKeyRef.name }}
+{{- tpl (.value.valueFrom.secretKeyRef.name | toYaml) .context }}
     {{- else if kindIs "string" .value -}}
 {{ .defaultName }}
     {{- else -}}
@@ -388,7 +435,7 @@ Params:
 */}}
 {{- define "secrets.key" -}}
 {{- if and .secretRef (kindIs "map" .secretRef) -}}
-{{ .secretRef.valueFrom.secretKeyRef.key }}
+{{- tpl .secretRef.valueFrom.secretKeyRef.key .context }}
 {{- else if kindIs "string" .secretRef -}}
 {{ .default }}
 {{- else -}}
@@ -457,7 +504,7 @@ Params:
   - context - Context - Required - Parent context.
 */}}
 {{- define "secrets.exists" -}}
-{{- $secret := (lookup "v1" "Secret" .context.Release.Namespace .secret) -}}
+{{- $secret := (lookup "v1" "Secret" ( include "common.names.namespace" .context ) .secret) -}}
 {{- if $secret -}}
 true
 {{- else -}}
@@ -472,7 +519,7 @@ false
         {{- $exists := include "secrets.exists" (dict "secret" .value.valueFrom.secretKeyRef.name "context" .context) -}}
         {{- if eq $exists "false" -}}
             secret: {{ .value.valueFrom.secretKeyRef.name }}:
-                The secret `{{ .value.valueFrom.secretKeyRef.name }}` does not exist in namespace `{{ .context.Release.Namespace }}`.
+                The secret `{{ .value.valueFrom.secretKeyRef.name }}` does not exist in namespace `{{ include "common.names.namespace" .context }}`.
         {{- end -}}
       {{- else -}}
           secret: unknown

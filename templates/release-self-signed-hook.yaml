@@ -1,6 +1,6 @@
-{{- if and .Values.hooks.getLicense.enabled .Values.licenseAcceptEula (not .Values.license) }}
-{{- $name := include "common.tplvalues.render" ( dict "value" .Values.hooks.getLicense.name "context" $ ) -}}
-{{- $licenseExists := include "secrets.exists" ( dict "secret" $name "context" $ ) -}}
+{{- if .Values.hooks.genSelfSigned.enabled }}
+{{- $name := include "common.tplvalues.render" ( dict "value" .Values.hooks.genSelfSigned.name "context" $ ) -}}
+{{- $keystoreExists := include "secrets.exists" ( dict "secret" $name "context" $ ) -}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -13,11 +13,11 @@ metadata:
     {{- end }}
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": {{ .Values.hooks.getLicense.deletePolicy }}
+    "helm.sh/hook-delete-policy": {{ .Values.hooks.genSelfSigned.deletePolicy }}
     "helm.sh/hook-weight": "0"
-    "license-status": "{{ $licenseExists }}"
+    "keystore-status": "{{ $keystoreExists }}"
 data:
-  {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+  {{- range $k, $v := .Values.hooks.genSelfSigned.configuration }}
   {{ $k }}: |-
     {{- include "common.tplvalues.render" (dict "value" $v.content "context" $) | nindent 4 }}
   {{- end }}
@@ -35,8 +35,8 @@ metadata:
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
-    "license-status": "{{ $licenseExists }}"
-{{- if eq $licenseExists "false" }}
+    "keystore-status": "{{ $keystoreExists }}"
+{{- if eq $keystoreExists "false" }}
 ---
 kind: Role
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
@@ -49,7 +49,7 @@ metadata:
     {{- end }}
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": {{ .Values.hooks.getLicense.deletePolicy }}
+    "helm.sh/hook-delete-policy": {{ .Values.hooks.genSelfSigned.deletePolicy }}
     "helm.sh/hook-weight": "0"
 rules:
   - apiGroups: [""]
@@ -67,7 +67,7 @@ metadata:
     {{- end }}
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": {{ .Values.hooks.getLicense.deletePolicy }}
+    "helm.sh/hook-delete-policy": {{ .Values.hooks.genSelfSigned.deletePolicy }}
     "helm.sh/hook-weight": "0"
 subjects:
   - kind: ServiceAccount
@@ -88,7 +88,7 @@ metadata:
     {{- end }}
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-delete-policy": {{ .Values.hooks.getLicense.deletePolicy }}
+    "helm.sh/hook-delete-policy": {{ .Values.hooks.genSelfSigned.deletePolicy }}
     "helm.sh/hook-weight": "0"
 spec:
   template:
@@ -100,29 +100,29 @@ spec:
         {{- end }}
     spec:
       restartPolicy: Never
-      {{- include "release.getLicense.imagePullSecrets" . | nindent 6 }}
+      {{- include "release.genSelfSigned.imagePullSecrets" . | nindent 6 }}
       initContainers:
-        - name: eula-get-license-job
+        - name: gen-self-signed-job
           image: {{ template "release.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
-          command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.getCommand "context" $) | nindent 12 }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.genSelfSigned.genCommand "context" $) | nindent 12 }}
           volumeMounts:
             - name: shared-data
               mountPath: /opt/xebialabs/xl-release-server/conf
-            {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+            {{- range $k, $v := .Values.hooks.genSelfSigned.configuration }}
             - name: configuration
               mountPath: /opt/xebialabs/xl-release-server/{{ $v.path }}
               subPath: {{ $v.path }}
             {{- end }}
       containers:
-        - name: eula-install-license-job
-          image: {{ template "release.getLicense.image" . }}
-          imagePullPolicy: {{ .Values.hooks.getLicense.image.pullPolicy | quote }}
-          command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.installCommand "context" $) | nindent 12 }}
+        - name: install-self-signed-job
+          image: {{ template "release.genSelfSigned.image" . }}
+          imagePullPolicy: {{ .Values.hooks.genSelfSigned.image.pullPolicy | quote }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.genSelfSigned.installCommand "context" $) | nindent 12 }}
           volumeMounts:
             - name: shared-data
               mountPath: /opt/xebialabs/xl-release-server/conf
-            {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+            {{- range $k, $v := .Values.hooks.genSelfSigned.configuration }}
             - name: configuration
               mountPath: /opt/xebialabs/xl-release-server/{{ $v.path }}
               subPath: {{ $v.path }}
@@ -130,12 +130,12 @@ spec:
       volumes:
         - name: shared-data
           emptyDir: {}
-        {{- if .Values.hooks.getLicense.configuration }}
+        {{- if .Values.hooks.genSelfSigned.configuration }}
         - name: configuration
           configMap:
             name: {{ $name }}
             items:
-              {{- range $k, $v := .Values.hooks.getLicense.configuration }}
+              {{- range $k, $v := .Values.hooks.genSelfSigned.configuration }}
               - key: {{ $k }}
                 path: {{ $v.path }}
                 {{- if $v.mode}}

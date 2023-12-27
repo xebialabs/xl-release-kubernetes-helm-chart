@@ -31,7 +31,11 @@ spec:
             {{- if eq "true" (include "common.ingress.supportsPathType" .) }}
             pathType: {{ .Values.ingress.pathType }}
             {{- end }}
+            {{- if .Values.ssl.enabled }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" .) "servicePort" .Values.service.portNames.releaseHttps "context" $)  | nindent 14 }}
+            {{- else }}
             backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" .) "servicePort" .Values.service.portNames.releaseHttp "context" $)  | nindent 14 }}
+            {{- end }}
     {{- end }}
     {{- range .Values.ingress.extraHosts }}
     - host: {{ include "common.tplvalues.render" ( dict "value" .name "context" $ ) }}
@@ -41,7 +45,11 @@ spec:
             {{- if eq "true" (include "common.ingress.supportsPathType" $) }}
             pathType: {{ default "ImplementationSpecific" .pathType }}
             {{- end }}
+            {{- if .Values.ssl.enabled }}
+            backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" $.Values.service.portNames.releaseHttps "context" $) | nindent 14 }}
+            {{- else }}
             backend: {{- include "common.ingress.backend" (dict "serviceName" (include "common.names.fullname" $) "servicePort" $.Values.service.portNames.releaseHttp "context" $) | nindent 14 }}
+            {{- end }}
     {{- end }}
     {{- if .Values.ingress.extraRules }}
     {{- include "common.tplvalues.render" (dict "value" .Values.ingress.extraRules "context" $) | nindent 4 }}
@@ -51,7 +59,14 @@ spec:
     {{- if and .Values.ingress.tls (or (include "common.ingress.certManagerRequest" ( dict "annotations" .Values.ingress.annotations )) .Values.ingress.selfSigned) }}
     - hosts:
         - {{ .Values.ingress.hostname | quote }}
-      secretName: {{ printf "%s-tls" .Values.ingress.hostname }}
+      secretName: {{ printf "%s-ingress-tls" .Values.ingress.hostname }}
+    {{- end }}
+    {{- if .Values.ingress.secrets }}
+    {{- range .Values.ingress.secrets }}
+    - hosts:
+        - {{ $.Values.ingress.hostname | quote }}
+      secretName: {{ .name }}
+    {{- end }}
     {{- end }}
     {{- if .Values.ingress.extraTls }}
     {{- include "common.tplvalues.render" (dict "value" .Values.ingress.extraTls "context" $) | nindent 4 }}

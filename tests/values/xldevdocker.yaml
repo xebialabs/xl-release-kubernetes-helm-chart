@@ -1,4 +1,4 @@
 image:
     repository: xebialabsunsupported/xl-release
     pullPolicy: Always
-    tag: 24.1.0-1207.113
+    tag: 24.1.0-1207.113-centos

@@ -1,0 +1,7 @@
+route:
+  enabled: true
+  # url: https://dai-xlr.apps.apollo-op.64jh.p1.openshiftapps.com/
+  # without ssl on application
+  hostname: dai-xlr.apps.apollo-op.64jh.p1.openshiftapps.com
+  tls:
+    enabled: true
