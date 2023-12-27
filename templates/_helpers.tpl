@@ -83,15 +83,6 @@ Return the proper Docker Image Registry Secret Names
 {{/*
 Return the proper Docker Image Registry Secret Names
 */}}
-{{- define "release.getLicense.imagePullSecrets" -}}
-{{- if or .Values.global.imagePullSecrets .Values.hooks.getLicense.image.pullSecrets }}
-{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.getLicense.image) "context" $) }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the proper Docker Image Registry Secret Names
-*/}}
 {{- define "release.genSelfSigned.imagePullSecrets" -}}
 {{- if or .Values.global.imagePullSecrets .Values.hooks.genSelfSigned.image.pullSecrets }}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.genSelfSigned.image) "context" $) }}

@@ -15,7 +15,6 @@ metadata:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-delete-policy": {{ .Values.hooks.getLicense.deletePolicy }}
     "helm.sh/hook-weight": "0"
-    "license-status": "{{ $licenseExists }}"
 data:
   {{- range $k, $v := .Values.hooks.getLicense.configuration }}
   {{ $k }}: |-
