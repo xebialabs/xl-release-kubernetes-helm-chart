@@ -49,14 +49,14 @@ Return the proper Release image name
 {{- end -}}
 
 {{/*
-Return the proper get image name
+Return the proper Licence get image name
 */}}
 {{- define "release.getLicense.image" -}}
 {{ include "release.images.image" (dict "imageRoot" .Values.hooks.getLicense.image "global" .Values.global "context" .) }}
 {{- end -}}
 
 {{/*
-Return the proper get image name
+Return the proper Self signed get image name
 */}}
 {{- define "release.genSelfSigned.image" -}}
 {{ include "release.images.image" (dict "imageRoot" .Values.hooks.genSelfSigned.image "global" .Values.global "context" .) }}
@@ -68,6 +68,15 @@ Return the proper Docker Image Registry Secret Names
 {{- define "release.imagePullSecrets" -}}
 {{- if or .Values.global.imagePullSecrets .Values.image.pullSecrets .Values.busyBox.image.pullSecrets }}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.image .Values.busyBox.image) "context" $) }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the proper Docker Image Registry Secret Names
+*/}}
+{{- define "release.getLicense.imagePullSecrets" -}}
+{{- if or .Values.global.imagePullSecrets .Values.hooks.getLicense.image.pullSecrets }}
+{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.getLicense.image) "context" $) }}
 {{- end -}}
 {{- end -}}
 
@@ -182,11 +191,14 @@ Get the server URL
             {{- else }}
                 {{- printf "%s://%s" $protocol $hostname }}
             {{- end }}
-        {{- else -}}        
+        {{- else -}}
             {{- if .Values.ssl.enabled }}
                 {{- $protocol = "https" }}
             {{- end }}
             {{- $hostname := (include "release.serviceHostname" .) }}
+            {{- if .Values.appHostname }}
+                {{- $hostname := (printf "%s://%s" .Values.appProtocol .Values.appHostname) }}
+            {{- end }}
             {{- $path := include "release.path.fullname" $ }}
             {{- if $path }}
                 {{- printf "%s://%s%s" $protocol $hostname $path }}
@@ -206,8 +218,12 @@ Use the service name with namespace. In case of ssl enabled the SNI check will f
     {{- else -}}
         {{- if .Values.route.enabled }}
             {{- .Values.route.hostname }}
-        {{- else -}}        
-            {{- include "release.serviceHostname" . }}
+        {{- else -}}
+            {{- if .Values.appHostname }}
+                {{- printf "%s://%s" .Values.appProtocol .Values.appHostname }}
+            {{- else -}}
+                {{- include "release.serviceHostname" . }}
+            {{- end }}
         {{- end }}
     {{- end }}
 {{- end -}}

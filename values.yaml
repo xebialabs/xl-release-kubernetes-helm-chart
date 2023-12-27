@@ -63,6 +63,12 @@ forceUpgrade: true
 ## @param enableEmbeddedQueue Flag to expose external messaging queue. If set to true, a default embedded-queue will be used and all environment variables will be ignored.
 ##
 enableEmbeddedQueue: false
+## @param appProtocol Release protocol (the protocol http or https that will be used by enduser to access Release). It is not used if ingress or route are enabled.
+##
+appProtocol: http
+## @param appHostname Release hostname (the hostname that will be used by enduser to access Release). It is not used if ingress or route are enabled.
+##
+appHostname: ""
 ## @param appContextRoot Release context root.
 ##
 appContextRoot: /
@@ -86,9 +92,9 @@ hooks:
     enabled: true
     name: '{{ include "release.name" . }}-license'
     deletePolicy: "before-hook-creation,hook-succeeded"
-    getCommand: 
+    getCommand:
       - /opt/xebialabs/xl-release-server/bin/get-license.sh
-    installCommand: 
+    installCommand:
       - /opt/xebialabs/xl-release-server/bin/install-license.sh
     image:
       registry: docker.io
@@ -139,9 +145,9 @@ hooks:
     enabled: false
     name: '{{ include "release.name" . }}-self-signed'
     deletePolicy: "before-hook-creation,hook-succeeded"
-    genCommand: 
+    genCommand:
       - /opt/xebialabs/xl-release-server/bin/gen-self-signed.sh
-    installCommand: 
+    installCommand:
       - /opt/xebialabs/xl-release-server/bin/install-self-signed.sh
     image:
       registry: docker.io
@@ -189,7 +195,7 @@ hooks:
           KEYSTORE_FILE_PATH="/opt/xebialabs/xl-release-server/conf/keystore.{{- .Values.ssl.keystoreType -}}"
           CERT_FILE_PATH="/opt/xebialabs/xl-release-server/conf/public.cert"
           kubectl create secret generic {{ include "common.tplvalues.render" ( dict "value" $.Values.hooks.genSelfSigned.name "context" $ ) }} --from-file=$KEYSTORE_FILE_PATH --from-file=$CERT_FILE_PATH
-    
+
 ## Release Authentication parameters
 ##
 auth:
