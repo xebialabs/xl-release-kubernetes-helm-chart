@@ -19,7 +19,7 @@ metadata:
 spec:
   clusterIP: None
   ports:
-    {{- if .Values.http2.enabled }}
+    {{- if .Values.ssl.enabled }}
     - name: {{ .Values.service.portNames.releaseHttps }}
       port: {{ .Values.service.ports.releaseHttps }}
       targetPort: {{ .Values.service.portNames.releaseHttps }}

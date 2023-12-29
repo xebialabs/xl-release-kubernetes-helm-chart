@@ -82,19 +82,26 @@ logback:
   scanPeriod: "30 seconds"
 
 hooks:
-  ## @param busyBox.image.registry busyBox container image registry
-  ## @param busyBox.image.repository busyBox container image repository
-  ## @param busyBox.image.tag busyBox container image tag
-  ## @param busyBox.image.pullPolicy busyBox container image pull policy
-  ## @param busyBox.image.pullSecrets Specify docker-registry secret names as an array
-  ##
   getLicense:
+    ## @param hooks.getLicense.enabled set to true to support license auto generation by using helm hook, it is working together with enabled licenseAcceptEula
     enabled: true
+    ## @param hooks.getLicense.name Name of the resources that will be used during hook execution
     name: '{{ include "release.name" . }}-license'
-    getCommand: 
+    ## @param hooks.getLicense.deletePolicy Helm hook delete policy
+    deletePolicy: "before-hook-creation,hook-succeeded"
+    ## @param hooks.getLicense.getCommand The command for getting temporary license, see hooks.getLicense.configuration.bin_get-license
+    getCommand:
       - /opt/xebialabs/xl-release-server/bin/get-license.sh
-    installCommand: 
+    ## @param hooks.getLicense.installCommand The command for creating the secret with the license, see hooks.getLicense.configuration.bin_install-license
+    installCommand:
       - /opt/xebialabs/xl-release-server/bin/install-license.sh
+
+    ## @param hooks.getLicense.image.registry getLicense hook container image registry
+    ## @param hooks.getLicense.image.repository getLicense hook container image repository
+    ## @param hooks.getLicense.image.tag getLicense hook container image tag
+    ## @param hooks.getLicense.image.pullPolicy getLicense hook container image pull policy
+    ## @param hooks.getLicense.image.pullSecrets Specify docker-registry secret names as an array
+    ##
     image:
       registry: docker.io
       repository: bitnami/kubectl
@@ -111,11 +118,14 @@ hooks:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
-      ## @param configuration [string] Release Configuration file content: required cluster configuration
-      ## Do not override unless you know what you are doing.
-      ## To add more configuration, use `extraConfiguration` of `advancedConfiguration` instead
-      ##
+    ## @extra hooks.getLicense.configuration Release Configuration file content
+    ## Do not override unless you know what you are doing.
+    ##
     configuration:
+      ## @extra hooks.getLicense.configuration.bin_get-license The configuration of the script for getting the license
+      ## @param hooks.getLicense.configuration.bin_get-license.path The path to the script for getting the license
+      ## @param hooks.getLicense.configuration.bin_get-license.mode The access mode of the script for getting the license
+      ## @param hooks.getLicense.configuration.bin_get-license.content Content of the script for getting the license
       bin_get-license:
         path: "bin/get-license.sh"
         mode: 0755
@@ -125,16 +135,99 @@ hooks:
           echo "Requesting unregistered license"
           SERVER_PATH_PART=https://download.xebialabs.com
           echo -e $(curl -X POST "${SERVER_PATH_PART}/api/unregistered/xl-release" | jq --raw-output .license) > ${APP_HOME}/conf/xl-release-license.lic
+          file_size=$(stat -c%s "${APP_HOME}/conf/xl-release-license.lic")
+          if [ "$file_size" -lt 10 ]; then
+            echo "License file is NOT valid"
+            exit 1
+          fi
 
+      ## @extra hooks.getLicense.configuration.bin_install-license The configuration of the script for setting up license secret
+      ## @param hooks.getLicense.configuration.bin_install-license.path The path to the script for setting up license secret
+      ## @param hooks.getLicense.configuration.bin_install-license.mode The access mode of the script for setting up license secret
+      ## @param hooks.getLicense.configuration.bin_install-license.content Content of the script for setting up license secret
       bin_install-license:
         path: "bin/install-license.sh"
         mode: 0755
         content: |
           #!/bin/bash
 
-          file_path="/opt/xebialabs/xl-release-server/conf/xl-release-license.lic"
-          kubectl create secret generic {{ include "common.tplvalues.render" ( dict "value" $.Values.hooks.getLicense.name "context" $ ) }} --from-file=$file_path
-    
+          FILE_PATH="/opt/xebialabs/xl-release-server/conf/xl-release-license.lic"
+          kubectl create secret generic {{ include "common.tplvalues.render" ( dict "value" $.Values.hooks.getLicense.name "context" $ ) }} --from-file=$FILE_PATH
+
+  genSelfSigned:
+    ## @param hooks.genSelfSigned.enabled set to true to support self-signed ket auto generation by using helm hook
+    enabled: false
+    ## @param hooks.genSelfSigned.name Name of the resources that will be used during hook execution
+    name: '{{ include "release.name" . }}-self-signed'
+    ## @param hooks.genSelfSigned.deletePolicy Helm hook delete policy
+    deletePolicy: "before-hook-creation,hook-succeeded"
+    ## @param hooks.genSelfSigned.genCommand The command for getting self-signed key, see hooks.genSelfSigned.configuration.bin_gen-self-signed
+    genCommand:
+      - /opt/xebialabs/xl-release-server/bin/gen-self-signed.sh
+    ## @param hooks.genSelfSigned.installCommand The command for creating the secret with the self-signed key, see hooks.genSelfSigned.configuration.bin_install-self-signed
+    installCommand:
+      - /opt/xebialabs/xl-release-server/bin/install-self-signed.sh
+
+    ## @param hooks.genSelfSigned.image.registry genSelfSigned hook container image registry
+    ## @param hooks.genSelfSigned.image.repository genSelfSigned hook container image repository
+    ## @param hooks.genSelfSigned.image.tag genSelfSigned hook container image tag
+    ## @param hooks.genSelfSigned.image.pullPolicy genSelfSigned hook container image pull policy
+    ## @param hooks.genSelfSigned.image.pullSecrets Specify docker-registry secret names as an array
+    ##
+    image:
+      registry: docker.io
+      repository: bitnami/kubectl
+      tag: latest
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets (secrets must be manually created in the namespace)
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## Example:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+    ## @extra hooks.genSelfSigned.configuration Release Configuration file content
+    ## Do not override unless you know what you are doing.
+    ##
+    configuration:
+      ## @extra hooks.genSelfSigned.configuration.bin_gen-self-signed The configuration of the script for creating self signed key
+      ## @param hooks.genSelfSigned.configuration.bin_gen-self-signed.path The path to the script forcreating self signed key
+      ## @param hooks.genSelfSigned.configuration.bin_gen-self-signed.mode The access mode of the script for creating self signed key
+      ## @param hooks.genSelfSigned.configuration.bin_gen-self-signed.content Content of the script for creating self signed key
+      bin_gen-self-signed:
+        path: "bin/gen-self-signed.sh"
+        mode: 0755
+        content: |
+          #!/bin/bash
+
+          echo "Generating release self-signed cert"
+          HOSTNAME="{{- include "release.hostname" . -}}"
+          STOREPASS="{{- .Values.ssl.keystorePassword -}}"
+          KEYPASS="{{- .Values.ssl.keystoreKeypassword -}}"
+          KEYTYPE="{{- .Values.ssl.keystoreType -}}"
+          keytool -genkey -keyalg RSA -alias dai-release -keystore conf/keystore.$KEYTYPE -validity 365 -keysize 2048 -storepass "$STOREPASS" -storetype "$KEYTYPE" -keypass "$KEYPASS" \
+            -dname "CN=$HOSTNAME,OU=,O=Digital.ai Release,L=,ST=,C=" \
+            -ext "SAN=DNS:{{- include "common.names.fullname" . -}}.local"
+          keytool -export -alias dai-release -keystore conf/keystore.$KEYTYPE -rfc -file conf/public.cert -storepass "$STOREPASS" -storetype "$KEYTYPE" -keypass "$KEYPASS"
+
+      ## @extra hooks.genSelfSigned.configuration.bin_install-self-signed The configuration of the script for setting up self-signed key secret
+      ## @param hooks.genSelfSigned.configuration.bin_install-self-signed.path The path to the script for setting up self-signed key secret
+      ## @param hooks.genSelfSigned.configuration.bin_install-self-signed.mode The access mode of the script for setting up self-signed key secret
+      ## @param hooks.genSelfSigned.configuration.bin_install-self-signed.content Content of the script for setting up self-signed key secret
+      bin_install-self-signed:
+        path: "bin/install-self-signed.sh"
+        mode: 0755
+        content: |
+          #!/bin/bash
+
+          KEYSTORE_FILE_PATH="/opt/xebialabs/xl-release-server/conf/keystore.{{- .Values.ssl.keystoreType -}}"
+          CERT_FILE_PATH="/opt/xebialabs/xl-release-server/conf/public.cert"
+          kubectl create secret generic {{ include "common.tplvalues.render" ( dict "value" $.Values.hooks.genSelfSigned.name "context" $ ) }} --from-file=$KEYSTORE_FILE_PATH --from-file=$CERT_FILE_PATH
+
 ## Release Authentication parameters
 ##
 auth:
@@ -148,11 +241,19 @@ ssl:
   ## @param ssl.enabled Enable SSL to be used on Release
   enabled: false
   ## @param ssl.keystorePassword Keystore password with SSL key.
-  keystorePassword:
+  keystorePassword: changeme
   ## @param ssl.keystoreKeypassword Keystore key password with SSL key.
-  keystoreKeypassword:
-  ## @param ssl.keystore Keystore content in base64 format.
+  keystoreKeypassword: changeme
+  ## @param ssl.keystoreType Keystore type, options pkcs12 or jks.
+  keystoreType: pkcs12
+  ## @extra ssl.keystore Keystore content in base64 format or it can reference the existing secret.
+  ## @param ssl.keystore.valueFrom.secretKeyRef.name Name of the secret where the keystore was stored.
+  ## @param ssl.keystore.valueFrom.secretKeyRef.key Name of the key in the secret where the keystore was stored.
   keystore:
+    valueFrom:
+      secretKeyRef:
+        name: '{{ include "common.tplvalues.render" ( dict "value" .Values.hooks.genSelfSigned.name "context" $ ) }}'
+        key: keystore.{{ .Values.ssl.keystoreType }}
 
 external:
   db:
@@ -448,11 +549,15 @@ containerPorts:
 ##
 extraContainerPorts: []
 
-## @param configuration [string] Release Configuration file content: required cluster configuration
+## @extra configuration Release Configuration file content: required cluster configuration
 ## Do not override unless you know what you are doing.
 ## To add more configuration, use `extraConfiguration` of `advancedConfiguration` instead
 ##
 configuration:
+  ## @extra configuration.default-conf_xl-release-conf-template The configuration for the xl-release.conf.template file
+  ## @param configuration.default-conf_xl-release-conf-template.path The path for the xl-release.conf.template file
+  ## @param configuration.default-conf_xl-release-conf-template.mode The access mode for the xl-release.conf.template file
+  ## @param configuration.default-conf_xl-release-conf-template.content Content of the xl-release.conf.template file
   default-conf_xl-release-conf-template:
     path: "default-conf/xl-release.conf.template"
     mode: 0660
@@ -591,7 +696,7 @@ configuration:
         {{- end }}
       }
 
-## @param extraConfiguration [string] Configuration file content: extra configuration to be appended to Release configuration
+## @param extraConfiguration Configuration file content: extra configuration to be appended to Release configuration
 ## Use this instead of `configuration` to add more configuration
 ##
 extraConfiguration: {}
@@ -691,9 +796,9 @@ ingress:
   ## nginx.ingress.kubernetes.io/rewrite-target: /
   ## nginx.ingress.kubernetes.io/affinity: cookie
   ## nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
-  ## nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
-  ## nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-  ## nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+  ## nginx.ingress.kubernetes.io/proxy-connect-timeout: "120"
+  ## nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+  ## nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
   ##
   ## - haproxy
   ## kubernetes.io/ingress.class: "haproxy-dair"
@@ -707,7 +812,7 @@ ingress:
   annotations:
 
   ## @param ingress.tls Enable TLS configuration for the hostname defined at `ingress.hostname` parameter
-  ## TLS certificates will be retrieved from a TLS secret with name: {{- printf "%s-tls" .Values.ingress.hostname }}
+  ## TLS certificates will be retrieved from a TLS secret with name: {{- printf "%s-ingress-tls" .Values.ingress.hostname }}
   ## You can:
   ##   - Use the `ingress.secrets` parameter to create this TLS secret
   ##   - Relay on cert-manager to create it by setting the corresponding annotations
@@ -745,7 +850,7 @@ ingress:
   ## extraTls:
   ##   - hosts:
   ##       - release.local
-  ##     secretName: release.local-tls
+  ##     secretName: release.local-ingress-tls
   ##
   extraTls: []
   ## @param ingress.secrets Custom TLS certificates as secrets
@@ -757,7 +862,7 @@ ingress:
   ## Please see README.md for more information
   ## e.g:
   ## secrets:
-  ##   - name: release.local-tls
+  ##   - name: release.local-ingress-tls
   ##     key: |-
   ##       -----BEGIN RSA PRIVATE KEY-----
   ##       ...
@@ -798,12 +903,16 @@ route:
   tls:
     ## @param route.tls.enabled Enable the route TLS configuration
     enabled: false
+    ## @param route.tls.secretName Name of the secret to use with Route TLS setup
+    secretName: ""
     ## @param route.tls.key key in PEM-encoded format
     key: ""
     ## @param route.tls.certificate certificate in PEM-encoded format
     certificate: ""
     ## @param route.tls.caCertificate CA certificate in a PEM-encoded format
     caCertificate: ""
+    ## @param route.tls.destinationCACertificate destination CA certificate in a PEM-encoded format (the Release certificate)
+    destinationCACertificate: ""
     ## @param route.tls.insecureEdgeTerminationPolicy Redirect HTTP to HTTPS. The only valid values are None, Redirect, or empty for disabled.
     insecureEdgeTerminationPolicy: ""
     ## @param route.tls.termination The accepted values are edge, passthrough and reencrypt.
@@ -811,7 +920,8 @@ route:
     ## When the annotation value is unset, edge is the default route.
     ## The TLS certificate details must be defined in the template file to implement the default edge route.
     termination: edge
-
+    ## @param route.tls.selfSigned if set to `true` the key and certificate will be auto generated and set in the route configuration
+    selfSigned: false
 
 ## @section RBAC parameters
 ##

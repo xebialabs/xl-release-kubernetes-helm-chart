@@ -157,7 +157,7 @@ spec:
               {{- else }}
               value: "n"
               {{- end }}
-            {{- if .Values.http2.enabled }}
+            {{- if .Values.ssl.enabled }}
             - name: APP_PORT
               value: {{ .Values.containerPorts.releaseHttps | quote }}
             {{- else }}
@@ -238,7 +238,7 @@ spec:
             {{- end }}
             {{- if .Values.truststore.truststore }}
             - name: TRUSTSTORE
-              value: "/opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}"
+              value: "/opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}"
             - name: TRUSTSTORE_TYPE
               value: {{ .Values.truststore.type | quote }}
             {{- if .Values.truststore.password }}
@@ -272,11 +272,13 @@ spec:
             - name: SSL
               value: {{ .Values.ssl.enabled | quote }}
             - name: HTTP_SSL_KEYSTORE_PATH
-              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
             - name: HTTP_SSL_KEYSTORE_PASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.ssl.keystorePassword "defaultName" (include "common.names.fullname" .) "defaultKey" "sslKeystorePassword" "context" $ ) | nindent 14 }}
             - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.ssl.keystoreKeypassword "defaultName" (include "common.names.fullname" .) "defaultKey" "sslKeystoreKeypassword" "context" $ ) | nindent 14 }}
+            - name: HTTP_SSL_KEYSTORE_TYPE
+              value: {{ .Values.ssl.keystoreType }}
             {{- end }}
             - name: APP_CONTEXT_ROOT
               value: {{ .Values.appContextRoot }}
@@ -295,7 +297,7 @@ spec:
                 name: {{ include "common.tplvalues.render" (dict "value" .Values.extraEnvVarsSecret "context" $) }}
             {{- end }}
           ports:
-            {{- if .Values.http2.enabled }}
+            {{- if .Values.ssl.enabled }}
             - name: {{ .Values.service.portNames.releaseHttps }}
               containerPort: {{ .Values.containerPorts.releaseHttps }}
             {{- else }}
@@ -308,11 +310,12 @@ spec:
           {{- if not .Values.diagnosticMode.enabled }}
           {{- if .Values.health.enabled }}
           livenessProbe:
-            {{- if .Values.http2.enabled }}
+            {{- if .Values.ssl.enabled }}
             tcpSocket:
               port: {{ .Values.service.portNames.releaseHttps }}
             {{- else }}
             httpGet:
+              scheme: HTTP
               path: {{ .Values.appContextRoot }}
               port: {{ .Values.service.portNames.releaseHttp }}
             {{- end }}
@@ -320,11 +323,12 @@ spec:
             periodSeconds: {{ .Values.health.periodScans }}
             failureThreshold: {{ .Values.health.probeFailureThreshold }}
           readinessProbe:
-            {{- if .Values.http2.enabled }}
+            {{- if .Values.ssl.enabled }}
             tcpSocket:
-              port: http2
+              port: {{ .Values.service.portNames.releaseHttps }}
             {{- else }}
             httpGet:
+              scheme: HTTP
               path: {{ .Values.appContextRoot }}
               port: {{ .Values.service.portNames.releaseHttp }}
             {{- end }}
@@ -348,9 +352,9 @@ spec:
               subPath: {{ $v.path }}
             {{- end }}
             {{- if .Values.truststore.truststore }}
-            - mountPath: /opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}
+            - mountPath: /opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}
               name: release-truststore
-              subPath: {{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}
+              subPath: {{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}
               readOnly: true
             {{- end }}
             - name: data
@@ -358,8 +362,8 @@ spec:
               subPath: reports
             {{- if .Values.ssl.enabled }}
             - name: http-ssl-keystore
-              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
-              subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
+              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
+              subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
               readOnly: true
             {{- end }}
             {{- if .Values.extraVolumeMounts }}
@@ -398,12 +402,12 @@ spec:
         {{- if .Values.truststore.truststore }}
         - name: release-truststore
           secret:
-            secretName: "{{- include "render.secret-name" (dict "value" .Values.truststore.truststore "defaultName" (include "common.names.fullname" .) "context" $ ) }}"
+            secretName: {{ include "render.secret-name" (dict "value" .Values.truststore.truststore "defaultName" (include "common.names.fullname" .) "context" $ ) }}
         {{- end }}
         {{- if .Values.ssl.enabled }}
         - name: http-ssl-keystore
           secret:
-            secretName: "{{- include "render.secret-name" (dict "value" .Values.ssl.keystore "defaultName" (include "common.names.fullname" .) "context" $ ) }}"
+            secretName: {{ include "render.secret-name" (dict "value" .Values.ssl.keystore "defaultName" (include "common.names.fullname" .) "context" $ ) }}
         {{- end }}
         {{- if .Values.extraVolumes }}
         {{- include "common.tplvalues.render" (dict "value" .Values.extraVolumes "context" $)  | nindent 8 }}
