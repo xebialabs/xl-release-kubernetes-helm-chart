@@ -140,7 +140,7 @@ spec:
           {{- range $path := .Values.persistence.paths }}
             - name: data
               mountPath: {{ $path }}
-              subPath: reports
+              subPath: {{ regexFind "[^/]+$" $path }}
           {{- end }}
         {{- end }}
         {{- if .Values.initContainers }}
@@ -381,7 +381,7 @@ spec:
             {{- range $path := .Values.persistence.paths }}
             - name: data
               mountPath: {{ $path }}
-              subPath: reports
+              subPath: {{ regexFind "[^/]+$" $path }}
             {{- end }}
             {{- if .Values.ssl.enabled }}
             - name: http-ssl-keystore
