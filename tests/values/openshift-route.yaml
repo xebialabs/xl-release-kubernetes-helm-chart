@@ -1,5 +1,5 @@
 route:
   enabled: true
-  # hostname: router-default.apps.apollo-operator.raqx.p1.openshiftapps.com
+  # url: http://dai-xlr.apps.apollo-op.64jh.p1.openshiftapps.com/
   hostname: dai-xlr.apps.apollo-op.64jh.p1.openshiftapps.com
 

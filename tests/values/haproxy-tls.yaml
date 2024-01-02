@@ -1,7 +1,9 @@
 ## needs digitalai.release.local DNS setup 
 ## (for k3d put hostname in /etc/hosts port fw the dair-nginx-ingress-controller 
 ## with 18080 local port to 80:
-## check http://digitalai.release.local:18080)
+## check http://digitalai.release.local:18080
+## with 18443 local port to 443:
+## or https://digitalai.release.local:18443)
 ## 
 ## Ref: https://haproxy-ingress.github.io/docs/configuration/keys/
 ## 
@@ -9,6 +11,8 @@ ingress:
   enabled: true
   hostname: "digitalai.release.local"
   path: /
+  tls: true
+  selfSigned: true
 
   annotations:
     kubernetes.io/ingress.class: "haproxy-dai-xlr"
@@ -20,7 +24,7 @@ ingress:
     ingress.kubernetes.io/timeout-http-request: "120s"
     ingress.kubernetes.io/config-backend: |
      option httpchk GET / HTTP/1.0
-    haproxy-ingress.github.io/ssl-redirect: "false"
+    haproxy-ingress.github.io/ssl-redirect: "true"
 
 haproxy-ingress:
   install: true

@@ -18,21 +18,65 @@ metadata:
     {{- end }}
 spec:
   host: {{ .Values.route.hostname }}
+  {{- $isNotPassThrough := or ( not $.Values.route.tls.enabled ) ( and $.Values.route.tls.enabled ( not ( eq $.Values.route.tls.termination "passthrough"))) -}}
+  {{- if $isNotPassThrough }}
   path: {{ .Values.route.path }}
+  {{- end }}
   to:
     kind: Service
     name: {{ $fullName }}
   port:
+    {{- if .Values.ssl.enabled }}
+    targetPort: {{ .Values.service.portNames.releaseHttps }}
+    {{- else }}
     targetPort: {{ .Values.service.portNames.releaseHttp }}
+    {{- end }}
 {{- if $.Values.route.tls.enabled }}
   tls:
   {{- with $.Values.route.tls }}
+    {{- if .selfSigned }}
+    {{- $secretName := printf "%s-route-tls" $.Values.route.hostname }}
+    key: |-
+{{ include "common.secrets.lookup" (dict "secret" $secretName "key" "tls.key" "defaultValue" .key "context" $) | b64dec | indent 6 }}
+    certificate: |-
+{{ include "common.secrets.lookup" (dict "secret" $secretName "key" "tls.crt" "defaultValue" .certificate "context" $) | b64dec | indent 6 }}
+    caCertificate: |-
+{{ include "common.secrets.lookup" (dict "secret" $secretName "key" "ca.crt" "defaultValue" .caCertificate "context" $) | b64dec | indent 6 }}
+    {{- else }}
+    {{- if .secretName }}
+    key: |-
+{{ include "common.secrets.lookup" (dict "secret" .secretName "key" "tls.key" "defaultValue" .key "context" $) | b64dec | indent 6 }}
+    certificate: |-
+{{ include "common.secrets.lookup" (dict "secret" .secretName "key" "tls.crt" "defaultValue" .certificate "context" $) | b64dec | indent 6 }}
+    caCertificate: |-
+{{ include "common.secrets.lookup" (dict "secret" .secretName "key" "ca.crt" "defaultValue" .caCertificate "context" $) | b64dec | indent 6 }}
+    {{- else }}
+    {{- if .key }}
     key: |-
 {{ .key | indent 6 }}
+    {{- end }}
+    {{- if .certificate }}
     certificate: |-
 {{ .certificate | indent 6 }}
+    {{- end }}
+    {{- if .caCertificate }}
     caCertificate: |-
 {{ .caCertificate | indent 6 }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if $isNotPassThrough }}
+    {{- if and $.Values.ssl.enabled $.Values.hooks.genSelfSigned.enabled }}
+    {{- $secretName := include "common.tplvalues.render" ( dict "value" $.Values.hooks.genSelfSigned.name "context" $ ) }}
+    destinationCACertificate: |-
+{{ include "common.secrets.lookup" (dict "secret" $secretName "key" "public.cert" "defaultValue" .destinationCACertificate "context" $) | b64dec | indent 6 }}
+    {{- else }}
+    {{- if .destinationCACertificate }}
+    destinationCACertificate: |-
+{{ .destinationCACertificate | indent 6 }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
     insecureEdgeTerminationPolicy: {{ .insecureEdgeTerminationPolicy }}
     termination: {{ .termination }}
   {{- end }}
