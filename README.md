@@ -311,17 +311,18 @@ kubectl delete namespace digitalai
 
 ### Persistence parameters
 
-| Name                                              | Description                                      | Value               |
-| ------------------------------------------------- | ------------------------------------------------ | ------------------- |
-| `persistence.enabled`                             | Enable Release data persistence using PVC        | `true`              |
-| `persistence.single`                              | Enable Release data to use single PVC            | `true`              |
-| `persistence.storageClass`                        | PVC Storage Class for Release data volume        | `""`                |
-| `persistence.selector`                            | Selector to match an existing Persistent Volume  | `{}`                |
-| `persistence.accessModes`                         | PVC Access Modes for Release data volume         | `["ReadWriteMany"]` |
-| `persistence.existingClaim`                       | Provide an existing PersistentVolumeClaims       | `""`                |
-| `persistence.size`                                | PVC Storage Request for Release data volume      | `8Gi`               |
-| `persistence.annotations`                         | Persistence annotations. Evaluated as a template |                     |
-| `persistence.annotations.helm.sh/resource-policy` | Persistence annotation for keeping created PVCs  | `keep`              |
+| Name                                              | Description                                      | Value                                          |
+| ------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------- |
+| `persistence.enabled`                             | Enable Release data persistence using PVC        | `true`                                         |
+| `persistence.single`                              | Enable Release data to use single PVC            | `true`                                         |
+| `persistence.storageClass`                        | PVC Storage Class for Release data volume        | `""`                                           |
+| `persistence.selector`                            | Selector to match an existing Persistent Volume  | `{}`                                           |
+| `persistence.accessModes`                         | PVC Access Modes for Release data volume         | `["ReadWriteMany"]`                            |
+| `persistence.existingClaim`                       | Provide an existing PersistentVolumeClaims       | `""`                                           |
+| `persistence.size`                                | PVC Storage Request for Release data volume      | `8Gi`                                          |
+| `persistence.annotations`                         | Persistence annotations. Evaluated as a template |                                                |
+| `persistence.annotations.helm.sh/resource-policy` | Persistence annotation for keeping created PVCs  | `keep`                                         |
+| `persistence.paths`                               | mounted paths for the Release                    | `["/opt/xebialabs/xl-release-server/reports"]` |
 
 ### Exposure parameters
 
