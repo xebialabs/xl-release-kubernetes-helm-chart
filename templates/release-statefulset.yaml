@@ -137,9 +137,11 @@ spec:
           resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           {{- end }}
           volumeMounts:
+          {{- range $path := .Values.persistence.paths }}
             - name: data
-              mountPath: /opt/xebialabs/xl-release-server/reports
+              mountPath: {{ $path }}
               subPath: reports
+          {{- end }}
         {{- end }}
         {{- if .Values.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
@@ -376,9 +378,11 @@ spec:
               subPath: {{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}
               readOnly: true
             {{- end }}
+            {{- range $path := .Values.persistence.paths }}
             - name: data
-              mountPath: /opt/xebialabs/xl-release-server/reports
+              mountPath: {{ $path }}
               subPath: reports
+            {{- end }}
             {{- if .Values.ssl.enabled }}
             - name: http-ssl-keystore
               mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}

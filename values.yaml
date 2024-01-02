@@ -997,6 +997,9 @@ persistence:
   ##
   annotations:
     helm.sh/resource-policy: "keep"
+  ## @param persistence.paths mounted paths for the Release
+  paths:
+    - /opt/xebialabs/xl-release-server/reports
 
 ## @section Exposure parameters
 ##
@@ -1302,7 +1305,7 @@ volumePermissions:
     pullSecrets: []
   ## @param volumePermissions.script Script for changing the owner and group of the persistent volume(s). Paths are declared in the 'paths' variable.
   script: |
-    declare -a paths=( "/opt/xebialabs/xl-release-server/reports" )
+    declare -a paths=( {{ range $path := .Values.persistence.paths }} "{{ $path }}"{{ end }} )
     for path in "${paths[@]}"; do
       echo "Changing ownership to {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} for ${path}"
       chown "{{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}" "${path}"
