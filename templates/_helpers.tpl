@@ -97,6 +97,13 @@ BusyBox image
 {{- end }}
 
 {{/*
+Return the proper image name (for the init container volume-permissions image)
+*/}}
+{{- define "release.volumePermissions.image" -}}
+{{ include "common.images.image" (dict "imageRoot" .Values.volumePermissions.image "global" .Values.global) }}
+{{- end -}}
+
+{{/*
  Create the name of the service account to use
  */}}
 {{- define "release.serviceAccountName" -}}
