@@ -835,6 +835,10 @@ persistence:
     helm.sh/resource-policy: "keep"
   ## @param persistence.paths mounted paths for the Release
   paths:
+    - /opt/xebialabs/xl-release-server/conf
+    - /opt/xebialabs/xl-release-server/ext
+    - /opt/xebialabs/xl-release-server/hotfix
+    - /opt/xebialabs/xl-release-server/hotfix/lib
     - /opt/xebialabs/xl-release-server/reports
 
 ## @section Exposure parameters
