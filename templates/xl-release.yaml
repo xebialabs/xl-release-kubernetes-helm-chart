@@ -23,13 +23,14 @@ spec:
         app: {{ template "xl-release.name" . }}
         release: {{ .Release.Name }}
     spec:
-      securityContext:
-        fsGroup: 10001
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       {{- if .Values.ImagePullSecret }}
       imagePullSecrets:
       - name: {{ .Values.ImagePullSecret }}
       {{- end }}
-      {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) }}
+      {{- if or (and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install)) (.Values.rabbitmq.install) (and .Values.volumePermissions.enabled .Values.Persistence.Enabled) }}
       initContainers:
         {{- if and (not .Values.UseExistingDB.Enabled) (.Values.postgresql.install) }}
         - name: wait-for-db
@@ -63,11 +64,31 @@ spec:
            - name: RABBITMQ_PORT
              value: "5672"
         {{- end }}
+        {{- if and .Values.volumePermissions.enabled .Values.Persistence.Enabled }}
+        - name: volume-permissions
+          image: "{{ .Values.TinyToolsImageRepository }}:{{ .Values.TinyToolsImageTag }}"
+          command:
+            - /bin/sh
+          args:
+            - -ec
+            - |
+              {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.script "context" $) | nindent 14 }}
+          securityContext: {{- .Values.volumePermissions.containerSecurityContext | toYaml | nindent 12 }}
+          volumeMounts:
+          {{- range $path := .Values.Persistence.Paths }}
+            - name: reports-dir
+              mountPath: {{ $path }}
+              subPath: {{ regexFind "[^/]+$" $path }}
+          {{- end }}
+        {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.ImageRepository }}:{{ .Values.ImageTag }}"
           imagePullPolicy: "{{ .Values.ImagePullPolicy }}"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 5516
@@ -84,30 +105,11 @@ spec:
               mountPath: /opt/xebialabs/xl-release-server/default-conf/xl-release.conf.template
               subPath: xl-release.conf.template
             {{- end }}
+            {{- range $path := .Values.Persistence.Paths }}
             - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/reports
-              subPath: reports
-            - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/work
-              subPath: work
-            - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/conf
-              subPath: conf
-            - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/ext
-              subPath: ext
-            - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/hotfix
-              subPath: hotfix
-            - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/hotfix/lib
-              subPath: lib
-            - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/hotfix/plugins
-              subPath: plugins
-            - name: reports-dir
-              mountPath: /opt/xebialabs/xl-release-server/log
-              subPath: log
+              mountPath: {{ $path }}
+              subPath: {{ regexFind "[^/]+$" $path }}
+            {{- end }}
             {{- if .Values.release.configurationManagement.volumeMounts.enabled }}
             {{- range $key, $val := .Values.release.configurationManagement.volumeMounts.paths }}
             - name: reports-dir
