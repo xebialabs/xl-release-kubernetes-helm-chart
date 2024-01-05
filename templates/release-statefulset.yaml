@@ -12,7 +12,7 @@ metadata:
     {{- end }}
   {{- if or .Values.commonAnnotations .Values.statefulsetAnnotations }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
-    {{- if .Values.statefulsetLabels }}
+    {{- if .Values.statefulsetAnnotations }}
     {{- include "common.tplvalues.render" (dict "value" .Values.statefulsetAnnotations "context" $) | nindent 4 }}
     {{- end }}
   {{- end }}
@@ -121,6 +121,27 @@ spec:
             - name: RABBITMQ_PORT
               value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
         {{- end }}
+        {{- end }}
+        {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
+        - name: volume-permissions
+          image: {{ include "release.volumePermissions.image" . }}
+          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
+          command:
+            - /bin/bash
+          args:
+            - -ec
+            - |
+              {{- include "common.tplvalues.render" (dict "value" .Values.volumePermissions.script "context" $) | nindent 14 }}
+          securityContext: {{- .Values.volumePermissions.containerSecurityContext | toYaml | nindent 12 }}
+          {{- if .Values.volumePermissions.resources }}
+          resources: {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- range $path := .Values.persistence.paths }}
+            - name: data
+              mountPath: {{ $path }}
+              subPath: {{ regexFind "[^/]+$" $path }}
+          {{- end }}
         {{- end }}
         {{- if .Values.initContainers }}
         {{- include "common.tplvalues.render" (dict "value" .Values.initContainers "context" $) | nindent 8 }}
@@ -345,21 +366,11 @@ spec:
               subPath: {{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore") }}
               readOnly: true
             {{- end }}
+            {{- range $path := .Values.persistence.paths }}
             - name: data
-              mountPath: /opt/xebialabs/xl-release-server/conf
-              subPath: conf
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/ext
-              subPath: ext
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/hotfix
-              subPath: hotfix
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/hotfix/lib
-              subPath: lib
-            - name: data
-              mountPath: /opt/xebialabs/xl-release-server/reports
-              subPath: reports
+              mountPath: {{ $path }}
+              subPath: {{ regexFind "[^/]+$" $path }}
+            {{- end }}
             {{- if .Values.ssl.enabled }}
             - name: http-ssl-keystore
               mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" "ssl_keystore.p12") }}
