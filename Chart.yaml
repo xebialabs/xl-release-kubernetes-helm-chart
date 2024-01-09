@@ -1,31 +1,26 @@
 apiVersion: v2
-appVersion: v23.1
+appVersion: 23.1.10
 description: A Helm chart for XL Release
 name: digitalai-release
-version: "23.1"
-
+version: "23.1.10"
 dependencies:
-- name: haproxy-ingress
-  version: 0.13.8
-  repository: "https://haproxy-ingress.github.io/charts"
-  condition: haproxy-ingress.install
-
-- name: nginx-ingress-controller
-  version: 9.2.0
-  repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
-  condition: nginx-ingress-controller.install
-
-- name: postgresql
-  version: 10.12.8
-  repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
-  condition: postgresql.install
-
-- name: rabbitmq
-  version: 8.26.1
-  repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
-  condition: rabbitmq.install
-
-- name: keycloak
-  version: 17.0.1
-  repository: "https://codecentric.github.io/helm-charts"
-  condition: keycloak.install
+  - name: haproxy-ingress
+    version: 0.13.8
+    repository: "https://haproxy-ingress.github.io/charts"
+    condition: haproxy-ingress.install
+  - name: nginx-ingress-controller
+    version: 9.2.0
+    repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
+    condition: nginx-ingress-controller.install
+  - name: postgresql
+    version: 10.12.8
+    repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
+    condition: postgresql.install
+  - name: rabbitmq
+    version: 8.26.1
+    repository: "https://raw.githubusercontent.com/bitnami/charts/c343a91d23e0a90ac783b37a2d51946b74a532f0/bitnami"
+    condition: rabbitmq.install
+  - name: keycloak
+    version: 17.0.1
+    repository: "https://codecentric.github.io/helm-charts"
+    condition: keycloak.install
