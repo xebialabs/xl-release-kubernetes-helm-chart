@@ -419,7 +419,7 @@ volumePermissions:
   ## @param volumePermissions.script Script for changing the owner and group of the persistent volume(s). Paths are declared in the 'paths' variable.
   script: |
     paths="{{ range $path := .Values.Persistence.Paths }}{{ $path }} {{ end }}"
-    for path in "${paths}"; do
+    for path in ${paths}; do
       echo "Changing ownership to {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} for ${path}"
       chown "{{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}" "${path}"
       find "${path}" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | \
