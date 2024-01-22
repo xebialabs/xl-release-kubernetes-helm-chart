@@ -508,7 +508,8 @@ valueFrom:
 {{- end -}}
 
 {{/*
-Returns whether a previous generated secret already exists
+Returns whether a previous generated secret already exists.
+On --dry-run this is always returning true (done by checking if release namespace exists)
 
 Usage:
 {{ include "secrets.exists" (dict "secret" "secret-name" "context" $) }}
@@ -518,18 +519,24 @@ Params:
   - context - Context - Required - Parent context.
 */}}
 {{- define "secrets.exists" -}}
-{{- $secret := (lookup "v1" "Secret" ( include "common.names.namespace" .context ) .secret) -}}
+{{- $namespaceName := include "common.names.namespace" .context -}}
+{{- $namespace := (lookup "v1" "ServicAaccount" $namespaceName "") -}}
+{{- if $namespace -}}
+{{- $secret := (lookup "v1" "Secret" $namespaceName .secret) -}}
 {{- if $secret -}}
 true
 {{- else -}}
 false
+{{- end -}}
+{{- else -}}
+true
 {{- end -}}
 {{- end -}}
 
 {{- define "validate.existing.secret" -}}
   {{- if .value -}}
     {{- if kindIs "map" .value -}}
-      {{- if .value.valueFrom.secretKeyRef.name }}
+      {{- if .value.valueFrom.secretKeyRef.name -}}
         {{- $exists := include "secrets.exists" (dict "secret" .value.valueFrom.secretKeyRef.name "context" .context) -}}
         {{- if eq $exists "false" -}}
             secret: {{ .value.valueFrom.secretKeyRef.name }}:
