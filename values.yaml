@@ -382,3 +382,65 @@ Persistence:
   Annotations: {}
   AccessMode: ReadWriteOnce
   Size: 8Gi
+  Paths:
+    - /opt/xebialabs/xl-release-server/reports
+    - /opt/xebialabs/xl-release-server/work
+    - /opt/xebialabs/xl-release-server/conf
+    - /opt/xebialabs/xl-release-server/ext
+    - /opt/xebialabs/xl-release-server/hotfix
+    - /opt/xebialabs/xl-release-server/hotfix/lib
+    - /opt/xebialabs/xl-release-server/hotfix/plugins
+    - /opt/xebialabs/xl-release-server/log
+
+## Release pods' Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param podSecurityContext.enabled Enable Release pod's Security Context
+## @param podSecurityContext.runAsUser Set Release pod's Security Context runAsUser
+## @param podSecurityContext.runAsGroup Set Release pod's Security Context runAsGroup
+## @param podSecurityContext.fsGroup Set Release pod's Security Context fsGroup
+##
+podSecurityContext:
+  enabled: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+
+## @param containerSecurityContext.enabled Enabled Release containers' Security Context
+## @param containerSecurityContext.runAsUser Set Release containers' Security Context runAsUser
+## @param containerSecurityContext.runAsNonRoot Set Release container's Security Context runAsNonRoot
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## Example:
+##   containerSecurityContext:
+##     capabilities:
+##       drop: ["NET_RAW"]
+##     readOnlyRootFilesystem: true
+##
+containerSecurityContext:
+  enabled: true
+  runAsUser: 10001
+  runAsNonRoot: true
+
+## Init Container parameters
+## Change the owner and group of the persistent volume(s) mountpoint(s) to 'runAsUser:fsGroup' on each component
+## values from the securityContext section of the component
+##
+volumePermissions:
+  ## @param volumePermissions.enabled Enable init container that changes the owner and group of the persistent volume(s) mountpoint to `runAsUser:fsGroup`
+  ##
+  enabled: false
+  ## @param volumePermissions.script Script for changing the owner and group of the persistent volume(s). Paths are declared in the 'paths' variable.
+  script: |
+    paths="{{ range $path := .Values.Persistence.Paths }}{{ $path }} {{ end }}"
+    for path in ${paths}; do
+      echo "Changing ownership to {{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }} for ${path}"
+      chown "{{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}" "${path}"
+      find "${path}" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | \
+        xargs -r chown -R "{{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}"
+    done
+  ## Init container' Security Context
+  ## Note: the chown of the data folder is done to containerSecurityContext.runAsUser
+  ## and not the below volumePermissions.containerSecurityContext.runAsUser
+  ## @param volumePermissions.containerSecurityContext.runAsUser User ID for the init container
+  ##
+  containerSecurityContext:
+    runAsUser: 0
