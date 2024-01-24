@@ -1,10 +1,9 @@
 
 # Helm chart for Digital.ai Release
 
-**From 10.2 version helm chart is not used directly. Use operator-based installation instead.**
+**From 10.2 version helm chart is not used directly. Use operator based installation instead.**
 
-Additional documentation can be found on the following links:
-- https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-before-you-begin.html
+Additional documentation can be found by this link:
 - https://xebialabs.github.io/xl-release-kubernetes-helm-chart
 
 ## Prerequisites
@@ -67,11 +66,12 @@ kubectl delete namespace digitalai
 
 ### Global parameters
 
-| Name                      | Description                                     | Value |
-| ------------------------- | ----------------------------------------------- | ----- |
-| `global.imageRegistry`    | Global Docker image registry                    | `""`  |
-| `global.imagePullSecrets` | Global Docker registry secret names as an array | `[]`  |
-| `global.storageClass`     | Global StorageClass for Persistent Volume(s)    | `""`  |
+| Name                                         | Description                                                    | Value |
+| -------------------------------------------- | -------------------------------------------------------------- | ----- |
+| `global.imageRegistry`                       | Global Docker image registry                                   | `""`  |
+| `global.imagePullSecrets`                    | Global Docker registry secret names as an array                | `[]`  |
+| `global.storageClass`                        | Global StorageClass for Persistent Volume(s)                   | `""`  |
+| `global.postgresql.service.ports.postgresql` | PostgreSQL service port (overrides `service.ports.postgresql`) | `""`  |
 
 ### Env parameters
 
@@ -83,7 +83,7 @@ kubectl delete namespace digitalai
 ### Release server parameters
 
 | Name                             | Description                                                                                                                                                                                                         | Value        |
-|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
 | `license`                        | Sets your XL License by passing a base64 string license, which will then be added to the license file.                                                                                                              | `""`         |
 | `licenseAcceptEula`              | Accept EULA, in case of missing license, it will generate temporary license.                                                                                                                                        | `false`      |
 | `generateXlConfig`               | Generate configuration from environment parameters passed, and volumes mounted with custom changes. If set to false, a default config will be used and all environment variables and volumes added will be ignored. | `true`       |
@@ -92,8 +92,10 @@ kubectl delete namespace digitalai
 | `clusterMode`                    | This is to specify if the HA setup is needed and to specify the HA mode. Possible values: "default", "hot-standby", "full"                                                                                          | `full`       |
 | `forceUpgrade`                   | It can be used to perform an upgrade in non-interactive mode by passing flag -force-upgrades while starting a service.                                                                                              | `true`       |
 | `enableEmbeddedQueue`            | Flag to expose external messaging queue. If set to true, a default embedded-queue will be used and all environment variables will be ignored.                                                                       | `false`      |
+| `appProtocol`                    | Release protocol (the protocol http or https that will be used by enduser to access Release). It is not used if ingress or route are enabled.                                                                       | `http`       |
+| `appHostname`                    | Release hostname (the hostname that will be used by enduser to access Release). It is not used if ingress or route are enabled.                                                                                     | `""`         |
 | `appContextRoot`                 | Release context root.                                                                                                                                                                                               | `/`          |
-| `logback.globalLoggingLevel`     | Global logging level. Possible values: "trace", "debug", "info", "warn", "error".                                                                                                                                   | `info`       |
+| `logback.globalLoggingLevel`     | Global logging level. Possible values: "trace", "debug", "info", "warn", "error"                                                                                                                                    | `info`       |
 | `logback.scanEnabled`            | Enables scanning of logback.xml.                                                                                                                                                                                    | `true`       |
 | `logback.scanPeriod`             | Interval for checking logback.xml configuration.                                                                                                                                                                    | `30 seconds` |
 | `auth.adminPassword`             | Admin password for Release. If user does not provide password, random 10 character alphanumeric string will be generated.                                                                                           | `""`         |
@@ -261,17 +263,18 @@ kubectl delete namespace digitalai
 
 ### Persistence parameters
 
-| Name                                              | Description                                      | Value               |
-| ------------------------------------------------- | ------------------------------------------------ | ------------------- |
-| `persistence.enabled`                             | Enable Release data persistence using PVC        | `true`              |
-| `persistence.single`                              | Enable Release data to use single PVC            | `true`              |
-| `persistence.storageClass`                        | PVC Storage Class for Release data volume        | `""`                |
-| `persistence.selector`                            | Selector to match an existing Persistent Volume  | `{}`                |
-| `persistence.accessModes`                         | PVC Access Modes for Release data volume         | `["ReadWriteMany"]` |
-| `persistence.existingClaim`                       | Provide an existing PersistentVolumeClaims       | `""`                |
-| `persistence.size`                                | PVC Storage Request for Release data volume      | `8Gi`               |
-| `persistence.annotations`                         | Persistence annotations. Evaluated as a template |                     |
-| `persistence.annotations.helm.sh/resource-policy` | Persistence annotation for keeping created PVCs  | `keep`              |
+| Name                                              | Description                                      | Value                                                                                                                                                                                                                 |
+| ------------------------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `persistence.enabled`                             | Enable Release data persistence using PVC        | `true`                                                                                                                                                                                                                |
+| `persistence.single`                              | Enable Release data to use single PVC            | `true`                                                                                                                                                                                                                |
+| `persistence.storageClass`                        | PVC Storage Class for Release data volume        | `""`                                                                                                                                                                                                                  |
+| `persistence.selector`                            | Selector to match an existing Persistent Volume  | `{}`                                                                                                                                                                                                                  |
+| `persistence.accessModes`                         | PVC Access Modes for Release data volume         | `["ReadWriteMany"]`                                                                                                                                                                                                   |
+| `persistence.existingClaim`                       | Provide an existing PersistentVolumeClaims       | `""`                                                                                                                                                                                                                  |
+| `persistence.size`                                | PVC Storage Request for Release data volume      | `8Gi`                                                                                                                                                                                                                 |
+| `persistence.annotations`                         | Persistence annotations. Evaluated as a template |                                                                                                                                                                                                                       |
+| `persistence.annotations.helm.sh/resource-policy` | Persistence annotation for keeping created PVCs  | `keep`                                                                                                                                                                                                                |
+| `persistence.paths`                               | mounted paths for the Release                    | `["/opt/xebialabs/xl-release-server/conf","/opt/xebialabs/xl-release-server/ext","/opt/xebialabs/xl-release-server/hotfix","/opt/xebialabs/xl-release-server/hotfix/lib","/opt/xebialabs/xl-release-server/reports"]` |
 
 ### Exposure parameters
 
@@ -299,57 +302,70 @@ kubectl delete namespace digitalai
 
 ### Statefulset parameters
 
-| Name                                                            | Description                                                                                                              | Value                       |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
-| `replicaCount`                                                  | Number of Release replicas to deploy                                                                                     | `3`                         |
-| `schedulerName`                                                 | Use an alternate scheduler, e.g. "stork".                                                                                | `""`                        |
-| `podManagementPolicy`                                           | Pod management policy                                                                                                    | `OrderedReady`              |
-| `podLabels`                                                     | Release Pod labels. Evaluated as a template                                                                              | `{}`                        |
-| `podAnnotations`                                                | Release Pod annotations. Evaluated as a template                                                                         | `{}`                        |
-| `updateStrategy.type`                                           | Update strategy type for Release statefulset                                                                             | `RollingUpdate`             |
-| `statefulsetLabels`                                             | Release statefulset labels. Evaluated as a template                                                                      | `{}`                        |
-| `statefulsetAnnotations`                                        | Release statefulset annotations. Evaluated as a template                                                                 | `{}`                        |
-| `priorityClassName`                                             | Name of the priority class to be used by Release pods, priority class needs to be created beforehand                     | `""`                        |
-| `podAffinityPreset`                                             | Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                      | `""`                        |
-| `podAntiAffinityPreset`                                         | Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                 | `soft`                      |
-| `nodeAffinityPreset.type`                                       | Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                | `""`                        |
-| `nodeAffinityPreset.key`                                        | Node label key to match Ignored if `affinity` is set.                                                                    | `""`                        |
-| `nodeAffinityPreset.values`                                     | Node label values to match. Ignored if `affinity` is set.                                                                | `[]`                        |
-| `affinity`                                                      | Affinity for pod assignment. Evaluated as a template                                                                     | `{}`                        |
-| `nodeSelector`                                                  | Node labels for pod assignment. Evaluated as a template                                                                  | `{}`                        |
-| `tolerations`                                                   | Tolerations for pod assignment. Evaluated as a template                                                                  | `[]`                        |
-| `topologySpreadConstraints`                                     | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template | `[]`                        |
-| `podSecurityContext.enabled`                                    | Enable Release pods' Security Context                                                                                    | `true`                      |
-| `podSecurityContext.fsGroup`                                    | Set Release pod's Security Context fsGroup                                                                               | `1001`                      |
-| `containerSecurityContext.enabled`                              | Enabled Release containers' Security Context                                                                             | `true`                      |
-| `containerSecurityContext.runAsUser`                            | Set Release containers' Security Context runAsUser                                                                       | `1001`                      |
-| `containerSecurityContext.runAsNonRoot`                         | Set Release container's Security Context runAsNonRoot                                                                    | `true`                      |
-| `resources.limits`                                              | The resources limits for Release containers                                                                              | `{}`                        |
-| `resources.requests`                                            | The requested resources for Release containers                                                                           | `{}`                        |
-| `health.enabled`                                                | Enable probes                                                                                                            | `true`                      |
-| `health.periodScans`                                            | Period seconds for probe                                                                                                 | `10`                        |
-| `health.probeFailureThreshold`                                  | Failure threshold for probe                                                                                              | `12`                        |
-| `health.probesLivenessTimeout`                                  | Initial delay seconds for livenessProbe                                                                                  | `60`                        |
-| `health.probesReadinessTimeout`                                 | Initial delay seconds for readinessProbe                                                                                 | `60`                        |
-| `initContainers`                                                | Add init containers to the Release pod                                                                                   | `[]`                        |
-| `sidecars`                                                      | Add sidecar containers to the Release pod                                                                                | `[]`                        |
-| `pdb.create`                                                    | Enable/disable a Pod Disruption Budget creation                                                                          | `false`                     |
-| `pdb.minAvailable`                                              | Minimum number/percentage of pods that should remain scheduled                                                           | `1`                         |
-| `pdb.maxUnavailable`                                            | Maximum number/percentage of pods that may be made unavailable                                                           | `""`                        |
-| `busyBox.image.registry`                                        | busyBox container image registry                                                                                         | `docker.io`                 |
-| `busyBox.image.repository`                                      | busyBox container image repository                                                                                       | `library/busybox`           |
-| `busyBox.image.tag`                                             | busyBox container image tag                                                                                              | `stable`                    |
-| `busyBox.image.pullPolicy`                                      | busyBox container image pull policy                                                                                      | `IfNotPresent`              |
-| `busyBox.image.pullSecrets`                                     | Specify docker-registry secret names as an array                                                                         | `[]`                        |
-| `haproxy-ingress.install`                                       | Enable Haproxy Ingress helm subchart installation                                                                        | `false`                     |
-| `haproxy-ingress.controller.ingressClass`                       | Name of the ingress class to route through this controller                                                               | `haproxy-dair`              |
-| `haproxy-ingress.controller.service.type`                       | Kubernetes Service type for Controller                                                                                   | `LoadBalancer`              |
-| `nginx-ingress-controller.install`                              | Enable NGINX Ingress Controller helm subchart installation                                                               | `false`                     |
-| `nginx-ingress-controller.extraArgs`                            | Additional command line arguments to pass to nginx-ingress-controller                                                    |                             |
-| `nginx-ingress-controller.extraArgs.ingress-class`              | Name of the IngressClass resource                                                                                        | `nginx-dair`                |
-| `nginx-ingress-controller.ingressClassResource.name`            | Name of the IngressClass resource                                                                                        | `nginx-dair`                |
-| `nginx-ingress-controller.ingressClassResource.controllerClass` | IngressClass identifier for the controller                                                                               | `k8s.io/ingress-nginx-dair` |
-| `nginx-ingress-controller.replicaCount`                         | Desired number of Controller pods                                                                                        | `1`                         |
+| Name                                                            | Description                                                                                                                       | Value                       |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |-----------------------------|
+| `replicaCount`                                                  | Number of Release replicas to deploy                                                                                              | `3`                         |
+| `schedulerName`                                                 | Use an alternate scheduler, e.g. "stork".                                                                                         | `""`                        |
+| `podManagementPolicy`                                           | Pod management policy                                                                                                             | `OrderedReady`              |
+| `podLabels`                                                     | Release Pod labels. Evaluated as a template                                                                                       | `{}`                        |
+| `podAnnotations`                                                | Release Pod annotations. Evaluated as a template                                                                                  | `{}`                        |
+| `updateStrategy.type`                                           | Update strategy type for Release statefulset                                                                                      | `RollingUpdate`             |
+| `statefulsetLabels`                                             | Release statefulset labels. Evaluated as a template                                                                               | `{}`                        |
+| `statefulsetAnnotations`                                        | Release statefulset annotations. Evaluated as a template                                                                          | `{}`                        |
+| `priorityClassName`                                             | Name of the priority class to be used by Release pods, priority class needs to be created beforehand                              | `""`                        |
+| `podAffinityPreset`                                             | Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                               | `""`                        |
+| `podAntiAffinityPreset`                                         | Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                          | `soft`                      |
+| `nodeAffinityPreset.type`                                       | Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`                                         | `""`                        |
+| `nodeAffinityPreset.key`                                        | Node label key to match Ignored if `affinity` is set.                                                                             | `""`                        |
+| `nodeAffinityPreset.values`                                     | Node label values to match. Ignored if `affinity` is set.                                                                         | `[]`                        |
+| `affinity`                                                      | Affinity for pod assignment. Evaluated as a template                                                                              | `{}`                        |
+| `nodeSelector`                                                  | Node labels for pod assignment. Evaluated as a template                                                                           | `{}`                        |
+| `tolerations`                                                   | Tolerations for pod assignment. Evaluated as a template                                                                           | `[]`                        |
+| `topologySpreadConstraints`                                     | Topology Spread Constraints for pod assignment spread across your cluster among failure-domains. Evaluated as a template          | `[]`                        |
+| `podSecurityContext.enabled`                                    | Enable Release pod's Security Context                                                                                             | `true`                      |
+| `podSecurityContext.runAsUser`                                  | Set Release pod's Security Context runAsUser                                                                                      | `10001`                     |
+| `podSecurityContext.runAsGroup`                                 | Set Release pod's Security Context runAsGroup                                                                                     | `10001`                     |
+| `podSecurityContext.fsGroup`                                    | Set Release pod's Security Context fsGroup                                                                                        | `10001`                     |
+| `containerSecurityContext.enabled`                              | Enabled Release containers' Security Context                                                                                      | `true`                      |
+| `containerSecurityContext.runAsUser`                            | Set Release containers' Security Context runAsUser                                                                                | `10001`                     |
+| `containerSecurityContext.runAsNonRoot`                         | Set Release container's Security Context runAsNonRoot                                                                             | `true`                      |
+| `resources.limits`                                              | The resources limits for Release containers                                                                                       | `{}`                        |
+| `resources.requests`                                            | The requested resources for Release containers                                                                                    | `{}`                        |
+| `health.enabled`                                                | Enable probes                                                                                                                     | `true`                      |
+| `health.periodScans`                                            | Period seconds for probe                                                                                                          | `10`                        |
+| `health.probeFailureThreshold`                                  | Failure threshold for probe                                                                                                       | `12`                        |
+| `health.probesLivenessTimeout`                                  | Initial delay seconds for livenessProbe                                                                                           | `60`                        |
+| `health.probesReadinessTimeout`                                 | Initial delay seconds for readinessProbe                                                                                          | `60`                        |
+| `initContainers`                                                | Add init containers to the Release pod                                                                                            | `[]`                        |
+| `sidecars`                                                      | Add sidecar containers to the Release pod                                                                                         | `[]`                        |
+| `volumePermissions.enabled`                                     | Enable init container that changes the owner and group of the persistent volume(s) mountpoint to `runAsUser:fsGroup`              | `false`                     |
+| `volumePermissions.image.registry`                              | Init container volume-permissions image registry                                                                                  | `docker.io`                 |
+| `volumePermissions.image.repository`                            | Init container volume-permissions image repository                                                                                | `bitnami/bitnami-shell`     |
+| `volumePermissions.image.tag`                                   | Init container volume-permissions image tag                                                                                       | `11-debian-11-r92`          |
+| `volumePermissions.image.digest`                                | Init container volume-permissions image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag | `""`                        |
+| `volumePermissions.image.pullPolicy`                            | Init container volume-permissions image pull policy                                                                               | `IfNotPresent`              |
+| `volumePermissions.image.pullSecrets`                           | Specify docker-registry secret names as an array                                                                                  | `[]`                        |
+| `volumePermissions.script`                                      | Script for changing the owner and group of the persistent volume(s). Paths are declared in the 'paths' variable.                  |                             |
+| `volumePermissions.resources.limits`                            | Init container volume-permissions resource limits                                                                                 | `{}`                        |
+| `volumePermissions.resources.requests`                          | Init container volume-permissions resource requests                                                                               | `{}`                        |
+| `volumePermissions.containerSecurityContext.runAsUser`          | User ID for the init container                                                                                                    | `0`                         |
+| `pdb.create`                                                    | Enable/disable a Pod Disruption Budget creation                                                                                   | `false`                     |
+| `pdb.minAvailable`                                              | Minimum number/percentage of pods that should remain scheduled                                                                    | `1`                         |
+| `pdb.maxUnavailable`                                            | Maximum number/percentage of pods that may be made unavailable                                                                    | `""`                        |
+| `busyBox.image.registry`                                        | busyBox container image registry                                                                                                  | `docker.io`                 |
+| `busyBox.image.repository`                                      | busyBox container image repository                                                                                                | `library/busybox`           |
+| `busyBox.image.tag`                                             | busyBox container image tag                                                                                                       | `stable`                    |
+| `busyBox.image.pullPolicy`                                      | busyBox container image pull policy                                                                                               | `IfNotPresent`              |
+| `busyBox.image.pullSecrets`                                     | Specify docker-registry secret names as an array                                                                                  | `[]`                        |
+| `haproxy-ingress.install`                                       | Enable Haproxy Ingress helm subchart installation                                                                                 | `false`                     |
+| `haproxy-ingress.controller.ingressClass`                       | Name of the ingress class to route through this controller                                                                        | `haproxy-dair`              |
+| `haproxy-ingress.controller.service.type`                       | Kubernetes Service type for Controller                                                                                            | `LoadBalancer`              |
+| `nginx-ingress-controller.install`                              | Enable NGINX Ingress Controller helm subchart installation                                                                        | `false`                     |
+| `nginx-ingress-controller.extraArgs`                            | Additional command line arguments to pass to nginx-ingress-controller                                                             |                             |
+| `nginx-ingress-controller.extraArgs.ingress-class`              | Name of the IngressClass resource                                                                                                 | `nginx-dair`                |
+| `nginx-ingress-controller.ingressClassResource.name`            | Name of the IngressClass resource                                                                                                 | `nginx-dair`                |
+| `nginx-ingress-controller.ingressClassResource.controllerClass` | IngressClass identifier for the controller                                                                                        | `k8s.io/ingress-nginx-dair` |
+| `nginx-ingress-controller.replicaCount`                         | Desired number of Controller pods                                                                                                 | `1`                         |
 
 ### Traffic exposure parameters
 
@@ -360,23 +376,24 @@ kubectl delete namespace digitalai
 
 ### PostgreSQL Primary parameters
 
-| Name                                           | Description                                                                                            | Value                                                  |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Name                                           | Description                                                                                            | Value                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
 | `postgresql.primary.initdb.scriptsSecret`      | Secret with scripts to be run at first boot (in case it contains sensitive information)                | `{{ include "postgresql.primary.fullname" . }}-release` |
-| `postgresql.primary.extendedConfiguration`     | Extended PostgreSQL Primary configuration (appended to main or default configuration)                  | `max_connections = 150`                                |
-| `postgresql.primary.persistence.enabled`       | Enable PostgreSQL Primary data persistence using PVC                                                   | `true`                                                 |
-| `postgresql.primary.persistence.accessModes`   | PVC Access Mode for PostgreSQL volume                                                                  | `["ReadWriteOnce"]`                                    |
-| `postgresql.primary.persistence.storageClass`  | PVC Storage Class for PostgreSQL Primary data volume                                                   | `""`                                                   |
-| `postgresql.primary.persistence.size`          | PVC Storage Request for PostgreSQL volume                                                              | `8Gi`                                                  |
-| `postgresql.primary.persistence.existingClaim` | Name of an existing PVC to use                                                                         | `""`                                                   |
-| `postgresql.primary.resources.requests.memory` | The requested memory for the PostgreSQL Primary containers                                             | `256Mi`                                                |
-| `postgresql.primary.resources.requests.cpu`    | The requested cpu for the PostgreSQL Primary containers                                                | `250m`                                                 |
-| `postgresql.primary.service.ports.postgresql`  | PostgreSQL service port                                                                                | `5432`                                                 |
-| `postgresql.primary.service.type`              | Kubernetes Service type                                                                                | `ClusterIP`                                            |
-| `postgresql.auth.enablePostgresUser`           | Assign a password to the "postgres" admin user. Otherwise, remote access will be blocked for this user | `true`                                                 |
-| `postgresql.auth.username`                     | Name for a custom user to create                                                                       | `postgres`                                             |
-| `postgresql.auth.postgresPassword`             | Password for the "postgres" admin user. Ignored if `auth.existingSecret` is provided                   | `postgres`                                             |
-| `postgresql.serviceAccount.create`             | Enable creation of ServiceAccount for PostgreSQL pod                                                   | `true`                                                 |
+| `postgresql.primary.extendedConfiguration`     | Extended PostgreSQL Primary configuration (appended to main or default configuration)                  | `max_connections = 150
+`                                |
+| `postgresql.primary.persistence.enabled`       | Enable PostgreSQL Primary data persistence using PVC                                                   | `true`                                                  |
+| `postgresql.primary.persistence.accessModes`   | PVC Access Mode for PostgreSQL volume                                                                  | `["ReadWriteOnce"]`                                     |
+| `postgresql.primary.persistence.storageClass`  | PVC Storage Class for PostgreSQL Primary data volume                                                   | `""`                                                    |
+| `postgresql.primary.persistence.size`          | PVC Storage Request for PostgreSQL volume                                                              | `8Gi`                                                   |
+| `postgresql.primary.persistence.existingClaim` | Name of an existing PVC to use                                                                         | `""`                                                    |
+| `postgresql.primary.resources.requests.memory` | The requested memory for the PostgreSQL Primary containers                                             | `256Mi`                                                 |
+| `postgresql.primary.resources.requests.cpu`    | The requested cpu for the PostgreSQL Primary containers                                                | `250m`                                                  |
+| `postgresql.primary.service.ports.postgresql`  | PostgreSQL service port                                                                                | `5432`                                                  |
+| `postgresql.primary.service.type`              | Kubernetes Service type                                                                                | `ClusterIP`                                             |
+| `postgresql.auth.enablePostgresUser`           | Assign a password to the "postgres" admin user. Otherwise, remote access will be blocked for this user | `true`                                                  |
+| `postgresql.auth.username`                     | Name for a custom user to create                                                                       | `postgres`                                              |
+| `postgresql.auth.postgresPassword`             | Password for the "postgres" admin user. Ignored if `auth.existingSecret` is provided                   | `postgres`                                              |
+| `postgresql.serviceAccount.create`             | Enable creation of ServiceAccount for PostgreSQL pod                                                   | `true`                                                  |
 
 ### Volume Permissions parameters
 
