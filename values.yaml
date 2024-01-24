@@ -1275,6 +1275,9 @@ nginx-ingress-controller:
 postgresql:
   ## @param postgresql.install Enable PostgreSQL helm subchart installation
   install: true
+  ## @param postgresql.image.tag PostgreSQL image tag (immutable tags are recommended)
+  image:
+    tag: 15.4.0-debian-11-r54
   ## @section PostgreSQL Primary parameters
   ##
   primary:
@@ -1366,12 +1369,18 @@ postgresql:
     ## @param postgresql.volumePermissions.enabled Enable init container that changes the owner and group of the persistent volume
     ##
     enabled: true
+    ## @param postgresql.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
+    image:
+      tag: 11-debian-11-r90
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
 rabbitmq:
   ## @param rabbitmq.install Enable Rabbitmq helm subchart installation
   install: true
+  ## @param rabbitmq.image.tag RabbitMQ image tag (immutable tags are recommended)
+  image:
+    tag: 3.12.7-debian-11-r0
   ## Clustering settings
   ##
   clustering:
@@ -1465,3 +1474,6 @@ rabbitmq:
     ## @param rabbitmq.volumePermissions.enabled Enable init container that changes the owner and group of the persistent volume(s) mountpoint to `runAsUser:fsGroup`
     ##
     enabled: true
+    ## @param rabbitmq.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
+    image:
+      tag: 11-debian-11-r90

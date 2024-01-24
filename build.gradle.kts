@@ -51,7 +51,7 @@ val operatorSdkVersion = properties["operatorSdkVersion"]
 val os = detectOs()
 val arch = detectHostArch()
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
-val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "23.3.0-${
+val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "23.3.3-${
     LocalDateTime.now().format(DateTimeFormatter.ofPattern("Mdd.Hmm"))
 }"
 project.extra.set("releasedVersion", releasedVersion)
