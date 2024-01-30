@@ -1,0 +1,133 @@
+apiVersion: xlr.digital.ai/v1alpha1
+kind: DigitalaiRelease
+metadata:
+  name: dai-xlr
+spec:
+  k8sSetup:
+    platform: PlainK8s
+  auth:
+    adminPassword: "removed because of security reasons"
+  license: |-
+    removed because of security reasons
+  keystore:
+    passphrase: "removed because of security reasons"
+    keystore: |-
+      removed because of security reasons
+  replicaCount: 1
+  external:
+    db:
+      enabled: false
+    mq:
+      enabled: false
+  oidc:
+    enabled: false
+    external: false
+  http2:
+    enabled: false
+  ssl:
+    enabled: false
+    keystorePassword:
+    keystoreKeypassword:
+    keystore: ""
+  persistence:
+    storageClass: "local-path"
+    accessModes:
+      - ReadWriteMany
+    size: 1Gi
+  image:
+    repository: xebialabs/xl-release
+    tag: "23.3.2"
+  diagnosticMode:
+    enabled: false
+  resources:
+    limits:
+      cpu: 4
+      memory: 8G
+    requests:
+      cpu: 250m
+      memory: 512Mi
+  extraConfiguration:
+    default-conf_xl-release-security_xml:
+      mode: 432
+      path: default-conf/xl-release-security.xml
+      content: |
+        <?xml version="1.0" encoding="UTF-8"?>
+  
+        <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xmlns:security="http://www.springframework.org/schema/security"
+          xsi:schemaLocation="
+          http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+        ">
+      
+          <bean id="rememberMeAuthenticationProvider" class="com.xebialabs.deployit.security.authentication.RememberMeAuthenticationProvider"/>
+        
+          <security:authentication-manager alias="authenticationManager">
+            <security:authentication-provider ref="rememberMeAuthenticationProvider" />
+            <security:authentication-provider ref="xlAuthenticationProvider"/>
+          </security:authentication-manager>
+        
+        </beans>
+    default-conf_deployit-defaults:
+      mode: 432
+      path: default-conf/deployit-defaults.properties
+      content: |
+        ansible.RunPlaybook.ansibleCmd=/usr/bin/ansible-playbook
+        ansible.RunPlaybook.iconLocation=ansible/ansible_logo.svg
+  ingress:
+    enabled: false
+    hostname: ""
+    path: /
+  route:
+    enabled: false
+  haproxy-ingress:
+    controller:
+      ingressClass: haproxy-dai-xlr
+    install: false
+  nginx-ingress-controller:
+    extraArgs:
+      ingress-class: nginx-dai-xlr
+    ingressClassResource:
+      controllerClass: k8s.io/ingress-nginx-dai-xlr
+      name: nginx-dai-xlr
+    install: false
+  postgresql:
+    global:
+      storageClass: "local-path"
+    install: true
+    primary:
+      persistence:
+        size: 1Gi
+        storageClass: "local-path"
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+    resources:
+      limits:
+        cpu: 2
+        memory: 2G
+      requests:
+        cpu: 250m
+        memory: 256Mi
+  rabbitmq:
+    install: true
+    persistence:
+      size: 1Gi
+      storageClass: "local-path"
+    replicaCount: 1
+    volumePermissions:
+      enabled: true
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+    podSecurityContext:
+      enabled: true
+      fsGroup: 1001
+      runAsUser: 1001
+    resources:
+      limits:
+        cpu: 2
+        memory: 2G
+      requests:
+        cpu: 250m
+        memory: 256Mi
