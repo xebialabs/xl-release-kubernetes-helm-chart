@@ -218,7 +218,7 @@ Use the service name with namespace. In case of ssl enabled the SNI check will f
             {{- .Values.route.hostname }}
         {{- else -}}
             {{- if .Values.appHostname }}
-                {{- printf "%s://%s" .Values.appProtocol .Values.appHostname }}
+                {{- .Values.appHostname }}
             {{- else -}}
                 {{- include "release.serviceHostname" . }}
             {{- end }}
@@ -424,7 +424,7 @@ release: license or licenseAcceptEula
 {{- define "render.secret-name" -}}
   {{- if .value -}}
     {{- if kindIs "map" .value -}}
-{{- tpl (.value.valueFrom.secretKeyRef.name | toYaml) .context }}
+{{- tpl .value.valueFrom.secretKeyRef.name .context }}
     {{- else if kindIs "string" .value -}}
 {{ .defaultName }}
     {{- else -}}
