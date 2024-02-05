@@ -259,7 +259,7 @@ spec:
             {{- end }}
             {{- if .Values.truststore.truststore }}
             - name: TRUSTSTORE
-              value: "/opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}"
+              value: "/opt/xebialabs/xl-release-server/certs/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}"
             - name: TRUSTSTORE_TYPE
               value: {{ .Values.truststore.type | quote }}
             {{- if .Values.truststore.password }}
@@ -293,7 +293,7 @@ spec:
             - name: SSL
               value: {{ .Values.ssl.enabled | quote }}
             - name: HTTP_SSL_KEYSTORE_PATH
-              value: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
+              value: /opt/xebialabs/xl-release-server/certs/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
             - name: HTTP_SSL_KEYSTORE_PASSWORD
               {{- include "render.value-secret" (dict  "value" .Values.ssl.keystorePassword "defaultName" (include "common.names.fullname" .) "defaultKey" "sslKeystorePassword" "context" $ ) | nindent 14 }}
             - name: HTTP_SSL_KEYSTORE_KEYPASSWORD
@@ -373,7 +373,7 @@ spec:
               subPath: {{ $v.path }}
             {{- end }}
             {{- if .Values.truststore.truststore }}
-            - mountPath: /opt/xebialabs/xl-release-server/truststore/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}
+            - mountPath: /opt/xebialabs/xl-release-server/certs/{{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}
               name: release-truststore
               subPath: {{ include "secrets.key" (dict "secretRef" .Values.truststore.truststore "default" "truststore" "context" $) }}
               readOnly: true
@@ -385,7 +385,7 @@ spec:
             {{- end }}
             {{- if .Values.ssl.enabled }}
             - name: http-ssl-keystore
-              mountPath: /opt/xebialabs/xl-release-server/http-ssl-keystore/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
+              mountPath: /opt/xebialabs/xl-release-server/certs/{{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
               subPath: {{ include "secrets.key" (dict "secretRef" .Values.ssl.keystore "default" (printf "ssl_keystore.%s" .Values.ssl.keystoreType) "context" $) }}
               readOnly: true
             {{- end }}
