@@ -232,6 +232,46 @@ tasks {
         }
     }
 
+    register<Exec>("installHelmUnitTestPlugin") {
+        group = "helm"
+        dependsOn("prepareHelmDeps")
+
+        standardOutput = ByteArrayOutputStream()
+        errorOutput = ByteArrayOutputStream()
+      
+        commandLine(helmCli, "plugin", "list")
+        logger.lifecycle(standardOutput.toString())
+        logger.error(errorOutput.toString())        
+        
+        doLast {
+            val unitTestPluginExists = standardOutput.toString()
+            if(!unitTestPluginExists.contains("unittest")) {
+                commandLine(helmCli, "plugin", "install", "https://github.com/helm-unittest/helm-unittest")
+                logger.lifecycle(standardOutput.toString())
+                logger.error(errorOutput.toString())            
+                logger.lifecycle("Install helm unit test plugin finished")
+            } else {        
+                logger.info("Plugin exists. Skipping helm unit test plugin installation")
+            }          
+        }        
+    }
+
+    register<Exec>("runHelmUnitTest") {
+        group = "helm"
+        dependsOn("installHelmUnitTestPlugin")
+
+        commandLine(helmCli, "unittest", ".")
+
+        standardOutput = ByteArrayOutputStream()
+        errorOutput = ByteArrayOutputStream()
+
+        doLast {
+            logger.lifecycle(standardOutput.toString())
+            logger.error(errorOutput.toString())
+            logger.lifecycle("Finished running unit tests")
+        }
+    }
+
     register<Exec>("buildHelmPackage") {
         group = "helm"
         dependsOn("prepareHelmDeps")

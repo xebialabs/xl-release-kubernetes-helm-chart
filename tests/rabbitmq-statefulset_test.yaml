@@ -1,5 +1,7 @@
 suite: Test Rabbitmq Statefulset
 templates:
+  - charts/rabbitmq/templates/config-secret.yaml
+  - charts/rabbitmq/templates/secrets.yaml
   - charts/rabbitmq/templates/statefulset.yaml
 release:
   name: test-release
@@ -8,6 +10,7 @@ release:
   upgrade: true
 tests:
   - it: basic should work
+    template: charts/rabbitmq/templates/statefulset.yaml
     values:
       - ./values/basic.yaml
     asserts:
@@ -18,15 +21,16 @@ tests:
           value: test-release-rabbitmq
       - equal:
           path: spec.replicas
-          value: 1
+          value: 3
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/bitnami/rabbitmq:3.11.10-debian-11-r0
+          value: docker.io/bitnami/rabbitmq:3.12.7-debian-11-r0
   - it: rabbitmq replicas
+    template: charts/rabbitmq/templates/statefulset.yaml
     values:
       - ./values/basic.yaml
       - ./values/replicated.yaml
     asserts:
       - equal:
           path: spec.replicas
-          value: 3
+          value: 2

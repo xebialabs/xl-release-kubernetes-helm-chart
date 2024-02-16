@@ -1,5 +1,6 @@
 suite: Test Postgresql Statefulset
 templates:
+  - charts/postgresql/templates/primary/extended-configmap.yaml
   - charts/postgresql/templates/primary/statefulset.yaml
 release:
   name: test-release
@@ -8,6 +9,7 @@ release:
   upgrade: true
 tests:
   - it: basic should work
+    template: charts/postgresql/templates/primary/statefulset.yaml
     values:
       - ./values/basic.yaml
     asserts:
@@ -21,4 +23,4 @@ tests:
           value: 1
       - equal:
           path: spec.template.spec.containers[0].image
-          value: docker.io/bitnami/postgresql:14.5.0-debian-11-r35
+          value: docker.io/bitnami/postgresql:15.4.0-debian-11-r54
