@@ -2,7 +2,7 @@
 sidebar_position: 22
 ---
 
-#  Migrate an existing Digital.ai Release installation to Kubernetes (v23.3 and v24.1)
+#  Planning migration of an existing Digital.ai Release installation to Kubernetes (v23.3 and v24.1)
 
 :::caution
 This is internal documentation.
@@ -13,10 +13,10 @@ The document can be used only if it was recommended by the Support Team.
 This document is for a Release version from 23.3 and up.
 :::
 
-Following steps should cover the general process of moving your Digital.ai software onto a Kubernetes platform. 
+Following steps should cover the general process for planning move of your Digital.ai Release software onto a Kubernetes platform. 
 Note that details can vary depending on your specific situation, needs, and pre-existing infrastructure.
 
-:::warning:
+:::warning
 This guide is technical in nature. Before starting the migration process, make sure you have a proficient level of understanding about your 
 existing infrastructure, Kubernetes, and the Digital.ai Release products.
 If you have more specific questions about any of these steps, feel free to ask!
