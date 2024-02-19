@@ -1,5 +1,7 @@
 suite: Test Release Statefulset
 templates:
+  - configuration.yaml
+  - secrets.yaml
   - release-statefulset.yaml
   - NOTES.txt
 release:
@@ -29,11 +31,26 @@ tests:
           path: metadata.name
           value: test-release-digitalai-release
       - equal:
+          path: metadata.namespace
+          value: test-namespace
+      - equal:
           path: spec.replicas
           value: 1
-      - equal:
+      - matchRegex:
           path: spec.template.spec.containers[0].image
-          value: docker.io/xebialabsunsupported/xl-release:22.3.1
+          pattern: xl-release:*
+  - it: basic should work extended tests
+    template: release-statefulset.yaml
+    values:
+      - ./values/basic.yaml
+    asserts:
+      - exists:
+          path: spec.template.metadata.annotations.checksum/config
+      - exists:
+          path: spec.template.metadata.annotations.checksum/secret
+      - equal:
+          path: spec.template.spec.terminationGracePeriodSeconds
+          value: 10
   - it: release replicas
     template: release-statefulset.yaml
     values:
@@ -42,7 +59,7 @@ tests:
     asserts:
       - equal:
           path: spec.replicas
-          value: 3
+          value: 2
   - it: diagnostic enabled
     template: release-statefulset.yaml
     values:
@@ -50,11 +67,11 @@ tests:
       - ./values/diagnostic-default.yaml
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].command
+          path: spec.template.spec.containers[?(@.name == "release")].command
           value:
             - /opt/xebialabs/tini
       - equal:
-          path: spec.template.spec.containers[0].args
+          path: spec.template.spec.containers[?(@.name == "release")].args
           value:
             - --
             - sleep
@@ -66,13 +83,13 @@ tests:
       - ./values/diagnostic-busybox.yaml
     asserts:
       - equal:
-          path: spec.template.spec.containers[0].image
+          path: spec.template.spec.containers[?(@.name == "release")].image
           value: docker.io/library/busybox:stable
       - equal:
-          path: spec.template.spec.containers[0].command
+          path: spec.template.spec.containers[?(@.name == "release")].command
           value:
             - sleep
       - equal:
-          path: spec.template.spec.containers[0].args
+          path: spec.template.spec.containers[?(@.name == "release")].args
           value:
             - infinity

@@ -463,9 +463,9 @@ extraDeploy: [ ]
 commonAnnotations: { }
 ## @extra commonLabels Labels to add to all deployed objects
 ##
-commonLabels:
-  ## @param commonLabels.app.kubernetes.io/version Labels Release server version
-  app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+commonLabels: { }
+## @param commonLabels.app.kubernetes.io/version Labels Release server version
+## Eg. app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
 ## Enable diagnostic mode in the deployment
 ##
 diagnosticMode:
