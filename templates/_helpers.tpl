@@ -371,6 +371,7 @@ Compile all warnings into a single message, and call fail.
 {{- $messages = append $messages (include "release.validateValues.ingress.tls" .) -}}
 {{- $messages = append $messages (include "release.validateValues.keystore.passphrase" .) -}}
 {{- $messages = append $messages (include "release.validateValues.license" .) -}}
+{{- $messages = append $messages (include "release.validateValues.http2" .) -}}
 {{- if .Values.auth.adminPassword -}}
 {{- $messages = append $messages (include "validate.existing.secret" (dict "value" .Values.auth.adminPassword "context" $) ) -}}
 {{- end -}}
@@ -418,6 +419,16 @@ Validate values of Release - license and licenseAcceptEula
 release: license or licenseAcceptEula
     The `license` is empty. It is mandatory to set if `licenseAcceptEula` is disabled.
 {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Validate values of Release - http2
+*/}}
+{{- define "release.validateValues.http2" -}}
+{{- if and .Values.http2.enabled (not .Values.ssl.enabled) }}
+release: http2.enabled and ssl.enabled
+    The `ssl.enabled` is false. It is mandatory to enable ssl setup in case of http2 enabled configuration.
 {{- end -}}
 {{- end -}}
 

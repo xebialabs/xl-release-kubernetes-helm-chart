@@ -307,6 +307,8 @@ truststore:
   password: 
   ## @param truststore.truststore Truststore file base64 encoded
   truststore: {}
+  ## @param truststore.params Truststore params in the command line
+  params: "{{- if .Values.truststore.truststore }} -Djavax.net.ssl.trustStore=$(TRUSTSTORE) -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD) -Djavax.net.ssl.trustStoreType=$(TRUSTSTORE_TYPE){{- end }}"
 
 ## Network Policy configuration
 ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
@@ -480,6 +482,15 @@ diagnosticMode:
     - --
     - sleep
     - infinity
+## Enable debug mode in the deployment
+##
+debugMode:
+  ## @param debugMode.enabled Enable debug mode (it starts all process with debug agent)
+  ##
+  enabled: false
+  ## @param debugMode.remoteJvmParams Agent lib configuration line with port. Do port forwarding to the port you would like to use.
+  ##
+  remoteJvmParams: "{{- if .Values.debugMode.enabled }} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:8001{{- end }}"
 
 ## @param hostAliases Deployment pod host aliases
 ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
