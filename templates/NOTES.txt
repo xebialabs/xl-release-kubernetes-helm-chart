@@ -6,7 +6,7 @@
 {{ include "release.serverUrl" . }}
 {{- end }}
 {{- if .Values.ssl.enabled }}
-{{- if .Values.http2.enabled }}
+{{- if eq .Values.appProtocol "http2" }}
 ## To connect over HTTP2 port forward on port {{ .Values.containerPorts.releaseHttps }} use:
 kubectl port-forward service/{{ include "common.names.fullname" . }} {{ .Values.containerPorts.releaseHttps }}:{{ .Values.service.portNames.releaseHttps }}
 {{- else }}

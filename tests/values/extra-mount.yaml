@@ -1,0 +1,4 @@
+extraVolumeMounts:
+  - name: data
+    mountPath: /opt/xebialabs/xl-release-server/log
+    subPath: log
