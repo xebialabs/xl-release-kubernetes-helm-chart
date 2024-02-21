@@ -288,7 +288,7 @@ spec:
             {{- end -}}
             {{- end }}
             - name: XLR_HTTP2_ENABLED
-              value: {{ .Values.http2.enabled | quote }}
+              value: {{ (eq .Values.appProtocol "http2") | quote }}
             {{- if .Values.ssl.enabled }}
             - name: SSL
               value: {{ .Values.ssl.enabled | quote }}

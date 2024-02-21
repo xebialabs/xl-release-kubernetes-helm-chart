@@ -226,7 +226,10 @@ hooks:
 
           KEYSTORE_FILE_PATH="/opt/xebialabs/xl-release-server/conf/keystore.{{- .Values.ssl.keystoreType -}}"
           CERT_FILE_PATH="/opt/xebialabs/xl-release-server/conf/public.cert"
-          kubectl create secret generic {{ include "common.tplvalues.render" ( dict "value" $.Values.hooks.genSelfSigned.name "context" $ ) }} --from-file=$KEYSTORE_FILE_PATH --from-file=$CERT_FILE_PATH
+          kubectl create secret generic {{ include "common.tplvalues.render" ( dict "value" $.Values.hooks.genSelfSigned.name "context" $ ) }} \
+            --from-file=$KEYSTORE_FILE_PATH \
+            --from-file=$CERT_FILE_PATH \
+            --from-literal=host={{- include "release.hostname" . -}}
 
 ## Release Authentication parameters
 ##
@@ -234,9 +237,6 @@ auth:
   ## @param auth.adminPassword Admin password for Release. If user does not provide password, random 10 character alphanumeric string will be generated.
   adminPassword: 
 
-http2:
-  ## @param http2.enabled Enable HTTP2 communication on Release
-  enabled: false
 ssl:
   ## @param ssl.enabled Enable SSL to be used on Release
   enabled: false
