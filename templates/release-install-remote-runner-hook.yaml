@@ -1,0 +1,107 @@
+{{- if and .Values.hooks.installReleaseRunner.enabled }}
+{{- $name := include "common.tplvalues.render" ( dict "value" .Values.hooks.installReleaseRunner.name "context" $ ) -}}
+{{- $rrExists := (lookup "v1" "statefulset" (include "common.names.namespace" . | quote) ".Values.hooks.installReleaseRunner.releaseName") | default "" -}}
+{{- if not $rrExists }}
+---
+kind: Role
+apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": {{ .Values.hooks.installReleaseRunner.deletePolicy }}
+    "helm.sh/hook-weight": "0"
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["list", "get"]
+---
+kind: RoleBinding
+apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": {{ .Values.hooks.installReleaseRunner.deletePolicy }}
+    "helm.sh/hook-weight": "0"
+subjects:
+  - kind: ServiceAccount
+    name: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ $name }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+    {{- if .Values.commonLabels }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.commonLabels "context" $ ) | nindent 4 }}
+    {{- end }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": {{ .Values.hooks.installReleaseRunner.deletePolicy }}
+    "helm.sh/hook-weight": "0"
+spec:
+  template:
+    metadata:
+      name: {{ $name }}
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.podLabels "context" $) | nindent 8 }}
+        {{- end }}
+    spec:
+      restartPolicy: Never
+      {{- include "release.installReleaseRunner.imagePullSecrets" . | nindent 6 }}
+      initContainers:
+        - name: wait-for-release
+          image: {{ include "release.busyBox.image" . }}
+          imagePullPolicy: {{ .Values.busyBox.image.pullPolicy | quote }}
+          command:
+            - /bin/sh
+          args:
+            - -ec
+            - |
+              until nc -z -w 2 -v $RELEASE_SVC $RELEASE_PORT && echo release ok; do
+                sleep 2;
+              done;
+          env:
+            - name: RELEASE_SVC
+              value: {{ include "common.names.fullname" . }}
+            - name: RELEASE_PORT
+              {{- if .Values.ssl.enabled }}
+              value: {{ .Values.service.ports.releaseHttps | quote }}
+              {{- else }}
+              value: {{ .Values.service.ports.releaseHttp | quote }}
+              {{- end }}
+      containers:
+        - name: install-remote-runner-job
+          image: {{ template "release.installReleaseRunner.image" . }}
+          imagePullPolicy: {{ .Values.hooks.installReleaseRunner.image.pullPolicy | quote }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.installReleaseRunner.installCommand "context" $) | nindent 12 }}
+      {{- if .Values.hooks.installReleaseRunner.answersSecret }}
+          volumeMounts:
+            - name: answers-volume
+              readOnly: true
+              mountPath: /opt/xebialabs/xl-client/generated_answers.yaml
+              subPath: generated_answers.yaml
+      volumes:
+        - name: answers-volume
+          secret:
+            secretName: {{ .Values.hooks.installReleaseRunner.answersSecret }}
+      {{- end }}
+{{- end }}
+{{- end }}

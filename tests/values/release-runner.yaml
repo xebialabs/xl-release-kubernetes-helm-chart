@@ -1,0 +1,7 @@
+hooks:
+  installReleaseRunner:
+    enabled: true
+    releaseName: remote-runner
+    answersSecret: remote-runner-answers
+    image:
+      pullPolicy: Always

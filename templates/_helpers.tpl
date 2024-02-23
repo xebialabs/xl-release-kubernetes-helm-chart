@@ -63,6 +63,13 @@ Return the proper Self signed get image name
 {{- end -}}
 
 {{/*
+Return the proper Self signed get image name
+*/}}
+{{- define "release.installReleaseRunner.image" -}}
+{{ include "release.images.image" (dict "imageRoot" .Values.hooks.installReleaseRunner.image "global" .Values.global "context" .) }}
+{{- end -}}
+
+{{/*
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "release.imagePullSecrets" -}}
@@ -86,6 +93,15 @@ Return the proper Docker Image Registry Secret Names
 {{- define "release.genSelfSigned.imagePullSecrets" -}}
 {{- if or .Values.global.imagePullSecrets .Values.hooks.genSelfSigned.image.pullSecrets }}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.genSelfSigned.image) "context" $) }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the proper Docker Image Registry Secret Names
+*/}}
+{{- define "release.installReleaseRunner.imagePullSecrets" -}}
+{{- if or .Values.global.imagePullSecrets .Values.hooks.installReleaseRunner.image.pullSecrets }}
+{{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.installReleaseRunner.image) "context" $) }}
 {{- end -}}
 {{- end -}}
 
