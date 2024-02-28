@@ -426,9 +426,9 @@ release: license or licenseAcceptEula
 Validate values of Release - http2
 */}}
 {{- define "release.validateValues.http2" -}}
-{{- if and .Values.http2.enabled (not .Values.ssl.enabled) }}
-release: http2.enabled and ssl.enabled
-    The `ssl.enabled` is false. It is mandatory to enable ssl setup in case of http2 enabled configuration.
+{{- if and (eq .Values.appProtocol "http2") (not .Values.ssl.enabled) }}
+release: appProtocol and ssl.enabled
+    The `ssl.enabled` is false. It is mandatory to enable ssl setup in case of `appProtocol` http2.
 {{- end -}}
 {{- end -}}
 
