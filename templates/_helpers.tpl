@@ -473,13 +473,13 @@ Params:
   {{- tpl (.source | toYaml) .context }}
 {{- else -}}
   {{- if .value -}}
-    {{- if kindIs "string" .value -}}
+    {{- if kindIs "map" .value -}}
 valueFrom:
     secretKeyRef:
         name: {{ .defaultName }}
         key: {{ .defaultKey }}
     {{- else -}}
-        {{- tpl (.value | toYaml) .context }}
+value: {{- tpl (.value | toYaml) .context | indent 1}}
     {{- end -}}
   {{- else -}}
     {{- if .default -}}
