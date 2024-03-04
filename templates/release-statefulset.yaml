@@ -335,7 +335,7 @@ spec:
           readinessProbe:
             {{- if .Values.http2.enabled }}
             tcpSocket:
-              port: http2
+              port: {{ .Values.service.portNames.releaseHttps }}
             {{- else }}
             httpGet:
               path: {{ .Values.appContextRoot }}
