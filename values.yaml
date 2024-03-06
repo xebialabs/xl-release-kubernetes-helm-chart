@@ -231,6 +231,51 @@ hooks:
             --from-file=$CERT_FILE_PATH \
             --from-literal=host={{- include "release.hostname" . -}}
 
+  installReleaseRunner:
+    ## @param hooks.installReleaseRunner.enabled set to true to support installation of the Remote Runner after Release installation
+    enabled: false
+    ## @param hooks.installReleaseRunner.name Name of the resources that will be used during hook execution
+    name: '{{ include "release.name" . }}-install-runner'
+    ## @param hooks.installReleaseRunner.deletePolicy Helm hook delete policy
+    deletePolicy: "before-hook-creation,hook-succeeded"
+    ## @param hooks.installReleaseRunner.releaseName The release name for Release Runner installation
+    releaseName: ""
+    ## @param hooks.installReleaseRunner.answersSecret The secret that will be used during Release Runner installation
+    answersSecret: ""
+    ## @param hooks.installReleaseRunner.installCommand The command for Release Runner installation
+    installCommand:
+      - /opt/xebialabs/xl-client/xl
+      - kube
+      - upgrade
+      - --skip-context-check
+      - --local-repo
+      - /opt/xebialabs/xl-op-blueprints
+      - --answers
+      - /opt/xebialabs/xl-client/generated_answers.yaml
+      
+    ## @param hooks.installReleaseRunner.image.registry getLicense hook container image registry
+    ## @param hooks.installReleaseRunner.image.repository getLicense hook container image repository
+    ## @param hooks.installReleaseRunner.image.tag getLicense hook container image tag
+    ## @param hooks.installReleaseRunner.image.pullPolicy getLicense hook container image pull policy
+    ## @param hooks.installReleaseRunner.image.pullSecrets Specify docker-registry secret names as an array
+    ##
+    image:
+      registry: docker.io
+      repository: xebialabsunsupported/xl-client
+      tag: 24.1.0-219.1500
+      ## Specify a imagePullPolicy
+      ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+      ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+      ##
+      pullPolicy: IfNotPresent
+      ## Optionally specify an array of imagePullSecrets (secrets must be manually created in the namespace)
+      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+      ## Example:
+      ## pullSecrets:
+      ##   - myRegistryKeySecretName
+      ##
+      pullSecrets: []
+
 ## Release Authentication parameters
 ##
 auth:
