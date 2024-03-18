@@ -88,7 +88,7 @@ spec:
               value: {{ .Values.service.ports.releaseHttp | quote }}
               {{- end }}
       containers:
-        - name: install-remote-runner-job
+        - name: install-runner-job
           image: {{ template "release.installReleaseRunner.image" . }}
           imagePullPolicy: {{ .Values.hooks.installReleaseRunner.image.pullPolicy | quote }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.installReleaseRunner.installCommand "context" $) | nindent 12 }}
