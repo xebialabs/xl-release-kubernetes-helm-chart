@@ -57,7 +57,7 @@ helm delete dair -n digitalai
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 Uninstalling the chart will not remove the PVCs, you need to delete them manually.
 
-To delete all resources with one command (if in the namespace is only remote-runner installed) you can delete namespace with:
+To delete all resources with one command (if in the namespace is only release-runner installed) you can delete namespace with:
 ```shell
 kubectl delete namespace digitalai
 ```
