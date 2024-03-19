@@ -1,4 +1,4 @@
 image:
     repository: xebialabsunsupported/xl-release
     pullPolicy: Always
-    tag: 23.3.4
+    tag: 23.3.5
