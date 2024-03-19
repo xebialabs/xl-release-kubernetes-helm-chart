@@ -1,11 +1,11 @@
 {{/* vim: set filetype=mustache: */}}
 
 {{- define "postgresql.subchart" -}}
-{{ include "postgresql.primary.fullname" (merge .Subcharts.postgresql (dict "nameOverride" "postgresql")) }}
+{{ include "postgresql.v1.primary.fullname" (merge .Subcharts.postgresql (dict "nameOverride" "postgresql")) }}
 {{- end -}}
 
 {{- define "release.postgresql.service.port" -}}
-{{ include "postgresql.service.port" (dict "Values" (dict "global" .Values.global "primary" .Values.postgresql.primary)) }}
+{{ include "postgresql.v1.service.port" (dict "Values" (dict "global" .Values.global "primary" .Values.postgresql.primary)) }}
 {{- end -}}
 
 {{- define "rabbitmq.subchart" -}}
