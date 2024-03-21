@@ -333,7 +333,9 @@ external:
     ## @param external.mq.username External message queue broker username for Release
     username: 
     ## @param external.mq.password External message queue broker password for Release
-    password: 
+    password:
+    ## @param external.mq.queueType External rabbitmq message queue type. Which can be either classic(default) or quorum
+    queueType: "classic"
 
 keystore:
   ## @param keystore.passphrase Set passphrase for the keystore
