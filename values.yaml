@@ -105,7 +105,7 @@ hooks:
     image:
       registry: docker.io
       repository: bitnami/kubectl
-      tag: latest
+      tag: 1.28.7-debian-12-r3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -177,7 +177,7 @@ hooks:
     image:
       registry: docker.io
       repository: bitnami/kubectl
-      tag: latest
+      tag: 1.28.7-debian-12-r3
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -262,7 +262,7 @@ hooks:
     image:
       registry: docker.io
       repository: xebialabsunsupported/xl-client
-      tag: 24.1.0-219.1500
+      tag: "{{ .Chart.AppVersion }}"
       ## Specify a imagePullPolicy
       ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
       ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -1344,8 +1344,8 @@ volumePermissions:
   ##
   image:
     registry: docker.io
-    repository: bitnami/bitnami-shell
-    tag: 11-debian-11-r92
+    repository: bitnami/os-shell
+    tag: 12-debian-12-r16
     digest: ""
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -1458,6 +1458,15 @@ haproxy-ingress:
 nginx-ingress-controller:
   ## @param nginx-ingress-controller.install Enable NGINX Ingress Controller helm subchart installation
   install: false
+  ## @param nginx-ingress-controller.image.tag NGINX Ingress Controller image tag (immutable tags are recommended)
+  image:
+    tag: 1.9.6-debian-12-r8
+  ## Default 404 backend
+  ##
+  defaultBackend:
+    ## @skip nginx-ingress-controller.defaultBackend.image.tag Default backend image tag (immutable tags are recommended)
+    image:
+      tag: 1.25.4-debian-12-r3
   ## @extra nginx-ingress-controller.extraArgs Additional command line arguments to pass to nginx-ingress-controller
   ## E.g. to specify the default SSL certificate you can use
   ## extraArgs:
@@ -1493,7 +1502,7 @@ postgresql:
   install: true
   ## @param postgresql.image.tag PostgreSQL image tag (immutable tags are recommended)
   image:
-    tag: 15.4.0-debian-11-r54
+    tag: 15.6.0-debian-12-r7
   ## @section PostgreSQL Primary parameters
   ##
   primary:
@@ -1504,7 +1513,7 @@ postgresql:
       ## @param postgresql.primary.initdb.scriptsSecret Secret with scripts to be run at first boot (in case it contains sensitive information)
       ## NOTE: This can work along `primary.initdb.scripts` or `primary.initdb.scriptsConfigMap`
       ##
-      scriptsSecret: '{{ include "postgresql.primary.fullname" . }}-release'
+      scriptsSecret: '{{ include "postgresql.v1.primary.fullname" . }}-release'
     ## @param postgresql.primary.extendedConfiguration Extended PostgreSQL Primary configuration (appended to main or default configuration)
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#allow-settings-to-be-loaded-from-files-other-than-the-default-postgresqlconf
     ##
@@ -1587,7 +1596,7 @@ postgresql:
     enabled: true
     ## @param postgresql.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
     image:
-      tag: 11-debian-11-r90
+      tag: 12-debian-12-r16
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
@@ -1596,7 +1605,7 @@ rabbitmq:
   install: true
   ## @param rabbitmq.image.tag RabbitMQ image tag (immutable tags are recommended)
   image:
-    tag: 3.12.7-debian-11-r0
+    tag: 3.12.13-debian-12-r2
   ## Clustering settings
   ##
   clustering:
@@ -1692,4 +1701,4 @@ rabbitmq:
     enabled: true
     ## @param rabbitmq.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
     image:
-      tag: 11-debian-11-r90
+      tag: 12-debian-12-r16
