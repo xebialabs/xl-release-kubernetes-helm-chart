@@ -25,7 +25,6 @@ buildscript {
         classpath("com.xebialabs.gradle.plugins:gradle-commit:${properties["gradleCommitPluginVersion"]}")
         classpath("com.xebialabs.gradle.plugins:gradle-xl-defaults-plugin:${properties["xlDefaultsPluginVersion"]}")
         classpath("com.xebialabs.gradle.plugins:gradle-xl-plugins-plugin:${properties["xlPluginsPluginVersion"]}")
-        classpath("com.xebialabs.gradle.plugins:integration-server-gradle-plugin:${properties["integrationServerGradlePluginVersion"]}")
     }
 }
 
@@ -39,10 +38,8 @@ plugins {
 }
 
 apply(plugin = "ai.digital.gradle-commit")
-apply(plugin = "integration.server")
 apply(plugin = "com.xebialabs.dependency")
 
-apply(from = "$rootDir/integration-tests/base-test-configuration.gradle")
 group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
@@ -172,7 +169,7 @@ tasks {
 
     register<Copy>("prepareHelmPackage") {
         group = "helm"
-        dependsOn("dumpVersion", "unzipHelm", ":integration-tests:jar", ":integration-tests:inspectClassesForKotlinIC")
+        dependsOn("dumpVersion", "unzipHelm")
         from(layout.projectDirectory)
         exclude(
             layout.buildDirectory.get().asFile.name,
@@ -241,22 +238,22 @@ tasks {
 
         standardOutput = ByteArrayOutputStream()
         errorOutput = ByteArrayOutputStream()
-      
+
         commandLine(helmCli, "plugin", "list")
         logger.lifecycle(standardOutput.toString())
-        logger.error(errorOutput.toString())        
-        
+        logger.error(errorOutput.toString())
+
         doLast {
             val unitTestPluginExists = standardOutput.toString()
             if(!unitTestPluginExists.contains("unittest")) {
                 commandLine(helmCli, "plugin", "install", "https://github.com/helm-unittest/helm-unittest")
                 logger.lifecycle(standardOutput.toString())
-                logger.error(errorOutput.toString())            
+                logger.error(errorOutput.toString())
                 logger.lifecycle("Install helm unit test plugin finished")
-            } else {        
+            } else {
                 logger.info("Plugin exists. Skipping helm unit test plugin installation")
-            }          
-        }        
+            }
+        }
     }
 
     register<Exec>("runHelmUnitTest") {
