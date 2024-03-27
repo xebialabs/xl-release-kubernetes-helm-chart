@@ -22,7 +22,6 @@ buildscript {
         classpath("com.xebialabs.gradle.plugins:gradle-commit:${properties["gradleCommitPluginVersion"]}")
         classpath("com.xebialabs.gradle.plugins:gradle-xl-defaults-plugin:${properties["xlDefaultsPluginVersion"]}")
         classpath("com.xebialabs.gradle.plugins:gradle-xl-plugins-plugin:${properties["xlPluginsPluginVersion"]}")
-        classpath("com.xebialabs.gradle.plugins:integration-server-gradle-plugin:${properties["integrationServerGradlePluginVersion"]}")
     }
 }
 
@@ -35,11 +34,9 @@ plugins {
     id("maven-publish")
 }
 
-apply(plugin = "integration.server")
 apply(plugin = "ai.digital.gradle-commit")
 apply(plugin = "com.xebialabs.dependency")
 
-apply(from = "$rootDir/integration-tests/base-test-configuration.gradle")
 group = "ai.digital.release.helm"
 project.defaultTasks = listOf("build")
 
