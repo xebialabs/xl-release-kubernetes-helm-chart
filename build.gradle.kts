@@ -191,28 +191,9 @@ tasks {
         }
     }
 
-    register<Copy>("prepareValuesYaml") {
-        group = "helm"
-        dependsOn("prepareHelmPackage")
-        from(buildXlrOperatorDir)
-        include("values-nginx.yaml")
-        into(buildXlrOperatorDir)
-        rename("values-nginx.yaml", "values.yaml")
-        doLast {
-            exec {
-                workingDir(buildXlrOperatorDir)
-                commandLine("rm", "-f", "values-haproxy.yaml")
-            }
-            exec {
-                workingDir(buildXlrOperatorDir)
-                commandLine("rm", "-f", "values-nginx.yaml")
-            }
-        }
-    }
-
     register<Exec>("prepareHelmDeps") {
         group = "helm"
-        dependsOn("prepareValuesYaml")
+        dependsOn("prepareHelmPackage")
         workingDir(buildXlrOperatorDir)
         commandLine(helmCli, "dependency", "update", ".")
 
@@ -232,8 +213,24 @@ tasks {
         }
     }
 
+    register<Exec>("runHelmLint") {
+        group = "helm-test"
+        dependsOn("prepareHelmDeps")
+
+        commandLine(helmCli, "lint", "-f", "tests/values/basic.yaml")
+
+        standardOutput = ByteArrayOutputStream()
+        errorOutput = ByteArrayOutputStream()
+
+        doLast {
+            logger.lifecycle(standardOutput.toString())
+            logger.error(errorOutput.toString())
+            logger.lifecycle("Finished running helm lint")
+        }
+    }
+
     register<Exec>("installHelmUnitTestPlugin") {
-        group = "helm"
+        group = "helm-test"
         dependsOn("prepareHelmDeps")
 
         standardOutput = ByteArrayOutputStream()
@@ -257,10 +254,10 @@ tasks {
     }
 
     register<Exec>("runHelmUnitTest") {
-        group = "helm"
-        dependsOn("installHelmUnitTestPlugin")
+        group = "helm-test"
+        dependsOn("installHelmUnitTestPlugin", "runHelmLint")
 
-        commandLine(helmCli, "unittest", ".")
+        commandLine(helmCli, "unittest", "--file=tests/unit/*_test.yaml", ".")
 
         standardOutput = ByteArrayOutputStream()
         errorOutput = ByteArrayOutputStream()

@@ -23,7 +23,7 @@ tests:
   - it: basic should work
     template: release-statefulset.yaml
     values:
-      - ./values/basic.yaml
+      - ../values/basic.yaml
     asserts:
       - isKind:
           of: StatefulSet
@@ -42,7 +42,7 @@ tests:
   - it: basic should work extended tests
     template: release-statefulset.yaml
     values:
-      - ./values/basic.yaml
+      - ../values/basic.yaml
     asserts:
       - exists:
           path: spec.template.metadata.annotations.checksum/config
@@ -54,8 +54,8 @@ tests:
   - it: release replicas
     template: release-statefulset.yaml
     values:
-      - ./values/basic.yaml
-      - ./values/replicated.yaml
+      - ../values/basic.yaml
+      - ../values/replicated.yaml
     asserts:
       - equal:
           path: spec.replicas
@@ -63,8 +63,8 @@ tests:
   - it: diagnostic enabled
     template: release-statefulset.yaml
     values:
-      - ./values/basic.yaml
-      - ./values/diagnostic-default.yaml
+      - ../values/basic.yaml
+      - ../values/diagnostic-default.yaml
     asserts:
       - equal:
           path: spec.template.spec.containers[?(@.name == "release")].command
@@ -79,8 +79,8 @@ tests:
   - it: diagnostic enhancement enabled
     template: release-statefulset.yaml
     values:
-      - ./values/basic.yaml
-      - ./values/diagnostic-busybox.yaml
+      - ../values/basic.yaml
+      - ../values/diagnostic-busybox.yaml
     asserts:
       - equal:
           path: spec.template.spec.containers[?(@.name == "release")].image

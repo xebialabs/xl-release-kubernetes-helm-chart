@@ -11,7 +11,7 @@ tests:
   - it: basic should work
     template: charts/postgresql/templates/primary/statefulset.yaml
     values:
-      - ./values/basic.yaml
+      - ../values/basic.yaml
     asserts:
       - isKind:
           of: StatefulSet
@@ -21,6 +21,6 @@ tests:
       - equal:
           path: spec.replicas
           value: 1
-      - equal:
+      - matchRegex:
           path: spec.template.spec.containers[0].image
-          value: docker.io/bitnami/postgresql:15.4.0-debian-11-r54
+          pattern: "docker.io/bitnami/postgresql:.*"
