@@ -1,0 +1,9 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestSuite
+kindConfig: e2e/kind.yml
+testDirs:
+- tests/e2e/helm/
+# namespace: test-release
+reportName: release-helm-basic
+reportFormat: json
+timeout: 200
