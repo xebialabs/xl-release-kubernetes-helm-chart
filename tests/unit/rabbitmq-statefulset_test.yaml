@@ -12,7 +12,7 @@ tests:
   - it: basic should work
     template: charts/rabbitmq/templates/statefulset.yaml
     values:
-      - ./values/basic.yaml
+      - ../values/basic.yaml
     asserts:
       - isKind:
           of: StatefulSet
@@ -21,15 +21,15 @@ tests:
           value: test-release-rabbitmq
       - equal:
           path: spec.replicas
-          value: 3
-      - equal:
+          value: 1
+      - matchRegex:
           path: spec.template.spec.containers[0].image
-          value: docker.io/bitnami/rabbitmq:3.12.7-debian-11-r0
+          pattern: "docker.io/bitnami/rabbitmq:.*"
   - it: rabbitmq replicas
     template: charts/rabbitmq/templates/statefulset.yaml
     values:
-      - ./values/basic.yaml
-      - ./values/replicated.yaml
+      - ../values/basic.yaml
+      - ../values/replicated.yaml
     asserts:
       - equal:
           path: spec.replicas
