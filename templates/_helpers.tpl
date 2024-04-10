@@ -380,7 +380,7 @@ Get the mq password
 {{- end -}}
 
 {{/*
-Get the rabbitmq queue type
+Get the external rabbitmq queue type
 */}}
 {{- define "release.mqQueueType" -}}
     {{- if .Values.external.mq.queueType -}}
@@ -389,6 +389,18 @@ Get the rabbitmq queue type
         "classic"
     {{- end -}}
 {{- end -}}
+
+{{/*
+Get the external queue connector type
+*/}}
+{{- define "release.mqQueueConnector" -}}
+    {{- if .Values.external.mq.connector -}}
+        {{ .Values.external.mq.connector | quote }}
+    {{- else -}}
+        "rabbitmq-jms"
+    {{- end -}}
+{{- end -}}
+
 
 {{/*
 Compile all warnings into a single message, and call fail.
