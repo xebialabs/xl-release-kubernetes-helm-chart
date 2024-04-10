@@ -250,6 +250,8 @@ spec:
               {{- include "render.value-secret" (dict  "value" (include "release.mqPassword" .) "source" .Values.external.mq.password "sourceEnabled" .Values.external.mq.enabled "defaultName" (include "common.names.fullname" .) "defaultKey" "rabbitmqPassword" "context" $ ) | nindent 14 }}
             - name: XLR_TASK_QUEUE_TYPE
               value: {{ include "release.mqQueueType" . }}
+            - name: XLR_TASK_QUEUE_CONNECTOR_TYPE
+              value: {{ include "release.mqQueueConnector" . }}              
              {{- end }}
             {{- if .Values.keystore.keystore }}
             - name: REPOSITORY_KEYSTORE
