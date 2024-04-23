@@ -9,3 +9,4 @@ bin/
 values-*.yaml
 database/
 index.*
+kubeconfig

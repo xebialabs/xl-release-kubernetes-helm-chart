@@ -1,0 +1,11 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+unitTest: false
+commands:
+- command: helm delete dair --cascade foreground
+  namespaced: true
+  ignoreFailure: true
+- command: helm install dair $HELM_REL_PATH/.. --values $HELM_REL_PATH/values/basic.yaml --values $HELM_REL_PATH/values/xldevdocker.yaml 
+  namespaced: true
+assert:
+-  ../../asserts/running-pods.yaml

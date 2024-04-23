@@ -36,3 +36,4 @@ tests-values/
 scripts/
 values-*.yaml
 .env
+kubeconfig

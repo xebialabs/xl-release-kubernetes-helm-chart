@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dair-rabbitmq-0
+status:
+  phase: Running
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dair-postgresql-0
+status:
+  phase: Running
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dair-digitalai-release-0
+status:
+  phase: Running
