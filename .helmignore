@@ -28,6 +28,7 @@ buildSrc/
 documentation/
 integration-tests/
 docs/
+operator/
 old-chart/
 build/
 tests/

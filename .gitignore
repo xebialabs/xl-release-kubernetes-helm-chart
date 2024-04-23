@@ -7,3 +7,5 @@ Chart.lock
 .DS_Store
 bin/
 values-*.yaml
+database/
+index.*
