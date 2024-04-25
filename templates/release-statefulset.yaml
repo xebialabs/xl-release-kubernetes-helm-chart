@@ -87,7 +87,7 @@ spec:
         {{- if not .Values.diagnosticMode.enabled }}
         {{- if and (not .Values.external.db.enabled) .Values.postgresql.install }}
         - name: wait-for-postgresql
-          image: {{ include "release.busyBox.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.busyBox.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.busyBox.image.pullPolicy | quote }}
           command:
             - /bin/sh
@@ -105,7 +105,7 @@ spec:
         {{- end }}
         {{- if and (not .Values.external.mq.enabled) .Values.rabbitmq.install }}
         - name: wait-for-rabbitmq
-          image: {{ include "release.busyBox.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.busyBox.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.busyBox.image.pullPolicy | quote }}
           command:
             - /bin/sh
@@ -124,7 +124,7 @@ spec:
         {{- end }}
         {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
         - name: volume-permissions
-          image: {{ include "release.volumePermissions.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.volumePermissions.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy | quote }}
           command:
             - /bin/bash
@@ -149,7 +149,7 @@ spec:
       {{- end }}
       containers:
         - name: release
-          image: {{ template "release.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           {{- if .Values.containerSecurityContext.enabled }}
           securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
@@ -251,7 +251,7 @@ spec:
             - name: XLR_TASK_QUEUE_TYPE
               value: {{ include "release.mqQueueType" . }}
             - name: XLR_TASK_QUEUE_CONNECTOR_TYPE
-              value: {{ include "release.mqQueueConnector" . }}              
+              value: {{ include "release.mqQueueConnector" . }}
              {{- end }}
             {{- if .Values.keystore.keystore }}
             - name: REPOSITORY_KEYSTORE

@@ -21,52 +21,38 @@
 {{- end -}}
 {{- end -}}
 
+
 {{/*
-Return the proper image name
-{{ include "common.images.image" ( dict "imageRoot" .Values.path.to.the.image "global" $) }}
+Return the proper image name. Replaces template from the common package with support for one-line image definition.
+{{ include "common.images.image" ( dict "imageRoot" .Values.path.to.the.image "global" .Values.global ) }}
 */}}
-{{- define "release.images.image" -}}
-{{- $registryName := .imageRoot.registry -}}
-{{- $repositoryName := .imageRoot.repository -}}
-{{- $tag := (tpl .imageRoot.tag .context) | toString -}}
-{{- if .global }}
-    {{- if .global.imageRegistry }}
-     {{- $registryName = .global.imageRegistry -}}
+{{- define "common.images.image" -}}
+{{- $imageOneLine := .imageRoot.image -}}
+{{- if $imageOneLine }}
+    {{- print $imageOneLine -}}
+{{- else -}}
+    {{- $registryName := .imageRoot.registry -}}
+    {{- $repositoryName := .imageRoot.repository -}}
+    {{- $separator := ":" -}}
+    {{- $termination := .imageRoot.tag | toString -}}
+    {{- if .context }}
+        {{- $termination = (tpl .imageRoot.tag .context) | toString -}}
+    {{- end -}}
+    {{- if .global }}
+        {{- if .global.imageRegistry }}
+         {{- $registryName = .global.imageRegistry -}}
+        {{- end -}}
+    {{- end -}}
+    {{- if .imageRoot.digest }}
+        {{- $separator = "@" -}}
+        {{- $termination = .imageRoot.digest | toString -}}
+    {{- end -}}
+    {{- if $registryName }}
+        {{- printf "%s/%s%s%s-FIX" $registryName $repositoryName $separator $termination -}}
+    {{- else -}}
+        {{- printf "%s%s%s-FIX"  $repositoryName $separator $termination -}}
     {{- end -}}
 {{- end -}}
-{{- if $registryName }}
-{{- printf "%s/%s:%s" $registryName $repositoryName $tag -}}
-{{- else -}}
-{{- printf "%s:%s" $repositoryName $tag -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the proper Release image name
-*/}}
-{{- define "release.image" -}}
-{{ include "release.images.image" (dict "imageRoot" .Values.image "global" .Values.global "context" .) }}
-{{- end -}}
-
-{{/*
-Return the proper Licence get image name
-*/}}
-{{- define "release.getLicense.image" -}}
-{{ include "release.images.image" (dict "imageRoot" .Values.hooks.getLicense.image "global" .Values.global "context" .) }}
-{{- end -}}
-
-{{/*
-Return the proper Self signed get image name
-*/}}
-{{- define "release.genSelfSigned.image" -}}
-{{ include "release.images.image" (dict "imageRoot" .Values.hooks.genSelfSigned.image "global" .Values.global "context" .) }}
-{{- end -}}
-
-{{/*
-Return the proper Self signed get image name
-*/}}
-{{- define "release.installReleaseRunner.image" -}}
-{{ include "release.images.image" (dict "imageRoot" .Values.hooks.installReleaseRunner.image "global" .Values.global "context" .) }}
 {{- end -}}
 
 {{/*
@@ -103,20 +89,6 @@ Return the proper Docker Image Registry Secret Names
 {{- if or .Values.global.imagePullSecrets .Values.hooks.installReleaseRunner.image.pullSecrets }}
 {{ include "common.images.renderPullSecrets" (dict "images" (list .Values.hooks.installReleaseRunner.image) "context" $) }}
 {{- end -}}
-{{- end -}}
-
-{{/*
-BusyBox image
-*/}}
-{{- define "release.busyBox.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.busyBox.image "global" .Values.global) }}
-{{- end }}
-
-{{/*
-Return the proper image name (for the init container volume-permissions image)
-*/}}
-{{- define "release.volumePermissions.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.volumePermissions.image "global" .Values.global) }}
 {{- end -}}
 
 {{/*
