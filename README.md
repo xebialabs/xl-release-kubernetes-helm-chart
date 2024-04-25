@@ -4,7 +4,9 @@
 **From 10.2 version helm chart is not used directly. Use operator based installation instead.**
 
 Additional documentation can be found by this link:
-- https://xebialabs.github.io/xl-release-kubernetes-helm-chart
+- https://digital.ai/products/release/
+- https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-before-you-begin.html
+- https://digital-ai.github.io/release-helm-chart
 
 ## Prerequisites
 

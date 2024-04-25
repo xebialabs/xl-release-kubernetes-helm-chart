@@ -1,0 +1,122 @@
+apiVersion: xlr.digital.ai/v1alpha1
+kind: DigitalaiRelease
+metadata:
+  name: dairelease-placeholders
+spec:
+  k8sSetup:
+    platform: Openshift
+  auth:
+    adminPassword: '<mandatory-admin-password>'
+  licenseAcceptEula: true
+  license: '<license>'
+  appProtocol: http
+  appHostname: '<mandatory-release-hostname>'
+  keystore:
+    passphrase: '<mandatory-keystore-passphrase>'
+    keystore: '<mandatory-enter base64 encoded keystore>'
+  replicaCount: <release-replica-count>
+  external:
+    db:
+      enabled: false
+      main:
+        url: jdbc:postgresql://<xlr-db-host>:5432/<xlr-database-name>
+        username: <xlr-username>
+        password: |-
+          <xlr-password>
+        maxPoolSize: 10
+      report:
+        url: jdbc:postgresql://<xlr-report-db-host>:5432/<xlr-report-database-name>
+        username: <xlr-report-username>
+        password: |-
+          <xlr-report-password>
+        maxPoolSize: 10
+    mq:
+      enabled: false
+      url: <queue-url>
+      queueName: <queue-name>
+      username: <username>
+      password: |-
+        <password>
+      queueType: <classic-or-quorum>
+  oidc:
+    enabled: false
+    accessTokenUri: ''
+    clientId: ''
+    clientSecret: ''
+    emailClaim: ''
+    fullNameClaim: ''
+    issuer: ''
+    keyRetrievalUri: ''
+    logoutUri: ''
+    postLogoutRedirectUri: ''
+    redirectUri: ''
+    rolesClaim: ''
+    userAuthorizationUri: ''
+    userNameClaim: ''
+    scopes: '["openid"]'
+  ssl:
+    enabled: false
+    keystorePassword: ''
+    keystoreKeypassword: ''
+    keystoreType: ''
+    keystore: ''
+  hooks:
+    genSelfSigned:
+      enabled: false
+    getLicense:
+      enabled: true
+    installReleaseRunner:
+      enabled: false
+      releaseName: remote-runner
+      answersSecret: remote-runner-answers
+  persistence:
+    storageClass: '<mandatory-release-storage-class-rwx>'
+    accessModes:
+      - ReadWriteMany
+    size: '<release-storage-size>'
+  volumePermissions:
+    enabled: false
+  diagnosticMode:
+    enabled: false
+  ingress:
+    enabled: false
+  route:
+    enabled: true
+    annotations:
+      haproxy.router.openshift.io/cookie_name: JSESSIONID
+      haproxy.router.openshift.io/disable_cookies: 'false'
+      haproxy.router.openshift.io/rewrite-target: /
+      haproxy.router.openshift.io/timeout: 120s
+    hostname: '<mandatory-release-hostname>'
+    path: /
+    tls:
+      enabled: true
+      termination: edge
+  haproxy-ingress:
+    install: false
+  nginx-ingress-controller:
+    install: false
+  postgresql:
+    install: true
+    primary:
+      persistence:
+        size: '<postgresql-storage-size>'
+        storageClass: '<postgresql-storage-class-rwo>'
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+  rabbitmq:
+    install: true
+    persistence:
+      size: '<rabbitmq-storage-size>'
+      storageClass: '<rabbitmq-storage-class-rwo>'
+    replicaCount: <rabbitmq-replica-count>
+    volumePermissions:
+      enabled: true
+    securityContext:
+      enabled: true
+      fsGroup: 1001
+    podSecurityContext:
+      enabled: true
+      fsGroup: 1001
+      runAsUser: 1001

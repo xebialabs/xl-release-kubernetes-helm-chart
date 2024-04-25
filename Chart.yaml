@@ -5,9 +5,9 @@ name: digitalai-release
 version: 24.1.0
 kubeVersion: ">= 1.23.0-0 < 1.30.0-0"
 sources:
-  - https://github.com/xebialabs/xl-release-kubernetes-helm-chart
+  - https://github.com/digital-ai/release-helm-chart
   - https://github.com/xebialabs/xl-release
-home: https://github.com/xebialabs/xl-release-kubernetes-helm-chart
+home: https://github.com/digital-ai/release-helm-chart
 keywords:
   - Digital.ai
   - Release
