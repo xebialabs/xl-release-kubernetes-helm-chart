@@ -1,0 +1,12 @@
+
+  overrideValues:
+    hooks.getLicense.image.image: $RELATED_IMAGE_GET_LICENSE
+    hooks.genSelfSigned.image.image: $RELATED_IMAGE_GEN_SELF_SIGNED
+    hooks.installReleaseRunner.image.image: $RELATED_IMAGE_INSTALL_RELEASE_RUNNER
+    image.image: $RELATED_IMAGE_RELEASE
+    volumePermissions.image.image: $RELATED_IMAGE_RELEASE_VOLUME_PERMISSIONS
+    busyBox.image.image: $RELATED_IMAGE_RELEASE_BUSY_BOX
+    postgresql.image.image: $RELATED_IMAGE_POSTGRESQL
+    postgresql.volumePermissions.image.image: $RELATED_IMAGE_POSTGRESQL_VOLUME_PERMISSIONS
+    rabbitmq.image.image: $RELATED_IMAGE_RABBITMQ
+    rabbitmq.volumePermissions.image.image: $RELATED_IMAGE_RABBITMQ_VOLUME_PERMISSIONS

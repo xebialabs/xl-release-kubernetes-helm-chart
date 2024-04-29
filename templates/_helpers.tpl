@@ -48,9 +48,9 @@ Return the proper image name. Replaces template from the common package with sup
         {{- $termination = .imageRoot.digest | toString -}}
     {{- end -}}
     {{- if $registryName }}
-        {{- printf "%s/%s%s%s-FIX" $registryName $repositoryName $separator $termination -}}
+        {{- printf "%s/%s%s%s" $registryName $repositoryName $separator $termination -}}
     {{- else -}}
-        {{- printf "%s%s%s-FIX"  $repositoryName $separator $termination -}}
+        {{- printf "%s%s%s"  $repositoryName $separator $termination -}}
     {{- end -}}
 {{- end -}}
 {{- end -}}
