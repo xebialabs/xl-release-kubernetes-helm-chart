@@ -307,7 +307,7 @@ Get the mq URL
         {{ .Values.external.mq.url }}
     {{- else -}}
         {{- if .Values.rabbitmq.install -}}
-            "amqp://{{ include "rabbitmq.subchart" . }}:{{ .Values.rabbitmq.service.ports.amqp }}/"
+            "amqp://{{ include "rabbitmq.subchart" . }}:{{ .Values.rabbitmq.service.ports.amqp }}"
         {{- end -}}
     {{- end -}}
 {{- end -}}
