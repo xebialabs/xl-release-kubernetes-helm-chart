@@ -22,9 +22,9 @@ spec:
             - name: RELATED_IMAGE_RELEASE
               value: docker.io/xebialabsunsupported/xl-release:${APP_VERSION}
             - name: RELATED_IMAGE_RELEASE_VOLUME_PERMISSIONS
-              value: docker.io/bitnami/os-shell:12-debian-12-r16
+              value: docker.io/xebialabsunsupported/xl-release:${APP_VERSION}
             - name: RELATED_IMAGE_RELEASE_BUSY_BOX
-              value: docker.io/library/busybox:stable
+              value: docker.io/xebialabsunsupported/xl-release:${APP_VERSION}
             - name: RELATED_IMAGE_POSTGRESQL
               value: docker.io/bitnami/postgresql:15.6.0-debian-12-r7
             - name: RELATED_IMAGE_POSTGRESQL_VOLUME_PERMISSIONS
