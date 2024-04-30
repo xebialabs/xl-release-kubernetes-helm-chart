@@ -327,7 +327,7 @@ tasks {
         doLast {
             exec {
                 workingDir(buildXlrDir)
-                commandLine("sed", "-i", ".bak",
+                commandLine("sed", "-i.bak",
                     "-e", "s#memory: 128Mi#memory: 512Mi#g",
                     targetFile)
             }
@@ -384,13 +384,13 @@ tasks {
         doFirst {
             exec {
                 workingDir(buildXlrDir)
-                commandLine("sed", "-i", ".bak",
+                commandLine("sed", "-i.bak",
                     "-e", "/^FROM.*/r $sourceDockerFile",
                     targetDockerFile)
             }
             exec {
                 workingDir(buildXlrDir)
-                commandLine("sed", "-i", ".bak",
+                commandLine("sed", "-i.bak",
                     "-e", "s#\${VERSION}#$releasedVersion#g",
                     targetDockerFile)
             }
@@ -462,19 +462,19 @@ tasks {
             }
             exec {
                 workingDir(buildXlrDir)
-                commandLine("sed", "-i", ".bak",
+                commandLine("sed", "-i.bak",
                     "-e", "s#\${VERSION}#$releasedVersion#g",
                     buildXlrDir.get().dir("config/manifests/bases/xlr.clusterserviceversion.yaml"))
             }
             exec {
                 workingDir(buildXlrDir)
-                commandLine("sed", "-i", ".bak",
+                commandLine("sed", "-i.bak",
                     "-e", "s#\${CONTAINER_IMAGE}#$operatorImageUrl#g",
                     buildXlrDir.get().dir("config/manifests/bases/xlr.clusterserviceversion.yaml"))
             }
             exec {
                 workingDir(buildXlrDir)
-                commandLine("sed", "-i", ".bak",
+                commandLine("sed", "-i.bak",
                     "-e", "s#\${CURRENT_TIME}#$currentTime#g",
                     buildXlrDir.get().dir("config/manifests/bases/xlr.clusterserviceversion.yaml"))
             }
@@ -482,7 +482,7 @@ tasks {
         doLast {
             exec {
                 workingDir(buildXlrDir)
-                commandLine("sed", "-i", ".bak",
+                commandLine("sed", "-i.bak",
                     "-e", "/^LABEL operators.operatorframework.io.test.config.*/r $sourceDockerFile",
                     targetDockerFile)
             }
