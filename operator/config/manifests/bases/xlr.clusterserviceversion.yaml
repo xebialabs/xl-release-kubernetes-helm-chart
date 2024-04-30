@@ -26,7 +26,7 @@ metadata:
     createdAt: "${CURRENT_TIME}"
     support: "Digital.ai"
     repository: "https://github.com/digital-ai/release-helm-chart"
-  name: xlr.v${VERSION}
+  name: digitalai-release-operator.v${VERSION}
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -135,6 +135,7 @@ spec:
     - supported: true
       type: AllNamespaces
   keywords:
+    - digitalai-release-operator
     - digitalai
     - digital.ai
     - release
