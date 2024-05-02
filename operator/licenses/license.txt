@@ -14,9 +14,9 @@ EULA Artifacts Digital.ai, Version 1.0
   "License" means the license defined in article 3 below. "Artifacts" means
   the object code versions of software made available by Us under this EULA.
   "Use" means use of the Artifacts by You for Your own internal business
-  purposes only. "We", "Our" and "Us" means Digital.ai Software, Inc., a corporation
-  with its principal place of business at 52 Third Avenue, NWP #20,
-  Burlington, MA 01803, United States of America. "You" and "Your" means
+  purposes only. "We", "Our" and "Us" means Digital.ai Inc., a corporation
+  with its principal place of business at 555 Fayetteville St, Raleigh, NC 
+  27601, United States of America. "You" and "Your" means
   you, the person or legal entity who is granted a License to Use the
   Artifacts under these terms and conditions.
 
@@ -76,7 +76,7 @@ EULA Artifacts Digital.ai, Version 1.0
   these terms and conditions will be deemed to have effect as if such
   invalid or unenforceable provision were severed from these terms and
   conditions. These terms and conditions are governed by the laws of the
-  Commonwealth of Massachusetts, excluding its conflict of law rules and the
+  North Carolina, excluding its conflict of law rules and the
   UN Convention for the International Sale of Goods (CISG). Any dispute
   regarding these terms and conditions, or disputes arising from these terms
   and conditions, shall be subject to the exclusive jurisdiction of the
