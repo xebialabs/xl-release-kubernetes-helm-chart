@@ -1,7 +1,7 @@
 apiVersion: xlr.digital.ai/v1alpha1
 kind: DigitalaiRelease
 metadata:
-  name: dairelease-minimal
+  name: dairelease-doc
 spec:
   k8sSetup:
     platform: Openshift
@@ -13,8 +13,6 @@ spec:
     keystore: 'zs7OzgAAAAIAAAABAAAAAwAWZGVwbG95aXQtcGFzc3N3b3JkLWtleQAAAY66Cf9nrO0ABXNyADNjb20uc3VuLmNyeXB0by5wcm92aWRlci5TZWFsZWRPYmplY3RGb3JLZXlQcm90ZWN0b3LNV8pZ5zC7UwIAAHhyABlqYXZheC5jcnlwdG8uU2VhbGVkT2JqZWN0PjY9psO3VHACAARbAA1lbmNvZGVkUGFyYW1zdAACW0JbABBlbmNyeXB0ZWRDb250ZW50cQB+AAJMAAlwYXJhbXNBbGd0ABJMamF2YS9sYW5nL1N0cmluZztMAAdzZWFsQWxncQB+AAN4cHVyAAJbQqzzF/gGCFTgAgAAeHAAAAARMA8ECD0yEJAHFhBOAgMDDUB1cQB+AAUAAACQUhNP1jw1dwOxWArpm0JBAX40fr4fvvAmyGGrx7mzlCVjb4uOxi4IroUoxcbBx8cpjiS6QzCUg6chsCQ0IABB6s7Tow2VR8vRlxXyxpJXvlUwfH8hwJn/ZK8rQuDsCkzd2rC+lYR0pEO0lUP3/AQ7dHJ4TgloyZOKKbWRNJvE4K4EOafqASuNTkyrr0SPflRydAAWUEJFV2l0aE1ENUFuZFRyaXBsZURFU3QAFlBCRVdpdGhNRDVBbmRUcmlwbGVERVO3iVKkgrEJQ78wacyjhp3UZBSB/Q=='
   replicaCount: 1
   hooks:
-    genSelfSigned:
-      enabled: false
     getLicense:
       enabled: true
   persistence:
@@ -22,24 +20,6 @@ spec:
     accessModes:
       - ReadWriteOnce
     size: 1Gi
-  ingress:
-    enabled: false
-  route:
-    enabled: false
-    annotations:
-      haproxy.router.openshift.io/cookie_name: JSESSIONID
-      haproxy.router.openshift.io/disable_cookies: 'false'
-      haproxy.router.openshift.io/rewrite-target: /
-      haproxy.router.openshift.io/timeout: 120s
-    hostname: '<mandatory-release-hostname>'
-    path: /
-    tls:
-      enabled: true
-      termination: edge
-  haproxy-ingress:
-    install: false
-  nginx-ingress-controller:
-    install: false
   postgresql:
     install: true
     primary:

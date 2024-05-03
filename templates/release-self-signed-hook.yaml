@@ -102,7 +102,7 @@ spec:
       {{- include "release.genSelfSigned.imagePullSecrets" . | nindent 6 }}
       initContainers:
         - name: gen-self-signed-job
-          image: {{ template "release.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.genSelfSigned.genCommand "context" $) | nindent 12 }}
           volumeMounts:
@@ -115,7 +115,7 @@ spec:
             {{- end }}
       containers:
         - name: install-self-signed-job
-          image: {{ template "release.genSelfSigned.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.hooks.genSelfSigned.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.hooks.genSelfSigned.image.pullPolicy | quote }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.genSelfSigned.installCommand "context" $) | nindent 12 }}
           volumeMounts:
