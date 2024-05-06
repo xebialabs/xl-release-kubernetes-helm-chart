@@ -341,7 +341,7 @@ external:
 
 keystore:
   ## @param keystore.passphrase Set passphrase for the keystore
-  passphrase:
+  passphrase: 
   ## @param keystore.keystore Use repository-keystore.jceks files content ecoded with base64
   # https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
   # Convert repository-keystore.jceks files content to base64
@@ -1279,7 +1279,6 @@ containerSecurityContext:
 ## resources, such as Minikube. If you do want to specify resources, uncomment the following
 ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
 ## @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set (resources is recommended for production).
-## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
 ##
 resourcesPreset: "micro"
 ## @param resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
@@ -1341,7 +1340,7 @@ sidecars: []
 volumePermissions:
   ## @param volumePermissions.enabled Enable init container that changes the owner and group of the persistent volume(s) mountpoint to `runAsUser:fsGroup`
   ##
-  enabled: true
+  enabled: false
   ## @param volumePermissions.image.registry Init container volume-permissions image registry
   ## @param volumePermissions.image.repository Init container volume-permissions image repository
   ## @param volumePermissions.image.tag Init container volume-permissions image tag
@@ -1384,7 +1383,6 @@ volumePermissions:
   ## resources, such as Minikube. If you do want to specify resources, uncomment the following
   ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   ## @param volumePermissions.resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if volumePermissions.resources is set (volumePermissions.resources is recommended for production).
-  ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
   ##
   resourcesPreset: "nano"
   ## @param volumePermissions.resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
