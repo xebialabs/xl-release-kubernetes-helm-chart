@@ -52,7 +52,7 @@ val os = detectOs()
 val arch = detectHostArch()
 val currentTime = Instant.now().toString()
 val dockerHubRepository = System.getenv()["DOCKER_HUB_REPOSITORY"] ?: "xebialabsunsupported"
-val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "24.1.0-${
+val releasedVersion = System.getenv()["RELEASE_EXPLICIT"] ?: "24.3.0-${
     LocalDateTime.now().format(DateTimeFormatter.ofPattern("Mdd.Hmm"))
 }"
 project.extra.set("releasedVersion", releasedVersion)
@@ -189,9 +189,14 @@ tasks {
         }
     }
 
+    register<Delete>("cleanHelmAndOperator") {
+        group = "helm"
+        delete(buildXlrDir)
+    }
+
     register<Copy>("prepareHelmPackage") {
         group = "helm"
-        dependsOn("dumpVersion", "installHelm")
+        dependsOn("dumpVersion", "installHelm", "cleanHelmAndOperator")
         from(layout.projectDirectory)
         exclude(
             layout.buildDirectory.get().asFile.name,
@@ -311,7 +316,7 @@ tasks {
             }
             logger.lifecycle(standardOutput.toString())
             logger.error(errorOutput.toString())
-            logger.lifecycle("Helm package finished created ${buildDir}/xlr/xlr.tgz")
+            logger.lifecycle("Helm package finished created ${buildXlrDir}/xlr.tgz")
         }
     }
 
@@ -452,7 +457,7 @@ tasks {
         dependsOn("installKustomize", "buildOperatorApi")
         workingDir(buildXlrDir)
         commandLine("make", "bundle",
-            "IMG=$operatorImageUrl", "BUNDLE_GEN_FLAGS=--overwrite --version=$releasedVersion --channels=$operatorBundleChannels --package=digitalai-release-operator",
+            "IMG=$operatorImageUrl", "BUNDLE_GEN_FLAGS=--overwrite --version=$releasedVersion --channels=$operatorBundleChannels --package=digitalai-release-operator --use-image-digests",
             "OPERATOR_SDK=$operatorSdkCli", "KUSTOMIZE=$kustomizeCli")
 
         standardOutput = ByteArrayOutputStream()
@@ -572,7 +577,6 @@ tasks {
     register("publishToDockerHub") {
         group = "operator"
         dependsOn("publishOperatorToDockerHub")
-        dependsOn("publishBundleToDockerHub")
     }
 
     register("checkDependencyVersions") {
@@ -652,7 +656,6 @@ tasks.withType<AbstractPublishToMaven> {
 
 tasks.named("build") {
     dependsOn("buildOperatorImage")
-    dependsOn("buildOperatorBundle")
 }
 
 publishing {
