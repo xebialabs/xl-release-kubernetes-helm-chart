@@ -1,4 +1,38 @@
 
+# Certified Operator Installation
+
+Install operator from Openshift admin console: Operator > OperatorHub, search for `Digital.ai`.
+Select Release operator and press `Install` button.
+
+It will create from catalog source `openshift-operators`:
+- install plan
+- subscription
+- CSV
+
+## Check Result
+
+```shell
+oc get sub -n openshift-operators
+oc get installplan -n openshift-operators
+oc get csv
+```
+
+```shell
+oc describe csv 
+```
+
+```shell
+oc get pods -n openshift-operators
+```
+
+## Create Release release
+
+```shell
+oc create -n release-test-operator -f ../config/samples/xlr_minimal.yaml
+```
+
+# Local Operator Installation
+
 ## Installing the opm CLI
 
 Check [Installing the opm CLI](https://docs.openshift.com/container-platform/4.15/cli_reference/opm/cli-opm-install.html)
@@ -11,7 +45,7 @@ Check [Installing the opm CLI](https://docs.openshift.com/container-platform/4.1
 
 ```shell
 opm index add \
-  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.0-429.1602 \
+  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.0-rc.3-redhat \
   --tag docker.io/xebialabsunsupported/release-operator-index:latest \
   --generate
 ```
@@ -90,7 +124,7 @@ oc create -n release-test-operator -f ../config/samples/xlr_minimal.yaml
 
 ```shell
 opm index add \
-  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.0-429.1600 \
+  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.0-rc.3-redhat \
   --from-index docker.io/xebialabsunsupported/release-operator-index:latest \
   --tag docker.io/xebialabsunsupported/release-operator-index:latest \
   --generate
