@@ -1,0 +1,5 @@
+
+  # Custom
+  com.redhat.openshift.versions: v4.11
+  com.redhat.delivery.operator.bundle: true
+  com.redhat.deliver.backport: false
