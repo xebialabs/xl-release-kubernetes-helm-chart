@@ -344,7 +344,7 @@ tasks {
         dependsOn("installKustomize", "buildOperatorApi")
         workingDir(buildXlrDir)
         commandLine("make", "docker-build",
-            "IMG=$operatorImageUrl", "OPERATOR_SDK=\"$operatorSdkCli\"", "KUSTOMIZE=\"$kustomizeCli\"")
+            "IMG=$operatorImageUrl", "OPERATOR_SDK=${operatorSdkCli.toString().replace(" ", "\\ ")}", "KUSTOMIZE=${kustomizeCli.toString().replace(" ", "\\ ")}")
 
         val sourceDockerFile = operatorFolder.resolve("Dockerfile")
         val targetDockerFile = buildXlrDir.get().dir("Dockerfile")
