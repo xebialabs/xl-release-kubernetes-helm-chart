@@ -411,7 +411,7 @@ tasks {
         workingDir(buildXlrDir)
         commandLine("make", "bundle",
             "IMG=$operatorImageUrl", "BUNDLE_GEN_FLAGS=--overwrite --version=$releasedVersion --channels=$operatorBundleChannels --package=digitalai-release-operator --use-image-digests",
-            "OPERATOR_SDK=$operatorSdkCli", "KUSTOMIZE=$kustomizeCli")
+            "OPERATOR_SDK=${operatorSdkCli.toString().replace(" ", "\\ ")}", "KUSTOMIZE=${kustomizeCli.toString().replace(" ", "\\ ")}")
 
         val sourceDockerFile = operatorFolder.resolve("bundle.Dockerfile")
         val targetDockerFile = buildXlrDir.get().dir("bundle.Dockerfile")
