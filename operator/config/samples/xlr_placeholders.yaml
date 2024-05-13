@@ -1,7 +1,7 @@
 apiVersion: xlr.digital.ai/v1alpha1
 kind: DigitalaiRelease
 metadata:
-  name: dairelease-placeholders
+  name: dair-placeholders
 spec:
   k8sSetup:
     platform: Openshift
