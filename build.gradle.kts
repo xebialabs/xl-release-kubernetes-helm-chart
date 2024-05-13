@@ -186,6 +186,11 @@ tasks {
                 into(kustomizeDir)
                 fileMode = 0b111101101
             }
+            copy {
+                from(kustomizeDir)
+                into(buildXlrDir.get().dir("bin"))
+                fileMode = 0b111101101
+            }
         }
     }
 
