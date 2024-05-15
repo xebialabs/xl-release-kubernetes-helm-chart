@@ -1,0 +1,11 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: release-test-subscription
+  namespace: release-test-operator
+spec:
+  channel: beta
+  installPlanApproval: Automatic
+  name: xlr
+  source: release-test-operators
+  sourceNamespace: openshift-marketplace

@@ -68,7 +68,7 @@ spec:
       {{- include "release.installReleaseRunner.imagePullSecrets" . | nindent 6 }}
       initContainers:
         - name: wait-for-release
-          image: {{ include "release.busyBox.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.busyBox.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.busyBox.image.pullPolicy | quote }}
           command:
             - /bin/sh
@@ -89,7 +89,7 @@ spec:
               {{- end }}
       containers:
         - name: install-runner-job
-          image: {{ template "release.installReleaseRunner.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.hooks.installReleaseRunner.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.hooks.installReleaseRunner.image.pullPolicy | quote }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.installReleaseRunner.installCommand "context" $) | nindent 12 }}
       {{- if .Values.hooks.installReleaseRunner.answersSecret }}
