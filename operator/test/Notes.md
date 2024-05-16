@@ -73,11 +73,11 @@ The sample configuration uses:
 
 Configurations can be further personalized. Here are some areas you might want to consider:
 
-- **External DB:** For avoiding uncertified container images required by the subcharts, refer to these [instructions for setting up an external DB](https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-release-external-db-migration.html).
-- **External Message Queue:** To set up an external message queue, follow this [guide](https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-release-external-mq-migration.html).
-- **Custom License:** To apply a custom license, refer to this [process](https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-release-license-update.html).
-- **Custom Configuration:** For modifying the configuration files, use this [guide](https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-release-customize.html).
-- **Truststore Setup:** For modifying default truststore for Release, use this [guide](https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-release-setup-truststore.html).
+- **External DB:** For avoiding uncertified container images required by the subcharts, refer to these [instructions for setting up an external DB](https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-release-external-db-migration.html).
+- **External Message Queue:** To set up an external message queue, follow this [guide](https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-release-external-mq-migration.html).
+- **Custom License:** To apply a custom license, refer to this [process](https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-release-license-update.html).
+- **Custom Configuration:** For modifying the configuration files, use this [guide](https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-release-customize.html).
+- **Truststore Setup:** For modifying default truststore for Release, use this [guide](https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-release-setup-truststore.html).
 - **Plugin Management:** Managing plugins can be done using the following methods:
-    - [Plugin Management using XL CLI](https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-release-plugin-management.html)
-    - [Managing Plugins Offline for Kubernetes Environment](https://docs.digital.ai/bundle/devops-release-version-v.23.3/page/release/operator/xl-op-release-offline-plugin-management.html)
+    - [Plugin Management using XL CLI](https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-release-plugin-management.html)
+    - [Managing Plugins Offline for Kubernetes Environment](https://docs.digital.ai/bundle/devops-release-version-v.24.1/page/release/operator/xl-op-release-offline-plugin-management.html)
