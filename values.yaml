@@ -1642,7 +1642,7 @@ rabbitmq:
   ## @param rabbitmq.extraPlugins Extra plugins to enable (single string containing a space-separated list)
   ## Use this instead of `plugins` to add new plugins
   ##
-  extraPlugins: "rabbitmq_amqp1_0, rabbitmq_jms_topic_exchange"
+  extraPlugins: "rabbitmq_amqp1_0 rabbitmq_jms_topic_exchange"
   ## Loading a RabbitMQ definitions file to configure RabbitMQ
   ##
   loadDefinition:
