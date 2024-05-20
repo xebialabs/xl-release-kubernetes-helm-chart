@@ -1,0 +1,8 @@
+postgresql:
+    securityContextConstraints:
+      enabled: false
+rabbitmq:
+  securityContextConstraints:
+    enabled: false
+securityContextConstraints:
+  enabled: false
