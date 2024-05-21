@@ -1,0 +1,5 @@
+
+  overrideValues:
+    image.image: $RELATED_IMAGE_RELEASE
+    volumePermissions.image.image: $RELATED_IMAGE_RELEASE_VOLUME_PERMISSIONS
+    busyBox.image.image: $RELATED_IMAGE_RELEASE_BUSY_BOX

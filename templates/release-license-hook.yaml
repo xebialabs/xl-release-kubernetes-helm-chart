@@ -102,7 +102,7 @@ spec:
       {{- include "release.getLicense.imagePullSecrets" . | nindent 6 }}
       initContainers:
         - name: eula-get-license-job
-          image: {{ template "release.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.getCommand "context" $) | nindent 12 }}
           volumeMounts:
@@ -115,7 +115,7 @@ spec:
             {{- end }}
       containers:
         - name: eula-install-license-job
-          image: {{ template "release.getLicense.image" . }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.hooks.getLicense.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.hooks.getLicense.image.pullPolicy | quote }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.installCommand "context" $) | nindent 12 }}
           volumeMounts:

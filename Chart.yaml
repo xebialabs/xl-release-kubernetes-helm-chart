@@ -5,9 +5,9 @@ name: digitalai-release
 version: 24.1.2
 kubeVersion: ">= 1.23.0-0 < 1.30.0-0"
 sources:
-  - https://github.com/xebialabs/xl-release-kubernetes-helm-chart
+  - https://github.com/digital-ai/release-helm-chart
   - https://github.com/xebialabs/xl-release
-home: https://github.com/xebialabs/xl-release-kubernetes-helm-chart
+home: https://github.com/digital-ai/release-helm-chart
 keywords:
   - Digital.ai
   - Release
@@ -15,24 +15,30 @@ keywords:
   - DAIR
   - Xebia
   - XLR
+
 dependencies:
+
   - name: common
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
     version: 2.x.x
+
   - name: haproxy-ingress
     version: 0.14.6
     repository: "https://haproxy-ingress.github.io/charts"
     condition: haproxy-ingress.install
+
   - name: nginx-ingress-controller
     version: 9.10.3
     repository: "https://charts.bitnami.com/bitnami"
     condition: nginx-ingress-controller.install
+
   - name: postgresql
     version: 12.12.9
     repository: "https://charts.bitnami.com/bitnami"
     condition: postgresql.install
+
   - name: rabbitmq
     version: 12.0.13
     repository: "https://charts.bitnami.com/bitnami"
