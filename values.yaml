@@ -39,7 +39,7 @@ k8sSetup:
 ## @param license Sets your XL License by passing a base64 string license, which will then be added to the license file.
 ## Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
 ##
-license: 
+license:
 ## @param licenseAcceptEula Accept EULA, in case of missing license, it will generate temporary license.
 ##
 licenseAcceptEula: false
@@ -252,7 +252,7 @@ hooks:
       - /opt/xebialabs/xl-op-blueprints
       - --answers
       - /opt/xebialabs/xl-client/generated_answers.yaml
-      
+
     ## @param hooks.installReleaseRunner.image.registry getLicense hook container image registry
     ## @param hooks.installReleaseRunner.image.repository getLicense hook container image repository
     ## @param hooks.installReleaseRunner.image.tag getLicense hook container image tag
@@ -280,15 +280,17 @@ hooks:
 ##
 auth:
   ## @param auth.adminPassword Admin password for Release. If user does not provide password, random 10 character alphanumeric string will be generated.
-  adminPassword: 
+  adminPassword:
+  ## @param auth.sessionStorage When enabled it will store session in the DB (it could degrade DB performance).
+  sessionStorage: false
 
 ssl:
   ## @param ssl.enabled Enable SSL to be used on Release
   enabled: false
   ## @param ssl.keystorePassword Keystore password with SSL key.
-  keystorePassword: 
+  keystorePassword:
   ## @param ssl.keystoreKeypassword Keystore key password with SSL key.
-  keystoreKeypassword: 
+  keystoreKeypassword:
   ## @param ssl.keystoreType Keystore type, options pkcs12 or jks.
   keystoreType: pkcs12
   ## @extra ssl.keystore Keystore content in base64 format or it can reference the existing secret.
@@ -308,18 +310,18 @@ external:
       ## @param external.db.main.url Main database URL for Release
       url: ""
       ## @param external.db.main.username Main database username for Release
-      username: 
+      username:
       ## @param external.db.main.password Main database password for Release
-      password: 
+      password:
       ## @param external.db.main.maxPoolSize Main database max pool size for Release
       maxPoolSize: ""
     report:
       ## @param external.db.report.url Report database URL for Release
       url: ""
       ## @param external.db.report.username Report database username for Release
-      username: 
+      username:
       ## @param external.db.report.password Report database password for Release
-      password: 
+      password:
       ## @param external.db.report.maxPoolSize Report database max pool size for Release
       maxPoolSize: ""
 
@@ -331,7 +333,7 @@ external:
     ## @param external.mq.queueName External message queue name for Release
     queueName: ""
     ## @param external.mq.username External message queue broker username for Release
-    username: 
+    username:
     ## @param external.mq.password External message queue broker password for Release
     password:
     ## @param external.mq.queueType Applies only for external rabbitmq message broker. Can be either classic(default) or quorum
@@ -341,19 +343,19 @@ external:
 
 keystore:
   ## @param keystore.passphrase Set passphrase for the keystore
-  passphrase: 
+  passphrase:
   ## @param keystore.keystore Use repository-keystore.jceks files content ecoded with base64
   # https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
   # Convert repository-keystore.jceks files content to base64
   # ( cat repository-keystore.jceks | base64 -w 0 ) and put the output here
   # if empty during initial run, the default keystore will be generated with provided "passphrase"
-  keystore: 
+  keystore:
 
 truststore:
   ## @param truststore.type Type of truststore, possible value jks or jceks or pkcs12
   type: "pkcs12"
   ## @param truststore.password Truststore password
-  password: 
+  password:
   ## @param truststore.truststore Truststore file base64 encoded
   truststore: {}
   ## @param truststore.params Truststore params in the command line
@@ -640,6 +642,11 @@ configuration:
         server {
             http2 {
                 enabled = ${XLR_HTTP2_ENABLED}
+            }
+            session {
+                storage {
+                    enabled = {{ include "common.tplvalues.render" ( dict "value" .Values.auth.sessionStorage "context" $ ) }}
+                }
             }
         }
     
