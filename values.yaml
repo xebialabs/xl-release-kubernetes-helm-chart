@@ -1466,13 +1466,13 @@ nginx-ingress-controller:
   install: false
   ## @param nginx-ingress-controller.image.tag NGINX Ingress Controller image tag (immutable tags are recommended)
   image:
-    tag: 1.9.6-debian-12-r8
+    tag: 1.10.1-debian-12-r5
   ## Default 404 backend
   ##
   defaultBackend:
     ## @skip nginx-ingress-controller.defaultBackend.image.tag Default backend image tag (immutable tags are recommended)
     image:
-      tag: 1.25.4-debian-12-r3
+      tag: 1.26.0-debian-12-r1
   ## @extra nginx-ingress-controller.extraArgs Additional command line arguments to pass to nginx-ingress-controller
   ## E.g. to specify the default SSL certificate you can use
   ## extraArgs:
@@ -1508,7 +1508,7 @@ postgresql:
   install: true
   ## @param postgresql.image.tag PostgreSQL image tag (immutable tags are recommended)
   image:
-    tag: 15.6.0-debian-12-r7
+    tag: 16.1.0-debian-11-r27
   ## @section PostgreSQL Primary parameters
   ##
   primary:
@@ -1602,7 +1602,7 @@ postgresql:
     enabled: true
     ## @param postgresql.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
     image:
-      tag: 12-debian-12-r16
+      tag: 12-debian-12-r21
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
@@ -1611,7 +1611,7 @@ rabbitmq:
   install: true
   ## @param rabbitmq.image.tag RabbitMQ image tag (immutable tags are recommended)
   image:
-    tag: 3.12.13-debian-12-r2
+    tag: 3.13.2-debian-12-r4
   ## Clustering settings
   ##
   clustering:
@@ -1707,4 +1707,4 @@ rabbitmq:
     enabled: true
     ## @param rabbitmq.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
     image:
-      tag: 12-debian-12-r16
+      tag: 12-debian-12-r21
