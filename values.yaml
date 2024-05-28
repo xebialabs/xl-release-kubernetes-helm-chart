@@ -1549,15 +1549,7 @@ postgresql:
       ## @param postgresql.primary.persistence.existingClaim Name of an existing PVC to use
       ##
       existingClaim: ""
-    ## PostgreSQL Primary resource requests and limits
-    ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-    ## @param postgresql.primary.resources.requests.memory The requested memory for the PostgreSQL Primary containers
-    ## @param postgresql.primary.resources.requests.cpu The requested cpu for the PostgreSQL Primary containers
-    ##
-    resources:
-      requests:
-        memory: 256Mi
-        cpu: 250m
+
     ## PostgreSQL Primary service configuration
     ##
     service:
