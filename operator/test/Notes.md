@@ -21,7 +21,7 @@ The installation can be done using the sample configuration provided below. Plea
 apiVersion: xlr.digital.ai/v1alpha1
 kind: DigitalaiRelease
 metadata:
-  name: dairelease-minimal
+  name: dair-doc
 spec:
   k8sSetup:
     platform: Openshift
@@ -40,19 +40,54 @@ spec:
     accessModes:
       - ReadWriteOnce
     size: 1Gi
+  podSecurityContext:
+    enabled: true
+  containerSecurityContext:
+    enabled: true    
+  securityContextConstraints:
+    enabled: true
+  volumePermissions:
+    enabled: false
+  route:
+    enabled: false
+    annotations:
+      haproxy.router.openshift.io/cookie_name: JSESSIONID
+      haproxy.router.openshift.io/disable_cookies: 'false'
+      haproxy.router.openshift.io/rewrite-target: /
+      haproxy.router.openshift.io/timeout: 120s
+    hostname: '<mandatory-release-hostname>'
+    path: /
+    tls:
+      enabled: true
+      termination: edge
   postgresql:
     install: true
     primary:
       persistence:
         size: 1Gi
         storageClass: ''
+      podSecurityContext:
+        enabled: true
+      containerSecurityContext:
+        enabled: true
+      securityContextConstraints:
+        enabled: true
+    volumePermissions:
+      enabled: true
   rabbitmq:
     install: true
     persistence:
       size: 1Gi
-      size: 1Gi
       storageClass: ''
     replicaCount: 1
+    podSecurityContext:
+      enabled: true
+    containerSecurityContext:
+      enabled: true
+    securityContextConstraints:
+      enabled: true
+    volumePermissions:
+      enabled: true
 ```
 
 ### Configuration Details

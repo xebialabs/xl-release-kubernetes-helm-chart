@@ -74,6 +74,12 @@ spec:
     accessModes:
       - ReadWriteMany
     size: '<release-storage-size>'
+  podSecurityContext:
+    enabled: true
+  containerSecurityContext:
+    enabled: true    
+  securityContextConstraints:
+    enabled: true
   volumePermissions:
     enabled: false
   diagnosticMode:
@@ -102,21 +108,25 @@ spec:
       persistence:
         size: '<postgresql-storage-size>'
         storageClass: '<postgresql-storage-class-rwo>'
-    securityContext:
+      podSecurityContext:
+        enabled: true
+      containerSecurityContext:
+        enabled: true
+      securityContextConstraints:
+        enabled: true
+    volumePermissions:
       enabled: true
-      fsGroup: 1001
   rabbitmq:
     install: true
     persistence:
       size: '<rabbitmq-storage-size>'
       storageClass: '<rabbitmq-storage-class-rwo>'
     replicaCount: <rabbitmq-replica-count>
-    volumePermissions:
-      enabled: true
-    securityContext:
-      enabled: true
-      fsGroup: 1001
     podSecurityContext:
       enabled: true
-      fsGroup: 1001
-      runAsUser: 1001
+    containerSecurityContext:
+      enabled: true
+    securityContextConstraints:
+      enabled: true
+    volumePermissions:
+      enabled: true

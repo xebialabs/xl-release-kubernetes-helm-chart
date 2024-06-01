@@ -28,7 +28,7 @@ Return the proper image name. Replaces template from the common package with sup
 */}}
 {{- define "common.images.image" -}}
 {{- $imageOneLine := .imageRoot.image -}}
-{{- if $imageOneLine }}
+{{- if and $imageOneLine (not .imageRoot.override) }}
     {{- print $imageOneLine -}}
 {{- else -}}
     {{- $registryName := .imageRoot.registry -}}
