@@ -118,6 +118,15 @@ hooks:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+    containerSecurityContext:
+      enabled: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
     ## @extra hooks.getLicense.configuration Release Configuration file content
     ## Do not override unless you know what you are doing.
     ##
@@ -190,6 +199,15 @@ hooks:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+    containerSecurityContext:
+      enabled: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
     ## @extra hooks.genSelfSigned.configuration Release Configuration file content
     ## Do not override unless you know what you are doing.
     ##
@@ -275,6 +293,15 @@ hooks:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+    containerSecurityContext:
+      enabled: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
 
 ## Release Authentication parameters
 ##
@@ -1261,7 +1288,6 @@ topologySpreadConstraints: [ ]
 podSecurityContext:
   enabled: true
   runAsUser: 10001
-  runAsGroup: 10001
   fsGroup: 10001
 
 ## @param containerSecurityContext.enabled Enabled Release containers' Security Context
@@ -1276,8 +1302,17 @@ podSecurityContext:
 ##
 containerSecurityContext:
   enabled: true
-  runAsUser: 10001
   runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+## @param securityContextConstraints.enabled Enabled SecurityContextConstraints for Release (only on Openshift)
+securityContextConstraints:
+  enabled: true
 
 ## Release containers' resource requests and limits
 ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
@@ -1412,6 +1447,10 @@ volumePermissions:
   ##
   containerSecurityContext:
     runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    seccompProfile:
+      type: RuntimeDefault
 
 ## Pod Disruption Budget configuration
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
@@ -1575,6 +1614,11 @@ postgresql:
       ## @param postgresql.primary.service.type Kubernetes Service type
       ##
       type: ClusterIP
+
+    ## @param postgresql.primary.securityContextConstraints.enabled Enabled SecurityContextConstraints for Postgresql (only on Openshift)
+    securityContextConstraints:
+      enabled: true
+
   ## Authentication parameters
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#setting-the-root-password-on-first-run
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#creating-a-database-on-first-run
@@ -1692,6 +1736,19 @@ rabbitmq:
     ## If you change this value, you might have to adjust `rabbitmq.diskFreeLimit` as well
     ##
     size: 8Gi
+    
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  ## @param rabbitmq.securityContextConstraints.enabled Enabled SecurityContextConstraints for Rabbitmq (only on Openshift)
+  securityContextConstraints:
+    enabled: true
+
   ## @section Exposure parameters
   ##
 
@@ -1715,3 +1772,9 @@ rabbitmq:
     ## @param rabbitmq.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
     image:
       tag: 12-debian-12-r16
+    containerSecurityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+      seccompProfile:
+        type: RuntimeDefault

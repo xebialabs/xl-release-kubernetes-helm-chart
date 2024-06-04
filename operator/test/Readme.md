@@ -45,7 +45,7 @@ Check [Installing the opm CLI](https://docs.openshift.com/container-platform/4.1
 
 ```shell
 opm index add \
-  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.0-rc.3-redhat \
+  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.2-rc.6-redhat \
   --tag docker.io/xebialabsunsupported/release-operator-index:latest \
   --generate
 ```
@@ -124,7 +124,7 @@ oc create -n release-test-operator -f ../config/samples/xlr_minimal.yaml
 
 ```shell
 opm index add \
-  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.0-rc.3-redhat \
+  --bundles docker.io/xebialabsunsupported/release-operator-bundle:24.1.2-rc.5-redhat \
   --from-index docker.io/xebialabsunsupported/release-operator-index:latest \
   --tag docker.io/xebialabsunsupported/release-operator-index:latest \
   --generate
