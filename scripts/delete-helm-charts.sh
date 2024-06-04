@@ -4,3 +4,4 @@ kubectl delete pvc data-${DAI_RELEASE}-rabbitmq-0 -n $DAI_NAMESPACE --ignore-not
 kubectl delete pvc data-${DAI_RELEASE}-rabbitmq-1 -n $DAI_NAMESPACE --ignore-not-found=true
 kubectl delete pvc data-${DAI_RELEASE}-rabbitmq-2 -n $DAI_NAMESPACE --ignore-not-found=true
 kubectl delete pvc ${DAI_RELEASE}-digitalai-release -n $DAI_NAMESPACE --ignore-not-found=true
+kubectl delete pvc ${DAI_RELEASE}-digitalai-release-ocp -n $DAI_NAMESPACE --ignore-not-found=true

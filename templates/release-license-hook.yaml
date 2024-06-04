@@ -104,6 +104,9 @@ spec:
         - name: eula-get-license-job
           image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.hooks.getLicense.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.hooks.getLicense.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.getCommand "context" $) | nindent 12 }}
           volumeMounts:
             - name: shared-data
@@ -117,6 +120,9 @@ spec:
         - name: eula-install-license-job
           image: {{ include "common.images.image" (dict "imageRoot" .Values.hooks.getLicense.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.hooks.getLicense.image.pullPolicy | quote }}
+          {{- if .Values.hooks.getLicense.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.hooks.getLicense.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.getLicense.installCommand "context" $) | nindent 12 }}
           volumeMounts:
             - name: shared-data

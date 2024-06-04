@@ -424,6 +424,10 @@ tasks {
             }
             exec {
                 workingDir(buildXlrDir.get().dir("config/samples"))
+                commandLine(kustomizeCli, "edit", "add", "resource", "xlr_doc.yaml")
+            }
+            exec {
+                workingDir(buildXlrDir.get().dir("config/samples"))
                 commandLine(kustomizeCli, "edit", "add", "resource", "xlr_minimal.yaml")
             }
             exec {

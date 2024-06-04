@@ -12,8 +12,10 @@ allowHostIPC: false
 allowHostPorts: false
 allowPrivilegeEscalation: false
 allowPrivilegedContainer: false
-allowedCapabilities: []
-defaultAddCapabilities: []
+allowedCapabilities: null
+seccompProfiles:
+- runtime/default
+defaultAddCapabilities: null
 fsGroup:
   type: RunAsAny
 groups: []
@@ -51,6 +53,8 @@ allowHostPorts: false
 allowPrivilegeEscalation: false
 allowPrivilegedContainer: false
 allowedCapabilities: null
+seccompProfiles:
+- runtime/default
 defaultAddCapabilities: null
 fsGroup:
   type: RunAsAny
