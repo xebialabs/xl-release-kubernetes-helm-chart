@@ -17,7 +17,7 @@ Nginx Ingress and Haproxy ingress are disabled and not used with installations o
 
 The installation can be done using the sample configuration provided below. Please note that this is a minimal configuration and it's not recommended for production use.
 
-```
+```yaml
 apiVersion: xlr.digital.ai/v1alpha1
 kind: DigitalaiRelease
 metadata:
@@ -90,7 +90,7 @@ spec:
       enabled: true
 ```
 
-### Configuration Details
+#### Configuration Details
 
 The sample configuration uses:
 
@@ -103,6 +103,104 @@ The sample configuration uses:
 - Release pods are using persistence access mode `ReadWriteOnce`, for Release pods the requirement is to have `ReadWriteMany`
 - Embedded PostgreSQL for DB management
 - Embedded RabbitMQ for message queue management
+
+### Sample configuration without Security Context Constraints
+
+For cases when you would avoid using SCC, here is a similar configuration to the above but with disabled SCCs:
+
+```yaml
+apiVersion: xlr.digital.ai/v1alpha1
+kind: DigitalaiRelease
+metadata:
+  name: dair-min
+spec:
+  k8sSetup:
+    platform: Openshift
+  auth:
+    adminPassword: 'admin'
+  licenseAcceptEula: true
+  keystore:
+    passphrase: 'test1234'
+    keystore: 'zs7OzgAAAAIAAAABAAAAAwAWZGVwbG95aXQtcGFzc3N3b3JkLWtleQAAAY66Cf9nrO0ABXNyADNjb20uc3VuLmNyeXB0by5wcm92aWRlci5TZWFsZWRPYmplY3RGb3JLZXlQcm90ZWN0b3LNV8pZ5zC7UwIAAHhyABlqYXZheC5jcnlwdG8uU2VhbGVkT2JqZWN0PjY9psO3VHACAARbAA1lbmNvZGVkUGFyYW1zdAACW0JbABBlbmNyeXB0ZWRDb250ZW50cQB+AAJMAAlwYXJhbXNBbGd0ABJMamF2YS9sYW5nL1N0cmluZztMAAdzZWFsQWxncQB+AAN4cHVyAAJbQqzzF/gGCFTgAgAAeHAAAAARMA8ECD0yEJAHFhBOAgMDDUB1cQB+AAUAAACQUhNP1jw1dwOxWArpm0JBAX40fr4fvvAmyGGrx7mzlCVjb4uOxi4IroUoxcbBx8cpjiS6QzCUg6chsCQ0IABB6s7Tow2VR8vRlxXyxpJXvlUwfH8hwJn/ZK8rQuDsCkzd2rC+lYR0pEO0lUP3/AQ7dHJ4TgloyZOKKbWRNJvE4K4EOafqASuNTkyrr0SPflRydAAWUEJFV2l0aE1ENUFuZFRyaXBsZURFU3QAFlBCRVdpdGhNRDVBbmRUcmlwbGVERVO3iVKkgrEJQ78wacyjhp3UZBSB/Q=='
+  replicaCount: 1
+  hooks:
+    getLicense:
+      enabled: true
+  persistence:
+    storageClass: ''
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+  podSecurityContext:
+    runAsUser: null
+    runAsGroup: null
+    fsGroup: null
+  containerSecurityContext:
+    runAsUser: null
+    runAsGroup: null
+  securityContextConstraints:
+    enabled: false
+  volumePermissions:
+    enabled: false
+  route:
+    enabled: false
+    annotations:
+      haproxy.router.openshift.io/cookie_name: JSESSIONID
+      haproxy.router.openshift.io/disable_cookies: 'false'
+      haproxy.router.openshift.io/rewrite-target: /
+      haproxy.router.openshift.io/timeout: 120s
+    hostname: '<mandatory-release-hostname>'
+    path: /
+    tls:
+      enabled: true
+      termination: edge
+  postgresql:
+    install: true
+    primary:
+      persistence:
+        size: 1Gi
+        storageClass: ''
+      podSecurityContext:
+        enabled: false
+        runAsUser: null
+        runAsGroup: null
+        fsGroup: null
+      containerSecurityContext:
+        enabled: false
+        runAsUser: null
+        runAsGroup: null
+      securityContextConstraints:
+        enabled: false
+    volumePermissions:
+      enabled: false
+  rabbitmq:
+    install: true
+    persistence:
+      size: 1Gi
+      storageClass: ''
+    replicaCount: 1
+    podSecurityContext:
+      enabled: false
+      runAsUser: null
+      runAsGroup: null
+      fsGroup: null
+    containerSecurityContext:
+      enabled: false
+      runAsUser: null
+      runAsGroup: null
+    securityContextConstraints:
+      enabled: false
+    volumePermissions:
+      enabled: false
+```
+
+#### Configuration Details
+
+This sample configuration has all the same settings as the previous one, but it has additionally:
+
+- `securityContextConstraints.enabled: false` - disables creation of SCCs;
+- `podSecurityContext/containerSecurityContext` - that disables the use of specific UIDs or GIDs, so the IDs can be assigned from the defined ranges (for example from restricted SCC);
+- `volumePermissions.enabled: false` - disables automatic corrections of the mounted folders.
 
 ## Customize Your Configuration
 
