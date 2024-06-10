@@ -891,19 +891,21 @@ ingress:
   ## nginx.ingress.kubernetes.io/ssl-redirect: "false"
   ## nginx.ingress.kubernetes.io/rewrite-target: /
   ## nginx.ingress.kubernetes.io/affinity: cookie
-  ## nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+  ## nginx.ingress.kubernetes.io/session-cookie-name: ROUTE
+  ## nginx.ingress.kubernetes.io/proxy-body-size: "0"
   ## nginx.ingress.kubernetes.io/proxy-connect-timeout: "120"
   ## nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
   ## nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
   ##
   ## - haproxy
   ## kubernetes.io/ingress.class: "haproxy-dair"
-  ## ingress.kubernetes.io/rewrite-target: /
-  ## ingress.kubernetes.io/affinity: cookie
-  ## ingress.kubernetes.io/session-cookie-name: JSESSIONID
-  ## ingress.kubernetes.io/session-cookie-strategy: prefix
-  ## ingress.kubernetes.io/config-backend: |
-  ## option httpchk GET /ha/health HTTP/1.0
+  ## haproxy-ingress.github.io/ssl-redirect: "false"
+  ## haproxy-ingress.github.io/rewrite-target: /
+  ## haproxy-ingress.github.io/affinity: cookie
+  ## haproxy-ingress.github.io/session-cookie-name: JSESSIONID
+  ## haproxy-ingress.github.io/session-cookie-strategy: prefix
+  ## haproxy-ingress.github.io/timeout-client: "120s"
+  ## haproxy-ingress.github.io/timeout-http-request: "120s"
   ##
   annotations:
 
