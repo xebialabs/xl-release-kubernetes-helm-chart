@@ -105,6 +105,9 @@ spec:
               value: {{ include "postgresql.subchart" . }}
             - name: POSTGRESQL_PORT
               value: {{ (include "release.postgresql.service.port" .) | quote }}
+          {{- if .Values.defaultInitContainers.resources }}
+          resources: {{- toYaml .Values.defaultInitContainers.resources | nindent 12 }}
+          {{- end }}
         {{- end }}
         {{- if and (not .Values.external.mq.enabled) .Values.rabbitmq.install }}
         - name: wait-for-rabbitmq
@@ -126,6 +129,9 @@ spec:
               value: {{ include "rabbitmq.subchart" . }}
             - name: RABBITMQ_PORT
               value: {{ .Values.rabbitmq.service.ports.amqp | quote }}
+          {{- if .Values.defaultInitContainers.resources }}
+          resources: {{- toYaml .Values.defaultInitContainers.resources | nindent 12 }}
+          {{- end }}
         {{- end }}
         {{- end }}
         {{- if and .Values.volumePermissions.enabled .Values.persistence.enabled }}
@@ -373,6 +379,8 @@ spec:
           {{- end }}
           {{- if .Values.resources }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
+          {{- else if ne .Values.resourcesPreset "none" }}
+          resources: {{- include "release.resources.preset" (dict "type" .Values.resourcesPreset) | nindent 12 }}
           {{- end }}
           volumeMounts:
             {{- range $k, $v := .Values.configuration }}
