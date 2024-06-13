@@ -1273,27 +1273,27 @@ containerSecurityContext:
   runAsNonRoot: true
 
 ## Release containers' resource requests and limits
-## ref: https://kubernetes.io/docs/user-guide/compute-resources/
+## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 ## We usually recommend not to specify default resources and to leave this as a conscious
 ## choice for the user. This also increases chances charts run on environments with little
 ## resources, such as Minikube. If you do want to specify resources, uncomment the following
 ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+## @param resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if resources is set (resources is recommended for production).
+##
+resourcesPreset: "micro"
+## @param resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
 ## @param resources.limits The resources limits for Release containers
 ## @param resources.requests The requested resources for Release containers
+## Example:
+## resources: 
+##   limits:
+##     cpu: 1000m
+##     memory: 2Gi
+##   requests:
+##     cpu: 1000m
+##     memory: 2Gi
 ##
-resources:
-  ## Example:
-  ## limits:
-  ##    cpu: 1000m
-  ##    memory: 2Gi
-  ##
-  limits: {}
-  ## Examples:
-  ## requests:
-  ##    cpu: 1000m
-  ##    memory: 2Gi
-  ##
-  requests: {}
+resources: {}
 
 ## Configure containers' extra options for liveness and readiness probe
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -1310,6 +1310,17 @@ health:
   probesLivenessTimeout: 60
   probesReadinessTimeout: 60
 
+## @param defaultInitContainers Default init containers for the Release pod
+defaultInitContainers:
+  ## @param defaultInitContainers.resources Set default init container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ##
+  resources:
+    limits:
+      cpu: "150m"
+      memory: "192Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
 ## @param initContainers Add init containers to the Release pod
 ## Example:
 ## initContainers:
@@ -1319,6 +1330,7 @@ health:
 ##     ports:
 ##       - name: portname
 ##         containerPort: 1234
+##     resources: {}
 ##
 initContainers: []
 ## @param sidecars Add sidecar containers to the Release pod
@@ -1330,6 +1342,7 @@ initContainers: []
 ##     ports:
 ##       - name: portname
 ##         containerPort: 1234
+##     resources: {}
 ##
 sidecars: []
 
@@ -1376,28 +1389,17 @@ volumePermissions:
       find "${path}" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | \
         xargs -r chown -R "{{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}"
     done
-  ## Init Container resource requests and limits
-  ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
-  ## We usually recommend not to specify default resources and to leave this as a conscious
-  ## choice for the user. This also increases chances charts run on environments with little
-  ## resources, such as Minikube. If you do want to specify resources, uncomment the following
-  ## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  ## @param volumePermissions.resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
   ## @param volumePermissions.resources.limits Init container volume-permissions resource limits
   ## @param volumePermissions.resources.requests Init container volume-permissions resource requests
   ##
   resources:
-    ## Example:
-    ## limits:
-    ##    cpu: 100m
-    ##    memory: 128Mi
-    ##
-    limits: {}
-    ## Examples:
-    ## requests:
-    ##    cpu: 100m
-    ##    memory: 128Mi
-    ##
-    requests: {}
+    limits:
+      cpu: "150m"
+      memory: "192Mi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
   ## Init container' Security Context
   ## Note: the chown of the data folder is done to containerSecurityContext.runAsUser
   ## and not the below volumePermissions.containerSecurityContext.runAsUser
