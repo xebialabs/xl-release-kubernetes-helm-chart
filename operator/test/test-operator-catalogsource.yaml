@@ -10,4 +10,4 @@ spec:
   publisher: Digital.ai
   updateStrategy:
     registryPoll:
-      interval: 15m
+      interval: 60m
