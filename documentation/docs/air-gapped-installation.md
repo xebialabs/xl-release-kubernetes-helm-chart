@@ -40,7 +40,7 @@ You can see from here that `xl kube` needs blueprints from location [https://dis
 
 You need to download and put all files from that location to the server where you will execute `xl kube`.
 
-:::TIP
+:::tip
 You can download zipped version of the xl-op-blueprints from here: 
 [https://nexus.xebialabs.com/nexus/content/repositories/digitalai-public/ai/digital/xlclient/blueprints/xl-op-blueprints/](https://nexus.xebialabs.com/nexus/content/repositories/digitalai-public/ai/digital/xlclient/blueprints/xl-op-blueprints/)
 
@@ -287,7 +287,7 @@ During upgrade for the question `Edit list of custom resource keys that will mig
 #### kubernetes/template/deployment.yaml
 
 - spec.template.spec.containers[0].image: myrepo_host/myrepo/kube-rbac-proxy:v0.8.0
-- spec.template.spec.containers[1].image: myrepo_host/myrepo/release-operator:{operator-imageTag-given-in-xl-cmd-question}
+- spec.template.spec.containers[1].image: myrepo_host/myrepo/release-operator:operator-imageTag-given-in-xl-cmd-question
 - spec.template.spec.imagePullSecrets[0].name: regcred (only for custom private image registry requiring authentication)
 
 #### kubernetes/template/postgresql-init-keycloak-db.yaml

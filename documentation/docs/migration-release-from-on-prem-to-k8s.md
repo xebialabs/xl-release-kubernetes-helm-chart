@@ -29,7 +29,7 @@ Make sure all necessary prerequisites are in place. These include things like:
 - installing and configuring required Kubernetes CLI tools, 
 - preparing necessary information for PostgreSQL and RabbitMQ servers if existing ones are to be used.
 
-:::TIP
+:::tip
 Read through the xl kube workshop to gain a comprehensive understanding of how to install or upgrade Digital.ai Release or Release or Remote Runner on a kubernetes cluster.
 See:
 - [xl-kube-workshop](https://github.com/xebialabs/xl-kube-workshop)
