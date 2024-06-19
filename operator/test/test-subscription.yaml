@@ -7,5 +7,5 @@ spec:
   channel: beta
   installPlanApproval: Automatic
   name: xlr
-  source: release-test-operators
+  source: release-test-operators-24-1
   sourceNamespace: openshift-marketplace
