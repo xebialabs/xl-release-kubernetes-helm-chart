@@ -1,4 +1,5 @@
 {{- if eq .Values.k8sSetup.platform "Openshift" }}
+{{- if .Values.securityContextConstraints.enabled }}
 ---
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
@@ -9,10 +10,12 @@ allowHostPID: false
 allowHostDirVolumePlugin: false
 allowHostIPC: false
 allowHostPorts: false
-allowPrivilegeEscalation: true
-allowPrivilegedContainer: true
-allowedCapabilities: []
-defaultAddCapabilities: []
+allowPrivilegeEscalation: false
+allowPrivilegedContainer: false
+allowedCapabilities: null
+seccompProfiles:
+- runtime/default
+defaultAddCapabilities: null
 fsGroup:
   type: RunAsAny
 groups: []
@@ -29,7 +32,8 @@ users:
 - system:serviceaccount:{{ include "common.names.namespace" . }}:{{ include "release.serviceAccountName" . }}
 volumes:
 - '*'
-{{- if .Values.rabbitmq.install }}
+{{- end }}
+{{- if and .Values.rabbitmq.install .Values.rabbitmq.securityContextConstraints.enabled }}
 ---
 {{- $rabbitmqFullName := include "rabbitmq.subchart" . -}}
 apiVersion: security.openshift.io/v1
@@ -46,9 +50,11 @@ allowHostIPC: false
 allowHostNetwork: false
 allowHostPID: false
 allowHostPorts: false
-allowPrivilegeEscalation: true
+allowPrivilegeEscalation: false
 allowPrivilegedContainer: false
 allowedCapabilities: null
+seccompProfiles:
+- runtime/default
 defaultAddCapabilities: null
 fsGroup:
   type: RunAsAny
@@ -73,7 +79,7 @@ volumes:
   - projected
   - secret
 {{- end }}
-{{- if .Values.postgresql.install }}
+{{- if and .Values.postgresql.install .Values.postgresql.primary.securityContextConstraints.enabled }}
 ---
 {{- $postgresqlFullName := include "postgresql.subchart" . -}}
 apiVersion: security.openshift.io/v1
@@ -90,7 +96,7 @@ allowHostIPC: false
 allowHostNetwork: false
 allowHostPID: false
 allowHostPorts: false
-allowPrivilegeEscalation: true
+allowPrivilegeEscalation: false
 allowPrivilegedContainer: false
 allowedCapabilities: null
 seccompProfiles:

@@ -29,6 +29,7 @@ ingress:
     haproxy-ingress.github.io/backend-protocol: "h1-ssl"
     haproxy-ingress.github.io/secure-backends: "true"
     haproxy-ingress.github.io/secure-sni: host
+    haproxy-ingress.github.io/ssl-passthrough: "true"
 
 haproxy-ingress:
   install: true

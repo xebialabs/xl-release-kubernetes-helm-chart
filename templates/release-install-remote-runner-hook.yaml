@@ -65,11 +65,17 @@ spec:
         {{- end }}
     spec:
       restartPolicy: Never
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       {{- include "release.installReleaseRunner.imagePullSecrets" . | nindent 6 }}
       initContainers:
         - name: wait-for-release
           image: {{ include "common.images.image" (dict "imageRoot" .Values.busyBox.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.busyBox.image.pullPolicy | quote }}
+          {{- if .Values.hooks.installReleaseRunner.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.hooks.installReleaseRunner.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           command:
             - /bin/sh
           args:
@@ -91,6 +97,9 @@ spec:
         - name: install-runner-job
           image: {{ include "common.images.image" (dict "imageRoot" .Values.hooks.installReleaseRunner.image "global" .Values.global "context" .) }}
           imagePullPolicy: {{ .Values.hooks.installReleaseRunner.image.pullPolicy | quote }}
+          {{- if .Values.hooks.installReleaseRunner.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.hooks.installReleaseRunner.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           command: {{- include "common.tplvalues.render" (dict "value" .Values.hooks.installReleaseRunner.installCommand "context" $) | nindent 12 }}
       {{- if .Values.hooks.installReleaseRunner.answersSecret }}
           volumeMounts:

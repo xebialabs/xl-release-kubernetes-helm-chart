@@ -1,0 +1,42 @@
+podSecurityContext:
+  runAsUser: null
+  runAsGroup: null
+  fsGroup: null
+containerSecurityContext:
+  runAsUser: null
+  runAsGroup: null
+securityContextConstraints:
+  enabled: false
+volumePermissions:
+  enabled: false
+postgresql:
+  primary:
+    podSecurityContext:
+      # see https://github.com/helm/helm/issues/12637
+      enabled: false
+      runAsUser: null
+      runAsGroup: null
+      fsGroup: null
+    containerSecurityContext:
+      enabled: false
+      runAsUser: null
+      runAsGroup: null
+    securityContextConstraints:
+      enabled: false
+  volumePermissions:
+    enabled: false
+rabbitmq:
+  podSecurityContext:
+    # see https://github.com/helm/helm/issues/12637
+    enabled: false
+    runAsUser: null
+    runAsGroup: null
+    fsGroup: null
+  containerSecurityContext:
+    enabled: false
+    runAsUser: null
+    runAsGroup: null
+  securityContextConstraints:
+    enabled: false
+  volumePermissions:
+    enabled: false

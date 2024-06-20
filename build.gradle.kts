@@ -30,7 +30,7 @@ buildscript {
 plugins {
     kotlin("jvm") version "1.8.10"
 
-    id("com.github.node-gradle.node") version "4.0.0"
+    id("com.github.node-gradle.node") version "7.0.2"
     id("idea")
     id("nebula.release") version (properties["nebulaReleasePluginVersion"] as String)
     id("maven-publish")
@@ -424,6 +424,10 @@ tasks {
             }
             exec {
                 workingDir(buildXlrDir.get().dir("config/samples"))
+                commandLine(kustomizeCli, "edit", "add", "resource", "xlr_doc.yaml")
+            }
+            exec {
+                workingDir(buildXlrDir.get().dir("config/samples"))
                 commandLine(kustomizeCli, "edit", "add", "resource", "xlr_minimal.yaml")
             }
             exec {
@@ -560,27 +564,27 @@ tasks {
     }
 
     named<YarnTask>("yarn_install") {
-        group = "doc"
+        group = "docusaurus"
         args.set(listOf("--mutex", "network"))
         workingDir.set(file("${rootDir}/documentation"))
     }
 
     register<YarnTask>("yarnRunStart") {
-        group = "doc"
+        group = "docusaurus"
         dependsOn(named("yarn_install"))
         args.set(listOf("run", "start"))
         workingDir.set(file("${rootDir}/documentation"))
     }
 
     register<YarnTask>("yarnRunBuild") {
-        group = "doc"
+        group = "docusaurus"
         dependsOn(named("yarn_install"))
         args.set(listOf("run", "build"))
         workingDir.set(file("${rootDir}/documentation"))
     }
 
     register<Delete>("docCleanUp") {
-        group = "doc"
+        group = "docusaurus"
         delete(file("${rootDir}/docs"))
         delete(file("${rootDir}/documentation/build"))
         delete(file("${rootDir}/documentation/.docusaurus"))
@@ -588,14 +592,14 @@ tasks {
     }
 
     register<Copy>("docBuild") {
-        group = "doc"
+        group = "docusaurus"
         dependsOn(named("yarnRunBuild"), named("docCleanUp"))
         from(file("${rootDir}/documentation/build"))
         into(file("${rootDir}/docs"))
     }
 
     register<GenerateDocumentation>("updateDocs") {
-        group = "doc"
+        group = "docusaurus"
         dependsOn(named("docBuild"))
     }
 }
@@ -630,8 +634,8 @@ publishing {
 }
 
 node {
-    version.set("14.17.5")
-    yarnVersion.set("1.22.11")
+    version.set("20.14.0")
+    yarnVersion.set("1.22.22")
     download.set(true)
 }
 

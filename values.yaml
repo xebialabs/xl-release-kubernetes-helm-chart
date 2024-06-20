@@ -23,7 +23,7 @@ global:
       ports:
         postgresql: ""
 
-## @section Env parameters
+## @section K8S env parameters
 ##
 
 ## @param k8sSetup.platform The platform on which you install the chart. Possible values: AWSEKS/AzureAKS/GoogleGKE/PlainK8s
@@ -39,7 +39,7 @@ k8sSetup:
 ## @param license Sets your XL License by passing a base64 string license, which will then be added to the license file.
 ## Convert xl-release.lic files content to base64 ( cat xl-release.lic | base64 -w 0 ) and put the output here
 ##
-license: 
+license:
 ## @param licenseAcceptEula Accept EULA, in case of missing license, it will generate temporary license.
 ##
 licenseAcceptEula: false
@@ -81,6 +81,9 @@ logback:
   scanEnabled: true
   scanPeriod: "30 seconds"
 
+## @section Release hooks
+##
+
 hooks:
   getLicense:
     ## @param hooks.getLicense.enabled set to true to support license auto generation by using helm hook, it is working together with enabled licenseAcceptEula
@@ -118,6 +121,29 @@ hooks:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+    ## @param hooks.getLicense.containerSecurityContext.enabled Enabled get licence containers' Security Context
+    ## @param hooks.getLicense.containerSecurityContext.runAsNonRoot Set get licence container's Security Context runAsNonRoot
+    ## @param hooks.getLicense.containerSecurityContext.allowPrivilegeEscalation Set get licence container's Security Context allowPrivilegeEscalation
+    ## @extra hooks.getLicense.containerSecurityContext.capabilities Set get licence container's Security Context capabilities
+    ## @skip hooks.getLicense.containerSecurityContext.capabilities
+    ## @extra hooks.getLicense.containerSecurityContext.seccompProfile Set get licence container's Security Context seccompProfile
+    ## @skip hooks.getLicense.containerSecurityContext.seccompProfile
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## Example:
+    ##   containerSecurityContext:
+    ##     capabilities:
+    ##       drop: ["NET_RAW"]
+    ##     readOnlyRootFilesystem: true
+    ##
+    containerSecurityContext:
+      enabled: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
     ## @extra hooks.getLicense.configuration Release Configuration file content
     ## Do not override unless you know what you are doing.
     ##
@@ -190,6 +216,29 @@ hooks:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+    ## @param hooks.genSelfSigned.containerSecurityContext.enabled Enabled generate self-signed containers' Security Context
+    ## @param hooks.genSelfSigned.containerSecurityContext.runAsNonRoot Set generate self-signed container's Security Context runAsNonRoot
+    ## @param hooks.genSelfSigned.containerSecurityContext.allowPrivilegeEscalation Set generate self-signed container's Security Context allowPrivilegeEscalation
+    ## @extra hooks.genSelfSigned.containerSecurityContext.capabilities Set generate self-signed container's Security Context capabilities
+    ## @skip hooks.genSelfSigned.containerSecurityContext.capabilities
+    ## @extra hooks.genSelfSigned.containerSecurityContext.seccompProfile Set generate self-signed container's Security Context seccompProfile
+    ## @skip hooks.genSelfSigned.containerSecurityContext.seccompProfile
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## Example:
+    ##   containerSecurityContext:
+    ##     capabilities:
+    ##       drop: ["NET_RAW"]
+    ##     readOnlyRootFilesystem: true
+    ##
+    containerSecurityContext:
+      enabled: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
     ## @extra hooks.genSelfSigned.configuration Release Configuration file content
     ## Do not override unless you know what you are doing.
     ##
@@ -252,7 +301,7 @@ hooks:
       - /opt/xebialabs/xl-op-blueprints
       - --answers
       - /opt/xebialabs/xl-client/generated_answers.yaml
-      
+
     ## @param hooks.installReleaseRunner.image.registry getLicense hook container image registry
     ## @param hooks.installReleaseRunner.image.repository getLicense hook container image repository
     ## @param hooks.installReleaseRunner.image.tag getLicense hook container image tag
@@ -275,20 +324,47 @@ hooks:
       ##   - myRegistryKeySecretName
       ##
       pullSecrets: []
+    ## @param hooks.installReleaseRunner.containerSecurityContext.enabled Enabled install RR containers' Security Context
+    ## @param hooks.installReleaseRunner.containerSecurityContext.runAsNonRoot Set install RR container's Security Context runAsNonRoot
+    ## @param hooks.installReleaseRunner.containerSecurityContext.allowPrivilegeEscalation Set install RR container's Security Context allowPrivilegeEscalation
+    ## @extra hooks.installReleaseRunner.containerSecurityContext.capabilities Set install RR container's Security Context capabilities
+    ## @skip hooks.installReleaseRunner.containerSecurityContext.capabilities
+    ## @extra hooks.installReleaseRunner.containerSecurityContext.seccompProfile Set install RR container's Security Context seccompProfile
+    ## @skip hooks.installReleaseRunner.containerSecurityContext.seccompProfile
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+    ## Example:
+    ##   containerSecurityContext:
+    ##     capabilities:
+    ##       drop: ["NET_RAW"]
+    ##     readOnlyRootFilesystem: true
+    ##
+    containerSecurityContext:
+      enabled: true
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
+
+## @section Release security parameters
 
 ## Release Authentication parameters
 ##
 auth:
   ## @param auth.adminPassword Admin password for Release. If user does not provide password, random 10 character alphanumeric string will be generated.
-  adminPassword: 
+  adminPassword:
+  ## @param auth.sessionStorage When enabled it will store session in the DB (it could degrade DB performance).
+  sessionStorage: false
 
 ssl:
   ## @param ssl.enabled Enable SSL to be used on Release
   enabled: false
   ## @param ssl.keystorePassword Keystore password with SSL key.
-  keystorePassword: 
+  keystorePassword:
   ## @param ssl.keystoreKeypassword Keystore key password with SSL key.
-  keystoreKeypassword: 
+  keystoreKeypassword:
   ## @param ssl.keystoreType Keystore type, options pkcs12 or jks.
   keystoreType: pkcs12
   ## @extra ssl.keystore Keystore content in base64 format or it can reference the existing secret.
@@ -300,6 +376,8 @@ ssl:
         name: '{{ include "common.tplvalues.render" ( dict "value" .Values.hooks.genSelfSigned.name "context" $ ) }}'
         key: keystore.{{ .Values.ssl.keystoreType }}
 
+## @section Release external resources
+
 external:
   db:
     ## @param external.db.enabled Enable external database
@@ -308,18 +386,18 @@ external:
       ## @param external.db.main.url Main database URL for Release
       url: ""
       ## @param external.db.main.username Main database username for Release
-      username: 
+      username:
       ## @param external.db.main.password Main database password for Release
-      password: 
+      password:
       ## @param external.db.main.maxPoolSize Main database max pool size for Release
       maxPoolSize: ""
     report:
       ## @param external.db.report.url Report database URL for Release
       url: ""
       ## @param external.db.report.username Report database username for Release
-      username: 
+      username:
       ## @param external.db.report.password Report database password for Release
-      password: 
+      password:
       ## @param external.db.report.maxPoolSize Report database max pool size for Release
       maxPoolSize: ""
 
@@ -331,7 +409,7 @@ external:
     ## @param external.mq.queueName External message queue name for Release
     queueName: ""
     ## @param external.mq.username External message queue broker username for Release
-    username: 
+    username:
     ## @param external.mq.password External message queue broker password for Release
     password:
     ## @param external.mq.queueType Applies only for external rabbitmq message broker. Can be either classic(default) or quorum
@@ -339,27 +417,31 @@ external:
     ## @param external.mq.connector Connector type depending on external message queue broker. Can be either rabbitmq-jms(default) or activemq-jms
     connector: ""
 
+## @section Release keystore and truststore parameters
+
 keystore:
   ## @param keystore.passphrase Set passphrase for the keystore
-  passphrase: 
+  passphrase:
   ## @param keystore.keystore Use repository-keystore.jceks files content ecoded with base64
   # https://docs.xebialabs.com/v.9.8/release/how-to/update-the-xl-release-digital-certificate/#view-the-certificate
   # Convert repository-keystore.jceks files content to base64
   # ( cat repository-keystore.jceks | base64 -w 0 ) and put the output here
   # if empty during initial run, the default keystore will be generated with provided "passphrase"
-  keystore: 
+  keystore:
 
 truststore:
   ## @param truststore.type Type of truststore, possible value jks or jceks or pkcs12
   type: "pkcs12"
   ## @param truststore.password Truststore password
-  password: 
+  password:
   ## @param truststore.truststore Truststore file base64 encoded
   truststore: {}
   ## @param truststore.params Truststore params in the command line
   params: "{{- if .Values.truststore.truststore }} -Djavax.net.ssl.trustStore=$(TRUSTSTORE) -Djavax.net.ssl.trustStorePassword=$(TRUSTSTORE_PASSWORD) -Djavax.net.ssl.trustStoreType=$(TRUSTSTORE_TYPE){{- end }}"
 
-## Network Policy configuration
+## @section Release Network Policy configuration
+##
+
 ## ref: https://kubernetes.io/docs/concepts/services-networking/network-policies/
 ##
 networkPolicy:
@@ -486,7 +568,7 @@ oidc:
   ## You cannot sign in with a user if a local account with the same username exists.
   userNameClaim:
 
-## @section Common parameters
+## @section Common resources parameters
 ##
 
 ## @param nameOverride String to partially override release.fullname template (will maintain the release name)
@@ -510,11 +592,14 @@ extraDeploy: [ ]
 ## @param commonAnnotations Annotations to add to all deployed objects
 ##
 commonAnnotations: { }
-## @extra commonLabels Labels to add to all deployed objects
+## @param commonLabels Labels to add to all deployed objects
+## Eg. app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
 ##
 commonLabels: { }
-## @param commonLabels.app.kubernetes.io/version Labels Release server version
-## Eg. app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+
+## @section Release debug parameters
+##
+
 ## Enable diagnostic mode in the deployment
 ##
 diagnosticMode:
@@ -541,6 +626,9 @@ debugMode:
   ##
   remoteJvmParams: "{{- if .Values.debugMode.enabled }} -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:8001{{- end }}"
 
+## @section Release DNS parameters
+##
+
 ## @param hostAliases Deployment pod host aliases
 ## https://kubernetes.io/docs/concepts/services-networking/add-entries-to-pod-etc-hosts-with-host-aliases/
 ##
@@ -558,6 +646,9 @@ dnsPolicy: ""
 ##   - name: ndots
 ##     value: "4"
 dnsConfig: {}
+
+## @section Release runtime parameters
+##
 
 ## @param jvmArgs Release JVM arguments
 ##
@@ -640,6 +731,11 @@ configuration:
         server {
             http2 {
                 enabled = ${XLR_HTTP2_ENABLED}
+            }
+            session {
+                storage {
+                    enabled = {{ include "common.tplvalues.render" ( dict "value" .Values.auth.sessionStorage "context" $ ) }}
+                }
             }
         }
     
@@ -819,6 +915,9 @@ image:
   ##
   pullSecrets: []
 
+## @section Ingress parameters
+##
+
 ## Configure the ingress resource that allows you to access the
 ## Release installation. Set up the URL
 ## ref: https://kubernetes.io/docs/user-guide/ingress/
@@ -857,19 +956,21 @@ ingress:
   ## nginx.ingress.kubernetes.io/ssl-redirect: "false"
   ## nginx.ingress.kubernetes.io/rewrite-target: /
   ## nginx.ingress.kubernetes.io/affinity: cookie
-  ## nginx.ingress.kubernetes.io/session-cookie-name: JSESSIONID
+  ## nginx.ingress.kubernetes.io/session-cookie-name: ROUTE
+  ## nginx.ingress.kubernetes.io/proxy-body-size: "0"
   ## nginx.ingress.kubernetes.io/proxy-connect-timeout: "120"
   ## nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
   ## nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
   ##
   ## - haproxy
   ## kubernetes.io/ingress.class: "haproxy-dair"
-  ## ingress.kubernetes.io/rewrite-target: /
-  ## ingress.kubernetes.io/affinity: cookie
-  ## ingress.kubernetes.io/session-cookie-name: JSESSIONID
-  ## ingress.kubernetes.io/session-cookie-strategy: prefix
-  ## ingress.kubernetes.io/config-backend: |
-  ## option httpchk GET /ha/health HTTP/1.0
+  ## haproxy-ingress.github.io/ssl-redirect: "false"
+  ## haproxy-ingress.github.io/rewrite-target: /
+  ## haproxy-ingress.github.io/affinity: cookie
+  ## haproxy-ingress.github.io/session-cookie-name: JSESSIONID
+  ## haproxy-ingress.github.io/session-cookie-strategy: prefix
+  ## haproxy-ingress.github.io/timeout-client: "120s"
+  ## haproxy-ingress.github.io/timeout-http-request: "120s"
   ##
   annotations:
 
@@ -1248,18 +1349,20 @@ topologySpreadConstraints: [ ]
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @param podSecurityContext.enabled Enable Release pod's Security Context
 ## @param podSecurityContext.runAsUser Set Release pod's Security Context runAsUser
-## @param podSecurityContext.runAsGroup Set Release pod's Security Context runAsGroup
 ## @param podSecurityContext.fsGroup Set Release pod's Security Context fsGroup
 ##
 podSecurityContext:
   enabled: true
   runAsUser: 10001
-  runAsGroup: 10001
   fsGroup: 10001
 
 ## @param containerSecurityContext.enabled Enabled Release containers' Security Context
-## @param containerSecurityContext.runAsUser Set Release containers' Security Context runAsUser
 ## @param containerSecurityContext.runAsNonRoot Set Release container's Security Context runAsNonRoot
+## @param containerSecurityContext.allowPrivilegeEscalation Set Release container's Security Context allowPrivilegeEscalation
+## @extra containerSecurityContext.capabilities Set Release container's Security Context capabilities
+## @skip containerSecurityContext.capabilities
+## @extra containerSecurityContext.seccompProfile Set Release container's Security Context seccompProfile
+## @skip containerSecurityContext.seccompProfile
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## Example:
 ##   containerSecurityContext:
@@ -1269,8 +1372,17 @@ podSecurityContext:
 ##
 containerSecurityContext:
   enabled: true
-  runAsUser: 10001
   runAsNonRoot: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+## @param securityContextConstraints.enabled Enabled SecurityContextConstraints for Release (only on Openshift)
+securityContextConstraints:
+  enabled: true
 
 ## Release containers' resource requests and limits
 ## ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
@@ -1346,7 +1458,10 @@ initContainers: []
 ##
 sidecars: []
 
-## Init Container parameters
+
+## @section Release init Container parameters
+##
+
 ## Change the owner and group of the persistent volume(s) mountpoint(s) to 'runAsUser:fsGroup' on each component
 ## values from the securityContext section of the component
 ##
@@ -1404,9 +1519,20 @@ volumePermissions:
   ## Note: the chown of the data folder is done to containerSecurityContext.runAsUser
   ## and not the below volumePermissions.containerSecurityContext.runAsUser
   ## @param volumePermissions.containerSecurityContext.runAsUser User ID for the init container
+  ## @param volumePermissions.containerSecurityContext.runAsGroup Group ID for the init container
+  ## @param volumePermissions.containerSecurityContext.runAsNonRoot Set volume permissions init container's Security Context runAsNonRoot
+  ## @extra volumePermissions.containerSecurityContext.seccompProfile Set volume permissions init container's Security Context seccompProfile
+  ## @skip volumePermissions.containerSecurityContext.seccompProfile
   ##
   containerSecurityContext:
     runAsUser: 0
+    runAsGroup: 0
+    runAsNonRoot: false
+    seccompProfile:
+      type: RuntimeDefault
+
+## @section Release Pod Disruption Budget parameters
+##
 
 ## Pod Disruption Budget configuration
 ## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
@@ -1421,6 +1547,9 @@ pdb:
   ## @param pdb.maxUnavailable Maximum number/percentage of pods that may be made unavailable
   ##
   maxUnavailable: ""
+
+## @section Release Busy-box parameters
+##
 
 ## @param busyBox.image.registry busyBox container image registry
 ## @param busyBox.image.repository busyBox container image repository
@@ -1446,6 +1575,9 @@ busyBox:
     ##
     pullSecrets: []
 
+## @section Ingress HAProxy
+##
+
 ## Install haproxy subchart. If you have haproxy already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 haproxy-ingress:
@@ -1460,6 +1592,9 @@ haproxy-ingress:
       ##
       type: LoadBalancer
 
+## @section Ingress Nginx
+##
+
 ## Install nginx subchart. If you have nginx already installed, set 'install' to 'false'.
 ## If you have any other ingress controller installed, you can set the 'install' to 'false'.
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/README.md
@@ -1472,7 +1607,7 @@ nginx-ingress-controller:
   ## Default 404 backend
   ##
   defaultBackend:
-    ## @skip nginx-ingress-controller.defaultBackend.image.tag Default backend image tag (immutable tags are recommended)
+    ## @param nginx-ingress-controller.defaultBackend.image.tag Default backend image tag (immutable tags are recommended)
     image:
       tag: 1.26.0-debian-12-r1
   ## @extra nginx-ingress-controller.extraArgs Additional command line arguments to pass to nginx-ingress-controller
@@ -1503,6 +1638,9 @@ nginx-ingress-controller:
     ##
     type: LoadBalancer
 
+## @section Postgresql
+##
+
 ## Ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 ## Install postgresql chart. If you have an existing database deployment, set 'install' to 'false'.
 postgresql:
@@ -1513,6 +1651,7 @@ postgresql:
     tag: 16.1.0-debian-11-r27
   ## @section PostgreSQL Primary parameters
   ##
+
   primary:
     ## Initdb configuration
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#specifying-initdb-arguments
@@ -1562,7 +1701,14 @@ postgresql:
       ## @param postgresql.primary.service.type Kubernetes Service type
       ##
       type: ClusterIP
-  ## Authentication parameters
+
+    ## @param postgresql.primary.securityContextConstraints.enabled Enabled SecurityContextConstraints for Postgresql (only on Openshift)
+    securityContextConstraints:
+      enabled: true
+
+  ## @section Postgresql Authentication parameters
+  ##
+
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#setting-the-root-password-on-first-run
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#creating-a-database-on-first-run
   ## ref: https://github.com/bitnami/containers/tree/main/bitnami/postgresql#creating-a-database-user-on-first-run
@@ -1584,7 +1730,8 @@ postgresql:
     ## @param postgresql.serviceAccount.create Enable creation of ServiceAccount for PostgreSQL pod
     ##
     create: true
-  ## @section Volume Permissions parameters
+
+  ## @section Postgresql Volume Permissions parameters
   ##
 
   ## Init containers parameters:
@@ -1597,6 +1744,9 @@ postgresql:
     ## @param postgresql.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
     image:
       tag: 12-debian-12-r21
+
+## @section RabbitMQ
+##
 
 ## Install rabbitmq chart. If you have an existing message queue deployment, set 'install' to 'false'.
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/README.md
@@ -1657,7 +1807,8 @@ rabbitmq:
   ##
   extraConfiguration: |
     raft.wal_max_size_bytes = 1048576
-  ## @section Persistence parameters
+
+  ## @section RabbitMQ persistence parameters
   ##
   persistence:
     ## @param rabbitmq.persistence.enabled Enable RabbitMQ data persistence using PVC
@@ -1679,7 +1830,25 @@ rabbitmq:
     ## If you change this value, you might have to adjust `rabbitmq.diskFreeLimit` as well
     ##
     size: 8Gi
-  ## @section Exposure parameters
+
+  ## @param rabbitmq.containerSecurityContext.allowPrivilegeEscalation Set volume permissions init container's Security Context allowPrivilegeEscalation
+  ## @extra rabbitmq.containerSecurityContext.capabilities Set volume permissions init container's Security Context capabilities
+  ## @skip rabbitmq.containerSecurityContext.capabilities
+  ## @extra rabbitmq.containerSecurityContext.seccompProfile Set volume permissions init container's Security Context seccompProfile
+  ## @skip rabbitmq.containerSecurityContext.seccompProfile
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    seccompProfile:
+      type: RuntimeDefault
+
+  ## @param rabbitmq.securityContextConstraints.enabled Enabled SecurityContextConstraints for Rabbitmq (only on Openshift)
+  securityContextConstraints:
+    enabled: true
+
+  ## @section RabbitMQ Exposure parameters
   ##
 
   ## Kubernetes service type
@@ -1688,7 +1857,8 @@ rabbitmq:
     ## @param rabbitmq.service.type Kubernetes Service type
     ##
     type: ClusterIP
-  ## @section Init Container Parameters
+
+  ## @section RabbitMQ Init Container Parameters
   ##
 
   ## Init Container parameters
@@ -1702,3 +1872,18 @@ rabbitmq:
     ## @param rabbitmq.volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
     image:
       tag: 12-debian-12-r21
+
+    ## Init container' Security Context
+    ## Note: the chown of the data folder is done to containerSecurityContext.runAsUser
+    ## and not the below volumePermissions.containerSecurityContext.runAsUser
+    ## @param rabbitmq.volumePermissions.containerSecurityContext.runAsUser User ID for the init container
+    ## @param rabbitmq.volumePermissions.containerSecurityContext.runAsGroup Group ID for the init container
+    ## @param rabbitmq.volumePermissions.containerSecurityContext.runAsNonRoot Set volume permissions init container's Security Context runAsNonRoot
+    ## @extra rabbitmq.volumePermissions.containerSecurityContext.seccompProfile Set volume permissions init container's Security Context seccompProfile
+    ## @skip rabbitmq.volumePermissions.containerSecurityContext.seccompProfile
+    containerSecurityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      runAsNonRoot: false
+      seccompProfile:
+        type: RuntimeDefault
