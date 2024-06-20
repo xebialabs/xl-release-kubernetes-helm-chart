@@ -1422,7 +1422,7 @@ health:
   probesLivenessTimeout: 60
   probesReadinessTimeout: 60
 
-## @param defaultInitContainers Default init containers for the Release pod
+## Default init containers for the Release pod
 defaultInitContainers:
   ## @param defaultInitContainers.resources Set default init container requests and limits for different resources like CPU or memory (essential for production workloads)
   ##
@@ -1504,7 +1504,7 @@ volumePermissions:
       find "${path}" -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | \
         xargs -r chown -R "{{ .Values.containerSecurityContext.runAsUser }}:{{ .Values.podSecurityContext.fsGroup }}"
     done
-  ## @param volumePermissions.resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
+  ## Init Container resource requests and limits
   ## @param volumePermissions.resources.limits Init container volume-permissions resource limits
   ## @param volumePermissions.resources.requests Init container volume-permissions resource requests
   ##
