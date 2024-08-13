@@ -1,3 +1,8 @@
+# Repository Deprecated
+
+⚠️ **This repository is no longer maintained.** ⚠️
+
+Please use the [release-helm-chart](https://github.com/digital-ai/release-helm-chart) repository for the latest updates and support.
 
 # Helm chart for Digital.ai Release
 
